@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Choose Your Starter Pokémon</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: Arial, Helvetica, sans-serif;
+      }
+      body {
+        background: #0b0e14;
+        color: #fff;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 10px;
+      }
+      .starter-title {
+        font-size: 32px;
+        color: #4caf50;
+        font-weight: bold;
+        margin-bottom: 10px;
+        text-align: center;
+      }
+      .starter-desc {
+        font-size: 18px;
+        color: #aaa;
+        margin-bottom: 30px;
+        text-align: center;
+      }
+      .starters-grid {
+        display: flex;
+        gap: 32px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-bottom: 40px;
+      }
+      .starter-card {
+        background: #1a1f2e;
+        border-radius: 12px;
+        padding: 24px 18px 18px 18px;
+        text-align: center;
+        box-shadow: 0 4px 16px #0008;
+        cursor: pointer;
+        transition:
+          transform 0.2s,
+          box-shadow 0.2s;
+        min-width: 180px;
+        position: relative;
+      }
+      .starter-card.selected {
+        border: 2px solid #ffcc00;
+        box-shadow: 0 8px 32px #ffcc0033;
+        transform: scale(1.05);
+      }
+      .starter-card img {
+        width: 120px;
+        height: 120px;
+        margin-bottom: 10px;
+      }
+      .starter-card .name {
+        font-size: 20px;
+        color: #ffd700;
+        font-weight: bold;
+        margin-bottom: 6px;
+      }
+      .starter-card .type {
+        font-size: 14px;
+        color: #4caf50;
+        margin-bottom: 4px;
+      }
+      .choose-btn {
+        margin-top: 12px;
+        padding: 10px 20px;
+        background: #4caf50;
+        color: #000;
+        border: none;
+        border-radius: 8px;
+        font-weight: bold;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background 0.2s;
+      }
+      .choose-btn:hover {
+        background: #388e3c;
+      }
+      /* Modal */
+      .modal-bg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #000a;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+      }
+      .modal {
+        background: #1a1f2e;
+        border-radius: 16px;
+        padding: 32px 24px;
+        text-align: center;
+        color: #fff;
+        min-width: 320px;
+        box-shadow: 0 8px 32px #000a;
+      }
+      .modal .modal-title {
+        font-size: 22px;
+        color: #ffd700;
+        margin-bottom: 18px;
+      }
+      .modal .modal-btns {
+        margin-top: 18px;
+        display: flex;
+        gap: 16px;
+        justify-content: center;
+      }
+      .modal .modal-btns button {
+        padding: 8px 18px;
+        border-radius: 8px;
+        border: none;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+      }
+      .modal .confirm {
+        background: #4caf50;
+        color: #000;
+      }
+      .modal .cancel {
+        background: #e53935;
+        color: #fff;
+      }
+      /* Footer */
+      footer {
+        background: #11151f;
+        padding: 20px 24px;
+        text-align: center;
+        color: #aaa;
+        margin-top: auto;
+      }
+      footer a {
+        color: #4caf50;
+        margin: 0 10px;
+        text-decoration: none;
+        transition: color 0.2s;
+      }
+      footer a:hover {
+        color: #fff;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="navbar-placeholder"></div>
+    <main>
+      <div class="starter-title">Choose Your Starter Pokémon</div>
+      <div class="starter-desc">
+        Select your first Pokémon to begin your journey!
+      </div>
+      <div class="starters-grid" id="starters-grid">
+        <!-- Starter cards will be injected here -->
+      </div>
+    </main>
+    <footer>
+      <a href="dashboard.html">Dashboard</a> |
+      <a href="profile.html">Profile</a> |
+      <a href="game.html">Game</a>
+      <p>&copy; 2026 Bit-Pokemon by Kobe D. Estabalaya</p>
+    </footer>
+    <!-- Modal -->
+    <div id="modal-bg" class="modal-bg" style="display: none">
+      <div class="modal">
+        <div class="modal-title" id="modal-title"></div>
+        <div class="modal-btns">
+          <button class="confirm" id="modal-confirm">Yes</button>
+          <button class="cancel" id="modal-cancel">No</button>
+        </div>
+      </div>
+    </div>
+    <script>
+      // Load navbar
+      fetch("navbar.html")
+        .then((res) => res.text())
+        .then((data) => {
+          document.getElementById("navbar-placeholder").innerHTML = data;
+        });
+
+      // --- DYNAMIC STARTER FETCH FROM BACKEND ---
+      const API_BASE_URL = window.API_BASE_URL || "http://localhost:4000";
+      const startersGrid = document.getElementById("starters-grid");
+      let selectedStarter = null;
+      let starterData = {};
+
+      async function loadStarters() {
+        // Fetch starter list from backend (e.g. /starters or /pokemons?starter=true)
+        // For this example, we'll use the first 9 pokedex_no as starters
+        const res = await fetch(`${API_BASE_URL}/pokemons/starters`);
+        const starters = await res.json();
+        if (!Array.isArray(starters) || starters.length === 0) {
+          startersGrid.innerHTML =
+            '<div style="color:#e53935">No starters found in DB.</div>';
+          return;
+        }
+        for (const starter of starters) {
+          // starter: { pokedex_no, name }
+          const pokeRes = await fetch(
+            `https://pokeapi.co/api/v2/pokemon/${starter.pokedex_no}`,
+          );
+          const data = await pokeRes.json();
+          starterData[starter.pokedex_no] = data;
+          const card = document.createElement("div");
+          card.className = "starter-card";
+          card.innerHTML = `
+            <img src="${data.sprites.front_default}" alt="${starter.name}" />
+            <div class="name">${starter.name.charAt(0).toUpperCase() + starter.name.slice(1)}</div>
+            <div class="type">Type: ${data.types.map((t) => t.type.name).join(", ")}</div>
+            <button class="choose-btn">Choose</button>
+          `;
+          card.querySelector(".choose-btn").onclick = () =>
+            showModal({
+              ...starter,
+              id: starter.pokedex_no,
+              name:
+                starter.name.charAt(0).toUpperCase() + starter.name.slice(1),
+            });
+          startersGrid.appendChild(card);
+        }
+      }
+
+      loadStarters();
+
+      // Modal logic
+      const modalBg = document.getElementById("modal-bg");
+      const modalTitle = document.getElementById("modal-title");
+      const modalConfirm = document.getElementById("modal-confirm");
+      const modalCancel = document.getElementById("modal-cancel");
+      function showModal(starter) {
+        selectedStarter = starter;
+        modalTitle.textContent = `Are you sure you want ${starter.name} as your first Pokémon?`;
+        modalBg.style.display = "flex";
+      }
+      modalCancel.onclick = () => {
+        modalBg.style.display = "none";
+        selectedStarter = null;
+      };
+      modalConfirm.onclick = async () => {
+        if (!selectedStarter) return;
+
+        const user_id = localStorage.getItem("user_id");
+        const token = localStorage.getItem("token");
+
+        if (!user_id || !token) {
+          alert("Not logged in!");
+          return;
+        }
+
+        // Compose full Pokémon object for backend
+        const pokeData = starterData[selectedStarter.id];
+        const now = new Date().toISOString();
+        const pokemon = {
+          user_id: Number(user_id),
+          pokemon_id: selectedStarter.id, // For starters, use pokedex_no as pokemon_id
+          nickname: selectedStarter.name, // Default nickname to name
+          level: 1,
+          experience: 0,
+          current_hp:
+            pokeData.stats && pokeData.stats[0]
+              ? pokeData.stats[0].base_stat
+              : 20,
+          nature: null, // Or randomize if you want
+          is_shiny: false,
+          caught_at: now,
+          status: "active",
+          name: selectedStarter.name,
+          pokedex_no: selectedStarter.id,
+          sprite: pokeData.sprites.front_default,
+          types: pokeData.types.map((t) => t.type.name),
+        };
+
+        const resp = await fetch(`${API_BASE_URL}/users/${user_id}/pokemon`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(pokemon),
+        });
+
+        const result = await resp.json();
+
+        if (result.success) {
+          // Add starter balls to user inventory
+          const invResp = await fetch(
+            `${API_BASE_URL}/items/add-to-inventory`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({ user_id: Number(user_id) }),
+            },
+          );
+          const invResult = await invResp.json();
+          if (!invResult.success) {
+            alert(
+              "Pokémon saved, but failed to add starter balls: " +
+                (invResult.message || "Unknown error"),
+            );
+          }
+          window.location.href = "pip_interface.html";
+        } else {
+          alert(result.message || "Failed to save your Pokémon.");
+        }
+      };
+    </script>
+  </body>
+</html>

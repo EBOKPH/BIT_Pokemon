@@ -1,0 +1,519 @@
+<!-- navbar.html -->
+<nav class="navbar">
+  <!-- LEFT: Logo -->
+  <div class="nav-left">
+    <a href="pip_interface.html" class="logo">BIT-POKEMON</a>
+  </div>
+
+  <!-- CENTER: Nav links + ticker -->
+  <div class="nav-center">
+    <a href="map.html" class="nav-link">🗺️ Map</a>
+    <a href="inventory.html" class="nav-link">🎒 Inventory</a>
+    <a href="shop.html" class="nav-link">🛒 Shop</a>
+    <a href="codex.html" class="nav-link">📖 Codex</a>
+
+    <div class="ticker-wrap">
+      <div class="ticker-track">
+        <span>Season 1 has begun — Ironclad forces moving east</span>
+        <span>New Fragment chips detected in Sector 7-G</span>
+        <span>The Hollow have corrupted 3 Fragment caches</span>
+        <span>Echo Syndicate decrypting Project Genesis data</span>
+        <span>Fragment Hunter tournament — register now</span>
+        <span>Season 1 has begun — Ironclad forces moving east</span>
+        <span>New Fragment chips detected in Sector 7-G</span>
+        <span>The Hollow have corrupted 3 Fragment caches</span>
+        <span>Echo Syndicate decrypting Project Genesis data</span>
+        <span>Fragment Hunter tournament — register now</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: FRG coin + PIP icon + Profile -->
+  <div class="nav-right">
+    <a href="transaction.html" class="coin-display" id="wpc-balance">
+      <span class="coin-icon">&#9670;</span>
+      <span id="coin-amount">0 FRG</span>
+    </a>
+
+    <a href="pip_interface.html" class="pip-nav-btn" title="Open PIP Interface">
+      <img src="../assets/img/BITPIP.png" class="pip-nav-icon" alt="PIP" />
+    </a>
+
+    <div class="nav-item" id="profileNavItem">
+      <div class="profile-btn" id="profileBtn" onclick="toggleProfileMenu()">
+        <div class="avatar" id="navAvatar">
+          <img
+            src="#"
+            alt=""
+            id="avatarImg"
+            onerror="this.style.display = 'none'"
+            style="
+              display: none;
+              width: 100%;
+              height: 100%;
+              border-radius: 50%;
+              object-fit: cover;
+            "
+          />
+          <span id="avatarInitial">?</span>
+        </div>
+        <span class="profile-name" id="profileName">Hunter</span>
+        <span class="profile-caret">&#9660;</span>
+      </div>
+      <div class="profile-dropdown" id="profileDropdown">
+        <a href="profile.html"
+          ><span class="pd-icon">&#9786;</span> View Profile</a
+        >
+        <div class="pd-divider"></div>
+        <a href="index.html" id="logout-btn" class="pd-signout">
+          <span class="pd-icon">&#10148;</span> Sign Out
+        </a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<style>
+  :root {
+    --navbar-bg: #11151f;
+    --navbar-text: #fff;
+    --navbar-accent: #4caf50;
+    --navbar-accent-light: #43a047;
+    --navbar-button-bg: #1a1f2e;
+    --navbar-button-hover: #2a3147;
+    --navbar-dropdown-bg: #1a1f2e;
+    --navbar-border: rgba(76, 175, 80, 0.2);
+  }
+  body.codex-page,
+  html.codex-page body {
+    --navbar-bg: linear-gradient(90deg, #0e0a04 0%, #1a1208 50%, #0e0a04 100%);
+    --navbar-text: #e4d4aa;
+    --navbar-accent: #c9a84c;
+    --navbar-accent-light: #f0d080;
+    --navbar-button-bg: rgba(26, 18, 8, 0.7);
+    --navbar-button-hover: rgba(42, 26, 10, 0.9);
+    --navbar-dropdown-bg: rgba(26, 18, 8, 0.95);
+    --navbar-border: rgba(201, 168, 76, 0.25);
+  }
+  .navbar {
+    display: flex;
+    align-items: center;
+    padding: clamp(6px, 1vh, 12px) clamp(12px, 2vw, 24px);
+    background: var(--navbar-bg);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    border-bottom: 1px solid var(--navbar-border);
+    transition: all 0.3s ease;
+    gap: 0;
+    position: relative;
+    z-index: 100;
+  }
+  .nav-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+  .nav-center {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: 12px;
+    flex: 1;
+  }
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: clamp(6px, 1.2vw, 16px);
+    flex-shrink: 0;
+    margin-left: auto;
+  }
+  .nav-item {
+    position: relative;
+  }
+  .logo {
+    font-size: clamp(14px, 1.6vw, 22px);
+    font-weight: bold;
+    color: var(--navbar-text);
+    text-decoration: none;
+    transition: color 0.2s;
+    letter-spacing: 2px;
+  }
+  .logo:hover {
+    color: var(--navbar-accent-light);
+  }
+  .nav-link {
+    min-width: (70px, 7vw, 100px);
+    justify-content: center;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: clamp(5px, 0.6vh, 8px) clamp(8px, 1.2vw, 16px);
+    background: var(--navbar-button-bg);
+    border: 1px solid var(--navbar-border);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--navbar-text);
+    font-weight: 600;
+    text-decoration: none;
+    font-size: clamp(11px, 1vw, 14px);
+    letter-spacing: 1px;
+  }
+  .nav-link:hover {
+    background: var(--navbar-button-hover);
+    border-color: var(--navbar-accent-light);
+    color: var(--navbar-accent-light);
+  }
+  .dropdown {
+    position: absolute;
+    top: 110%;
+    left: 0;
+    min-width: 160px;
+    background: var(--navbar-dropdown-bg);
+    border: 1px solid var(--navbar-border);
+    border-radius: 6px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-5px);
+    transition: all 0.2s ease;
+    z-index: 100;
+  }
+  .nav-item:hover .dropdown:not(.profile-dropdown) {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+  .dropdown a {
+    display: block;
+    padding: 10px 14px;
+    color: var(--navbar-text);
+    text-decoration: none;
+    transition: all 0.2s;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  }
+  .dropdown a:last-child {
+    border-bottom: none;
+  }
+  .dropdown a:hover {
+    background: var(--navbar-button-hover);
+    color: var(--navbar-accent-light);
+  }
+  .ticker-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: clamp(22px, 2.2vh, 28px);
+    max-width: clamp(120px, 22vw, 380px);
+    min-width: 0;
+    overflow: hidden;
+    background: linear-gradient(
+      90deg,
+      rgba(76, 175, 80, 0.12),
+      rgba(76, 175, 80, 0.06)
+    );
+    border-top: 1px solid rgba(76, 175, 80, 0.3);
+    border-bottom: 1px solid rgba(76, 175, 80, 0.3);
+    flex-shrink: 1;
+  }
+  .ticker-track {
+    display: flex;
+    white-space: nowrap;
+    animation: tickerRoll 28s linear infinite;
+    padding-left: 100%;
+  }
+  .ticker-track span {
+    font-size: clamp(9px, 0.75vw, 11px);
+    font-weight: 500;
+    letter-spacing: 1.5px;
+    color: rgba(200, 230, 200, 0.75);
+    padding: 0 32px 0 0;
+  }
+  .ticker-track span::before {
+    content: "⚡ ";
+    color: var(--navbar-accent);
+    font-size: 9px;
+  }
+  @keyframes tickerRoll {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+  .coin-display {
+    background: var(--navbar-button-bg);
+    color: var(--navbar-accent-light);
+    padding: clamp(4px, 0.5vh, 6px) clamp(8px, 1vw, 14px);
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: clamp(10px, 0.9vw, 13px);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+    border: 1px solid var(--navbar-border);
+    letter-spacing: 1px;
+  }
+  .coin-display:hover {
+    background: var(--navbar-button-hover);
+    border-color: var(--navbar-accent-light);
+    box-shadow: 0 0 10px rgba(76, 175, 80, 0.2);
+  }
+  .coin-icon {
+    font-size: 11px;
+    color: var(--navbar-accent);
+    animation: coinPulse 2s ease-in-out infinite;
+  }
+  @keyframes coinPulse {
+    0%,
+    100% {
+      opacity: 0.6;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+  .pip-nav-btn {
+    display: flex;
+    align-items: center;
+    padding: 4px 8px;
+    background: rgba(10, 14, 6, 0.7);
+    border: 1px solid rgba(74, 255, 106, 0.25);
+    border-radius: 6px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+    overflow: hidden;
+  }
+  .pip-nav-btn:hover {
+    background: rgba(20, 32, 12, 0.9);
+    border-color: rgba(74, 255, 106, 0.65);
+    box-shadow: 0 0 12px rgba(74, 255, 106, 0.18);
+  }
+  .pip-nav-icon {
+    width: clamp(32px, 4vw, 56px);
+    height: clamp(18px, 2.2vh, 30px);
+    object-fit: contain;
+  }
+  .profile-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: clamp(3px, 0.4vh, 5px) clamp(6px, 0.8vw, 10px)
+      clamp(3px, 0.4vh, 5px) 5px;
+    background: var(--navbar-button-bg);
+    border: 1px solid var(--navbar-border);
+    border-radius: 24px;
+    cursor: pointer;
+    position: relative;
+    color: var(--navbar-text);
+    transition: all 0.2s;
+    user-select: none;
+  }
+  .profile-btn:hover {
+    background: var(--navbar-button-hover);
+    border-color: var(--navbar-accent-light);
+  }
+  .profile-name {
+    font-size: clamp(10px, 0.9vw, 13px);
+    font-weight: 600;
+    letter-spacing: 1px;
+  }
+  .profile-caret {
+    font-size: 9px;
+    opacity: 0.5;
+    margin-left: 2px;
+  }
+  .profile-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    min-width: 170px;
+    background: var(--navbar-dropdown-bg);
+    border: 1px solid var(--navbar-border);
+    border-radius: 8px;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.6);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-6px);
+    transition: all 0.2s ease;
+    z-index: 200;
+    overflow: hidden;
+  }
+  .profile-dropdown.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+  .profile-dropdown a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 16px;
+    color: var(--navbar-text);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.15s;
+  }
+  .profile-dropdown a:hover {
+    background: var(--navbar-button-hover);
+    color: var(--navbar-accent-light);
+  }
+  .pd-icon {
+    font-size: 15px;
+    opacity: 0.7;
+  }
+  .pd-divider {
+    height: 1px;
+    background: var(--navbar-border);
+    margin: 2px 0;
+  }
+  .pd-signout {
+    color: #ff6b6b !important;
+  }
+  .pd-signout:hover {
+    background: rgba(255, 80, 80, 0.08) !important;
+    color: #ff4444 !important;
+  }
+  .avatar {
+    width: clamp(26px, 2.4vw, 34px);
+    height: clamp(26px, 2.4vw, 34px);
+    border-radius: 50%;
+    background: linear-gradient(
+      135deg,
+      var(--navbar-accent),
+      var(--navbar-accent-light)
+    );
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: clamp(11px, 1vw, 14px);
+    color: #000;
+    flex-shrink: 0;
+    overflow: hidden;
+    border: 2px solid var(--navbar-border);
+  }
+  @media (max-width: 900px) {
+    .ticker-wrap {
+      max-width: 160px;
+    }
+    .nav-link {
+      min-width: unset;
+      padding: 7px 10px;
+      font-size: 13px;
+    }
+  }
+  @media (max-width: 640px) {
+    .navbar {
+      flex-wrap: wrap;
+      padding: 8px 12px;
+      gap: 6px;
+    }
+    .nav-left {
+      order: 1;
+    }
+    .nav-right {
+      order: 2;
+      gap: 8px;
+      margin-left: auto;
+    }
+    .nav-center {
+      order: 3;
+      width: 100%;
+      justify-content: center;
+      margin-left: 0;
+      flex-wrap: wrap;
+    }
+    .ticker-wrap {
+      display: none;
+    }
+    .profile-name {
+      display: none;
+    }
+    .pip-nav-icon {
+      width: 32px;
+      height: 18px;
+    }
+    .nav-link {
+      min-width: unset;
+      padding: 6px 8px;
+      font-size: 12px;
+    }
+    .logo {
+      font-size: 16px;
+    }
+    .coin-display {
+      font-size: 11px;
+      padding: 5px 8px;
+    }
+  }
+</style>
+
+<script>
+  function toggleProfileMenu() {
+    const dd = document.getElementById("profileDropdown");
+    if (dd) dd.classList.toggle("show");
+  }
+  document.addEventListener("click", function (e) {
+    const item = document.getElementById("profileNavItem");
+    if (item && !item.contains(e.target)) {
+      const dd = document.getElementById("profileDropdown");
+      if (dd) dd.classList.remove("show");
+    }
+  });
+  function applyNavbarTheme() {
+    const page = window.location.pathname.split("/").pop() || "";
+    if (page.includes("codex")) document.body.classList.add("codex-page");
+    else document.body.classList.remove("codex-page");
+  }
+  function attachLogoutHandler() {
+    const btn = document.getElementById("logout-btn");
+    if (btn) {
+      btn.addEventListener("click", function (e) {
+        e.preventDefault();
+        localStorage.clear();
+        sessionStorage.clear();
+        window.location.href = "index.html";
+      });
+    }
+  }
+  async function updateWPCBalance() {
+    const user_id = localStorage.getItem("user_id");
+    if (!user_id) return;
+    try {
+      const res = await fetch(
+        "http://localhost:4000/users/me-nonjwt?user_id=" + user_id,
+      );
+      const data = await res.json();
+      if (
+        data.success &&
+        data.data &&
+        typeof data.data.user_ingame_wallet !== "undefined"
+      ) {
+        const el = document.getElementById("coin-amount");
+        if (el) el.textContent = data.data.user_ingame_wallet + " FRG";
+      }
+    } catch {}
+  }
+  function loadProfileName() {
+    const ign = localStorage.getItem("ign");
+    const nameEl = document.getElementById("profileName");
+    const initEl = document.getElementById("avatarInitial");
+    if (nameEl && ign) nameEl.textContent = ign;
+    if (initEl && ign) initEl.textContent = ign.charAt(0).toUpperCase();
+  }
+  document.addEventListener("DOMContentLoaded", function () {
+    applyNavbarTheme();
+    attachLogoutHandler();
+    updateWPCBalance();
+    loadProfileName();
+  });
+  window.toggleProfileMenu = toggleProfileMenu;
+  window.attachLogoutHandler = attachLogoutHandler;
+</script>

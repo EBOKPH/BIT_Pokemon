@@ -1,0 +1,1546 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BIT-POKEMON — Register Hunter</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Bebas+Neue&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --green: #4aff6a;
+        --green-dim: #1a5c28;
+        --green-dark: #0a1f0f;
+        --amber: #ffb830;
+        --red: #ff4444;
+        --bg: #060908;
+        --panel: #0c120e;
+        --border: rgba(74, 255, 106, 0.18);
+        --border-dim: rgba(74, 255, 106, 0.08);
+        --text: #c8e8a0;
+        --text-dim: #4a6a38;
+        --mono: "Share Tech Mono", monospace;
+        --ui: "Rajdhani", sans-serif;
+      }
+
+      *,
+      *::before,
+      *::after {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        min-height: 100vh;
+        background: var(--bg);
+        font-family: var(--ui);
+        color: var(--text);
+        overflow-x: hidden;
+      }
+
+      /* ── ANIMATED BG ── */
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        background:
+          radial-gradient(
+            ellipse 60% 50% at 20% 40%,
+            rgba(74, 255, 106, 0.04) 0%,
+            transparent 60%
+          ),
+          radial-gradient(
+            ellipse 50% 60% at 80% 60%,
+            rgba(0, 60, 20, 0.12) 0%,
+            transparent 60%
+          ),
+          repeating-linear-gradient(
+            0deg,
+            transparent,
+            transparent 40px,
+            rgba(74, 255, 106, 0.012) 40px,
+            rgba(74, 255, 106, 0.012) 41px
+          ),
+          repeating-linear-gradient(
+            90deg,
+            transparent,
+            transparent 40px,
+            rgba(74, 255, 106, 0.008) 40px,
+            rgba(74, 255, 106, 0.008) 41px
+          );
+      }
+
+      /* Scanlines */
+      body::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        background: repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 2px,
+          rgba(0, 0, 0, 0.07) 2px,
+          rgba(0, 0, 0, 0.07) 4px
+        );
+      }
+
+      /* ── LAYOUT ── */
+      .page {
+        position: relative;
+        z-index: 1;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px 16px;
+      }
+
+      /* ── CARD ── */
+      .card {
+        width: 100%;
+        max-width: 480px;
+        background: linear-gradient(160deg, #0e160f 0%, #080d09 100%);
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        box-shadow:
+          0 0 0 1px rgba(74, 255, 106, 0.04),
+          0 0 60px rgba(74, 255, 106, 0.06),
+          0 32px 80px rgba(0, 0, 0, 0.8);
+        position: relative;
+        overflow: hidden;
+        animation: cardIn 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+      }
+      @keyframes cardIn {
+        from {
+          opacity: 0;
+          transform: translateY(16px);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+
+      /* Corner brackets */
+      .card::before,
+      .card::after {
+        content: "";
+        position: absolute;
+        width: 18px;
+        height: 18px;
+        border-color: rgba(74, 255, 106, 0.4);
+        border-style: solid;
+      }
+      .card::before {
+        top: -1px;
+        left: -1px;
+        border-width: 2px 0 0 2px;
+        border-radius: 2px 0 0 0;
+      }
+      .card::after {
+        bottom: -1px;
+        right: -1px;
+        border-width: 0 2px 2px 0;
+        border-radius: 0 0 2px 0;
+      }
+
+      /* ── HEADER ── */
+      .card-header {
+        padding: 20px 24px 16px;
+        border-bottom: 1px solid var(--border-dim);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        position: relative;
+      }
+      .header-icon {
+        width: 36px;
+        height: 36px;
+        background: rgba(74, 255, 106, 0.08);
+        border: 1px solid var(--border);
+        border-radius: 2px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        flex-shrink: 0;
+      }
+      .header-text {
+        flex: 1;
+      }
+      .header-title {
+        font-family: "Bebas Neue", sans-serif;
+        font-size: 22px;
+        letter-spacing: 4px;
+        color: var(--green);
+        text-shadow: 0 0 20px rgba(74, 255, 106, 0.4);
+        line-height: 1;
+      }
+      .header-sub {
+        font-family: var(--mono);
+        font-size: 9px;
+        letter-spacing: 3px;
+        color: var(--text-dim);
+        text-transform: uppercase;
+        margin-top: 3px;
+      }
+      /* Blinking cursor after title */
+      .header-title::after {
+        content: "_";
+        animation: blink 1s step-end infinite;
+        color: var(--green);
+      }
+      @keyframes blink {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0;
+        }
+      }
+
+      /* Progress dots */
+      .header-dots {
+        display: flex;
+        gap: 5px;
+        align-items: center;
+      }
+      .hd {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+      }
+      .hd.g {
+        background: var(--green);
+        box-shadow: 0 0 6px var(--green);
+        animation: ledBlink 1.5s ease-in-out infinite;
+      }
+      .hd.a {
+        background: var(--amber);
+        box-shadow: 0 0 6px var(--amber);
+        animation: ledBlink 1.5s ease-in-out infinite 0.5s;
+      }
+      .hd.r {
+        background: var(--red);
+        box-shadow: 0 0 6px var(--red);
+        animation: ledBlink 1.5s ease-in-out infinite 1s;
+      }
+      @keyframes ledBlink {
+        0%,
+        100% {
+          opacity: 0.4;
+        }
+        50% {
+          opacity: 1;
+        }
+      }
+
+      /* ── FORM BODY ── */
+      .card-body {
+        padding: 20px 24px;
+      }
+
+      /* Section label */
+      .section-label {
+        font-family: var(--mono);
+        font-size: 8px;
+        letter-spacing: 4px;
+        color: var(--text-dim);
+        text-transform: uppercase;
+        margin: 0 0 10px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .section-label::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: var(--border-dim);
+      }
+
+      /* Field rows */
+      .row-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      .field {
+        margin-bottom: 10px;
+        position: relative;
+      }
+
+      /* Inputs */
+      .field input,
+      .field select {
+        width: 100%;
+        background: rgba(0, 0, 0, 0.4);
+        border: 1px solid rgba(74, 255, 106, 0.15);
+        border-radius: 2px;
+        padding: 10px 12px;
+        font-family: var(--mono);
+        font-size: 11px;
+        letter-spacing: 1px;
+        color: var(--text);
+        outline: none;
+        transition:
+          border-color 0.2s,
+          box-shadow 0.2s;
+        caret-color: var(--green);
+      }
+      .field select {
+        color: var(--text-dim);
+        cursor: pointer;
+      }
+      .field select option {
+        background: #0c120e;
+        color: var(--text);
+      }
+
+      .field input::placeholder {
+        color: var(--text-dim);
+        opacity: 0.7;
+      }
+
+      .field input:focus,
+      .field select:focus {
+        border-color: rgba(74, 255, 106, 0.45);
+        box-shadow:
+          0 0 0 2px rgba(74, 255, 106, 0.06),
+          0 0 12px rgba(74, 255, 106, 0.08);
+      }
+
+      /* Field label (floating style) */
+      .field-label {
+        font-family: var(--mono);
+        font-size: 8px;
+        letter-spacing: 3px;
+        color: var(--text-dim);
+        text-transform: uppercase;
+        display: block;
+        margin-bottom: 5px;
+      }
+
+      /* Eye toggle */
+      .eye-btn {
+        position: absolute;
+        right: 10px;
+        bottom: 10px;
+        background: none;
+        border: none;
+        color: var(--text-dim);
+        cursor: pointer;
+        font-family: var(--mono);
+        font-size: 9px;
+        letter-spacing: 1px;
+        padding: 0;
+        transition: color 0.2s;
+      }
+      .eye-btn:hover {
+        color: var(--green);
+      }
+
+      /* Age display */
+      /* Birthday icon */
+      .date-wrap {
+        position: relative;
+        display: flex;
+        align-items: center;
+      }
+      .date-wrap input[type="date"] {
+        width: 100%;
+        cursor: pointer;
+      }
+      .date-wrap input[type="date"]::-webkit-calendar-picker-indicator {
+        opacity: 0;
+        cursor: pointer;
+        /* No width/height override — stays small, only covers the icon area */
+      }
+      .cal-icon {
+        position: absolute;
+        right: 10px;
+        font-size: 14px;
+        pointer-events: none;
+        color: var(--green);
+        opacity: 0.65;
+      }
+
+      /* Password strength */
+      .pw-strength {
+        margin-top: 8px;
+        display: none;
+      }
+      .pw-strength.visible {
+        display: block;
+      }
+      .pw-rule {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-family: var(--mono);
+        font-size: 9px;
+        letter-spacing: 1px;
+        color: var(--text-dim);
+        margin-bottom: 3px;
+        transition: color 0.2s;
+      }
+      .pw-rule.pass {
+        color: var(--green);
+      }
+      .pw-rule.fail {
+        color: rgba(255, 68, 68, 0.6);
+      }
+      .pw-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        border: 1px solid currentColor;
+        flex-shrink: 0;
+        transition: background 0.2s;
+      }
+      .pw-rule.pass .pw-dot {
+        background: var(--green);
+      }
+      .pw-rule.fail .pw-dot {
+        background: rgba(255, 68, 68, 0.6);
+      }
+      .pw-bar-wrap {
+        height: 2px;
+        background: rgba(74, 255, 106, 0.08);
+        border-radius: 1px;
+        margin: 6px 0 4px;
+        overflow: hidden;
+      }
+      .pw-bar {
+        height: 100%;
+        border-radius: 1px;
+        transition:
+          width 0.3s,
+          background 0.3s;
+        width: 0%;
+      }
+
+      /* Field validation */
+      .field input.valid {
+        border-color: rgba(74, 255, 106, 0.45) !important;
+      }
+      .field input.invalid {
+        border-color: rgba(255, 68, 68, 0.45) !important;
+      }
+      .field-msg {
+        font-family: var(--mono);
+        font-size: 9px;
+        letter-spacing: 1px;
+        margin-top: 4px;
+        min-height: 13px;
+      }
+      .field-msg.ok {
+        color: var(--green);
+      }
+      .field-msg.err {
+        color: rgba(255, 68, 68, 0.8);
+      }
+
+      /* Custom pronouns */
+      .pronouns-custom {
+        margin-top: 8px;
+      }
+
+      /* ── CONSENT ── */
+      .consent-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        margin: 14px 0 16px;
+        padding: 10px 12px;
+        background: rgba(74, 255, 106, 0.03);
+        border: 1px solid var(--border-dim);
+        border-radius: 2px;
+      }
+      .consent-row input[type="checkbox"] {
+        width: 14px;
+        height: 14px;
+        accent-color: var(--green);
+        margin-top: 2px;
+        flex-shrink: 0;
+        cursor: pointer;
+      }
+      .consent-text {
+        font-family: var(--mono);
+        font-size: 10px;
+        letter-spacing: 1px;
+        color: var(--text-dim);
+        line-height: 1.5;
+      }
+      .privacy-link {
+        color: var(--green);
+        text-decoration: none;
+        cursor: pointer;
+        border-bottom: 1px solid rgba(74, 255, 106, 0.3);
+        transition: color 0.2s;
+      }
+      .privacy-link:hover {
+        color: #fff;
+      }
+
+      /* ── SUBMIT BUTTON ── */
+      .btn-submit {
+        width: 100%;
+        padding: 12px;
+        background: rgba(74, 255, 106, 0.08);
+        border: 1px solid rgba(74, 255, 106, 0.35);
+        border-radius: 2px;
+        font-family: "Bebas Neue", sans-serif;
+        font-size: 16px;
+        letter-spacing: 5px;
+        color: var(--green);
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.2s;
+      }
+      .btn-submit::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          135deg,
+          rgba(74, 255, 106, 0.08) 0%,
+          transparent 60%
+        );
+        pointer-events: none;
+      }
+      .btn-submit::after {
+        content: "";
+        position: absolute;
+        top: -50%;
+        left: -60%;
+        width: 30%;
+        height: 200%;
+        background: rgba(255, 255, 255, 0.05);
+        transform: skewX(-18deg);
+        animation: btnShine 4s ease-in-out infinite;
+      }
+      @keyframes btnShine {
+        0%,
+        70%,
+        100% {
+          left: -60%;
+          opacity: 0;
+        }
+        40% {
+          left: 130%;
+          opacity: 1;
+        }
+      }
+      .btn-submit:hover {
+        background: rgba(74, 255, 106, 0.14);
+        border-color: var(--green);
+        box-shadow: 0 0 20px rgba(74, 255, 106, 0.15);
+      }
+      .btn-submit:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        animation: submitPulse 0.8s ease-in-out infinite;
+      }
+      @keyframes submitPulse {
+        0%,
+        100% {
+          opacity: 0.4;
+        }
+        50% {
+          opacity: 0.8;
+        }
+      }
+
+      /* ── OAUTH BUTTONS ── */
+      .oauth-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-top: 10px;
+      }
+      .oauth-btn {
+        padding: 8px;
+        border-radius: 2px;
+        font-family: var(--mono);
+        font-size: 9px;
+        letter-spacing: 2px;
+        font-weight: bold;
+        cursor: pointer;
+        border: 1px solid;
+        text-transform: uppercase;
+        transition: all 0.2s;
+      }
+      .oauth-btn.google {
+        background: rgba(219, 68, 55, 0.08);
+        border-color: rgba(219, 68, 55, 0.3);
+        color: #ff6b6b;
+      }
+      .oauth-btn.google:hover {
+        background: rgba(219, 68, 55, 0.16);
+        border-color: #ff4444;
+      }
+      .oauth-btn.facebook {
+        background: rgba(59, 89, 152, 0.08);
+        border-color: rgba(59, 89, 152, 0.3);
+        color: #6b8fff;
+      }
+      .oauth-btn.facebook:hover {
+        background: rgba(59, 89, 152, 0.16);
+        border-color: #6b8fff;
+      }
+
+      /* ── FOOTER ── */
+      .card-footer {
+        padding: 14px 24px 18px;
+        border-top: 1px solid var(--border-dim);
+        text-align: center;
+      }
+      .card-footer p {
+        font-family: var(--mono);
+        font-size: 10px;
+        letter-spacing: 1px;
+        color: var(--text-dim);
+      }
+      .card-footer a {
+        color: var(--green);
+        text-decoration: none;
+        border-bottom: 1px solid rgba(74, 255, 106, 0.3);
+        transition: color 0.2s;
+      }
+      .card-footer a:hover {
+        color: #fff;
+      }
+
+      /* ── LOADING MODAL ── */
+      #loadingModal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        background: rgba(0, 0, 0, 0.85);
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(4px);
+      }
+      .loader-box {
+        background: linear-gradient(160deg, #0e160f, #080d09);
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        padding: 32px 40px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        box-shadow: 0 0 40px rgba(74, 255, 106, 0.1);
+      }
+      .spinner {
+        width: 44px;
+        height: 44px;
+        border: 2px solid rgba(74, 255, 106, 0.12);
+        border-top-color: var(--green);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        box-shadow: 0 0 16px rgba(74, 255, 106, 0.2);
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      .loader-box span {
+        font-family: var(--mono);
+        font-size: 10px;
+        letter-spacing: 4px;
+        color: var(--green);
+        text-transform: uppercase;
+        animation: ledBlink 1s ease-in-out infinite;
+      }
+
+      /* ── MESSAGE MODAL ── */
+      #messageModal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        background: rgba(0, 0, 0, 0.85);
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(4px);
+      }
+      .message-box {
+        background: linear-gradient(160deg, #0e160f, #080d09);
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        padding: 28px 32px;
+        max-width: 380px;
+        width: 90%;
+        text-align: center;
+        box-shadow: 0 0 40px rgba(74, 255, 106, 0.1);
+      }
+      .message-box p {
+        font-family: var(--mono);
+        font-size: 12px;
+        letter-spacing: 1px;
+        color: var(--text);
+        line-height: 1.6;
+        margin-bottom: 20px;
+      }
+      .message-box button {
+        background: rgba(74, 255, 106, 0.08);
+        border: 1px solid rgba(74, 255, 106, 0.35);
+        border-radius: 2px;
+        padding: 8px 28px;
+        font-family: var(--mono);
+        font-size: 10px;
+        letter-spacing: 3px;
+        color: var(--green);
+        cursor: pointer;
+        text-transform: uppercase;
+        transition: all 0.2s;
+      }
+      .message-box button:hover {
+        background: rgba(74, 255, 106, 0.14);
+        border-color: var(--green);
+      }
+
+      /* ── PRIVACY MODAL ── */
+      #privacyModal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 10001;
+        background: rgba(0, 0, 0, 0.88);
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(4px);
+      }
+      .privacy-box {
+        background: linear-gradient(160deg, #0e160f, #080d09);
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        padding: 24px 28px;
+        max-width: 520px;
+        width: 92%;
+        box-shadow: 0 0 40px rgba(74, 255, 106, 0.1);
+      }
+      .privacy-box h3 {
+        font-family: "Bebas Neue", sans-serif;
+        font-size: 18px;
+        letter-spacing: 4px;
+        color: var(--green);
+        margin-bottom: 14px;
+      }
+      .privacy-content {
+        max-height: 42vh;
+        overflow-y: auto;
+        padding-right: 8px;
+        margin-bottom: 16px;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(74, 255, 106, 0.3) transparent;
+      }
+      .privacy-content::-webkit-scrollbar {
+        width: 4px;
+      }
+      .privacy-content::-webkit-scrollbar-thumb {
+        background: rgba(74, 255, 106, 0.3);
+        border-radius: 2px;
+      }
+      .privacy-content p {
+        font-family: var(--mono);
+        font-size: 10px;
+        letter-spacing: 0.5px;
+        color: var(--text-dim);
+        line-height: 1.7;
+        margin-bottom: 12px;
+      }
+      .privacy-content strong {
+        color: var(--text);
+      }
+      .privacy-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+        padding-top: 14px;
+        border-top: 1px solid var(--border-dim);
+      }
+      .privacy-actions button {
+        padding: 8px 20px;
+        border-radius: 2px;
+        font-family: var(--mono);
+        font-size: 9px;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      #acceptPrivacyModal {
+        background: rgba(74, 255, 106, 0.08);
+        border: 1px solid rgba(74, 255, 106, 0.35);
+        color: var(--green);
+      }
+      #acceptPrivacyModal:hover {
+        background: rgba(74, 255, 106, 0.16);
+        border-color: var(--green);
+      }
+      #closePrivacyModal {
+        background: rgba(255, 68, 68, 0.06);
+        border: 1px solid rgba(255, 68, 68, 0.25);
+        color: #ff6b6b;
+      }
+      #closePrivacyModal:hover {
+        background: rgba(255, 68, 68, 0.12);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <div class="card">
+        <!-- HEADER -->
+        <div class="card-header">
+          <div class="header-icon">⬡</div>
+          <div class="header-text">
+            <div class="header-title">REGISTER HUNTER</div>
+            <div class="header-sub">
+              BIT-POKEMON · Fragment Hunter Enrollment
+            </div>
+          </div>
+          <div class="header-dots">
+            <div class="hd g"></div>
+            <div class="hd a"></div>
+            <div class="hd r"></div>
+          </div>
+        </div>
+
+        <!-- FORM -->
+        <div class="card-body">
+          <form id="signupForm">
+            <div class="section-label">Identity</div>
+            <div class="row-2">
+              <div class="field">
+                <label class="field-label">First Name</label>
+                <input
+                  type="text"
+                  id="firstName"
+                  placeholder="e.g. Elias"
+                  required
+                />
+              </div>
+              <div class="field">
+                <label class="field-label">Last Name</label>
+                <input
+                  type="text"
+                  id="lastName"
+                  placeholder="e.g. Voss"
+                  required
+                />
+              </div>
+            </div>
+            <div class="field">
+              <label class="field-label">In-Game Name (IGN)</label>
+              <input
+                type="text"
+                id="ign"
+                placeholder="Your Hunter callsign"
+                required
+              />
+              <div class="field-msg" id="ignMsg"></div>
+            </div>
+            <div class="field">
+              <label class="field-label">Phone (optional)</label>
+              <input type="text" id="phone" placeholder="+63 9xx xxx xxxx" />
+            </div>
+
+            <div class="section-label" style="margin-top: 14px">
+              Credentials
+            </div>
+            <div class="field">
+              <label class="field-label">Email</label>
+              <input
+                type="email"
+                id="email"
+                placeholder="hunter@domain.com"
+                required
+              />
+              <div class="field-msg" id="emailMsg"></div>
+            </div>
+            <div class="field">
+              <label class="field-label">Password</label>
+              <input
+                type="password"
+                id="password"
+                placeholder="Min. 8 characters"
+                required
+              />
+              <button type="button" class="eye-btn" id="peekPassword">
+                SHOW
+              </button>
+              <!-- Strength checker -->
+              <div class="pw-strength" id="pwStrength">
+                <div class="pw-bar-wrap">
+                  <div class="pw-bar" id="pwBar"></div>
+                </div>
+                <div class="pw-rule" id="ruleLen">
+                  <span class="pw-dot"></span>At least 8 characters
+                </div>
+                <div class="pw-rule" id="ruleUpper">
+                  <span class="pw-dot"></span>One uppercase letter (A-Z)
+                </div>
+                <div class="pw-rule" id="ruleLower">
+                  <span class="pw-dot"></span>One lowercase letter (a-z)
+                </div>
+                <div class="pw-rule" id="ruleNum">
+                  <span class="pw-dot"></span>One number (0-9)
+                </div>
+                <div class="pw-rule" id="ruleSpecial">
+                  <span class="pw-dot"></span>One special character (!@#$...)
+                </div>
+              </div>
+            </div>
+            <div class="field">
+              <label class="field-label">Verify Password</label>
+              <input
+                type="password"
+                id="verifyPassword"
+                placeholder="Repeat password"
+                required
+              />
+            </div>
+
+            <div class="section-label" style="margin-top: 14px">Profile</div>
+            <div class="row-2">
+              <div class="field">
+                <label class="field-label">Date of Birth</label>
+                <div class="date-wrap">
+                  <input type="date" id="birthday" required />
+                  <span class="cal-icon">📅</span>
+                </div>
+              </div>
+              <div class="field">
+                <label class="field-label">Pronouns</label>
+                <select id="pronouns">
+                  <option value="" disabled selected>Select</option>
+                  <option value="he/him">He / Him</option>
+                  <option value="she/her">She / Her</option>
+                  <option value="they/them">They / Them</option>
+                  <option value="custom">Custom</option>
+                </select>
+                <input
+                  type="text"
+                  class="pronouns-custom"
+                  id="customPronouns"
+                  placeholder="Custom pronouns"
+                  style="display: none"
+                />
+              </div>
+            </div>
+
+            <!-- CONSENT -->
+            <div class="consent-row">
+              <input type="checkbox" id="consentCheckbox" required />
+              <span class="consent-text">
+                I have read and agree to the
+                <span class="privacy-link" id="openPrivacyModal"
+                  >Data Privacy Policy</span
+                >
+                in compliance with RA 10173.
+              </span>
+            </div>
+
+            <!-- SUBMIT -->
+            <button type="submit" class="btn-submit">▶ &nbsp;ENLIST</button>
+
+            <!-- OAUTH -->
+            <div class="oauth-row">
+              <button type="button" class="oauth-btn google">
+                ⬡ &nbsp;Google
+              </button>
+              <button type="button" class="oauth-btn facebook">
+                ⬡ &nbsp;Facebook
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="card-footer">
+          <p>
+            Already have an account? <a href="../index.html">Sign in here</a>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading Modal -->
+    <div
+      id="loadingModal"
+      style="
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        background: rgba(0, 0, 0, 0.85);
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(4px);
+      "
+    >
+      <div class="loader-box">
+        <div class="spinner"></div>
+        <span>Enlisting Hunter...</span>
+      </div>
+    </div>
+
+    <!-- Message Modal -->
+    <div
+      id="messageModal"
+      style="
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        background: rgba(0, 0, 0, 0.85);
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(4px);
+      "
+    >
+      <div class="message-box">
+        <p id="messageModalText"></p>
+        <button id="closeMessageModal">Confirm</button>
+      </div>
+    </div>
+
+    <!-- Privacy Modal -->
+    <div
+      id="privacyModal"
+      style="
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 10001;
+        background: rgba(0, 0, 0, 0.88);
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(4px);
+      "
+    >
+      <div class="privacy-box">
+        <h3>Data Privacy Policy</h3>
+        <div class="privacy-content">
+          <p>
+            In compliance with the
+            <strong>Data Privacy Act of 2012 (Republic Act No. 10173)</strong>,
+            Bit-Pokemon is committed to protecting your personal data.
+          </p>
+          <p>
+            We collect personal information such as your In-Game Name (IGN),
+            email address, birthdate, and selected pronouns solely for account
+            creation, authentication, and gameplay-related features.
+          </p>
+          <p>
+            Your personal data will be processed fairly and lawfully and will
+            not be shared, sold, or disclosed to third parties without your
+            consent, except when required by law.
+          </p>
+          <p>
+            All collected information is stored securely and accessed only by
+            authorized personnel. Reasonable organizational, physical, and
+            technical security measures are implemented to protect your data.
+          </p>
+          <p>
+            You have the right to access, correct, object to, or request the
+            deletion of your personal data in accordance with the Data Privacy
+            Act.
+          </p>
+          <p>
+            By signing up, you confirm that you have read, understood, and
+            consent to the collection and processing of your personal data as
+            described in this policy.
+          </p>
+        </div>
+        <div class="privacy-actions">
+          <button id="acceptPrivacyModal">Accept</button>
+          <button id="closePrivacyModal">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <script type="module">
+      import { registerUser, checkIGN, checkEmail } from "../api.js";
+
+      // Privacy Modal
+      const privacyModal = document.getElementById("privacyModal");
+      const consentCheckbox = document.getElementById("consentCheckbox");
+      document
+        .getElementById("openPrivacyModal")
+        .addEventListener("click", () => {
+          privacyModal.style.display = "flex";
+        });
+      document
+        .getElementById("closePrivacyModal")
+        .addEventListener("click", () => {
+          privacyModal.style.display = "none";
+        });
+      document
+        .getElementById("acceptPrivacyModal")
+        .addEventListener("click", () => {
+          consentCheckbox.checked = true;
+          privacyModal.style.display = "none";
+        });
+
+      // Pronouns
+      const pronounsSelect = document.getElementById("pronouns");
+      const customPronouns = document.getElementById("customPronouns");
+      pronounsSelect.addEventListener("change", () => {
+        customPronouns.style.display =
+          pronounsSelect.value === "custom" ? "block" : "none";
+      });
+
+      // Peek password
+      const passwordInput = document.getElementById("password");
+      const peekPasswordBtn = document.getElementById("peekPassword");
+      peekPasswordBtn.addEventListener("click", () => {
+        const show = passwordInput.type === "password";
+        passwordInput.type = show ? "text" : "password";
+        peekPasswordBtn.textContent = show ? "HIDE" : "SHOW";
+      });
+
+      // Password strength checker
+      const pwStrength = document.getElementById("pwStrength");
+      const pwBar = document.getElementById("pwBar");
+      const rules = [
+        { id: "ruleLen", test: (v) => v.length >= 8 },
+        { id: "ruleUpper", test: (v) => /[A-Z]/.test(v) },
+        { id: "ruleLower", test: (v) => /[a-z]/.test(v) },
+        { id: "ruleNum", test: (v) => /[0-9]/.test(v) },
+        { id: "ruleSpecial", test: (v) => /[^A-Za-z0-9]/.test(v) },
+      ];
+      const barColors = ["#ff4444", "#ff8c00", "#ffb830", "#a0d020", "#4aff6a"];
+      passwordInput.addEventListener("input", () => {
+        const v = passwordInput.value;
+        pwStrength.classList.toggle("visible", v.length > 0);
+        let passed = 0;
+        rules.forEach((r) => {
+          const el = document.getElementById(r.id);
+          if (r.test(v)) {
+            el.className = "pw-rule pass";
+            passed++;
+          } else el.className = "pw-rule fail";
+        });
+        pwBar.style.width = (passed / rules.length) * 100 + "%";
+        pwBar.style.background = barColors[passed - 1] || "transparent";
+      });
+
+      // Field message helper
+      function setMsg(id, msg, ok) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.textContent = msg;
+        el.className = "field-msg " + (ok ? "ok" : "err");
+      }
+
+      // IGN uniqueness check (debounced)
+      let ignTimer;
+      document.getElementById("ign").addEventListener("input", function () {
+        clearTimeout(ignTimer);
+        const val = this.value.trim();
+        setMsg("ignMsg", "", true);
+        this.classList.remove("valid", "invalid");
+        if (val.length < 3) return;
+        ignTimer = setTimeout(async () => {
+          try {
+            const res = await checkIGN(val);
+            if (res.taken) {
+              this.classList.add("invalid");
+              setMsg(
+                "ignMsg",
+                "✗ IGN already taken — choose another callsign",
+                false,
+              );
+            } else {
+              this.classList.add("valid");
+              setMsg("ignMsg", "✓ Callsign available", true);
+            }
+          } catch (_) {}
+        }, 600);
+      });
+
+      // Email uniqueness check (debounced)
+      let emailTimer;
+      document.getElementById("email").addEventListener("input", function () {
+        clearTimeout(emailTimer);
+        const val = this.value.trim();
+        setMsg("emailMsg", "", true);
+        this.classList.remove("valid", "invalid");
+        if (!val.includes("@")) return;
+        emailTimer = setTimeout(async () => {
+          try {
+            const res = await checkEmail(val);
+            if (res.taken) {
+              this.classList.add("invalid");
+              setMsg(
+                "emailMsg",
+                "✗ Email already registered — sign in instead",
+                false,
+              );
+            } else {
+              this.classList.add("valid");
+              setMsg("emailMsg", "✓ Email available", true);
+            }
+          } catch (_) {}
+        }, 600);
+      });
+
+      // Message modal
+      const messageModal = document.getElementById("messageModal");
+      const messageModalText = document.getElementById("messageModalText");
+      const showMessage = (msg, redirect = false) => {
+        messageModalText.textContent = msg;
+        messageModal.style.display = "flex";
+        document.getElementById("closeMessageModal").onclick = () => {
+          messageModal.style.display = "none";
+          if (redirect) window.location.href = "../index.html";
+        };
+      };
+
+      // Form submit
+      const signupForm = document.getElementById("signupForm");
+      const verifyPassword = document.getElementById("verifyPassword");
+      const birthdayInput = document.getElementById("birthday");
+      const submitBtn = signupForm.querySelector(".btn-submit");
+
+      signupForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        if (passwordInput.value !== verifyPassword.value) {
+          showMessage("Passwords do not match.");
+          return;
+        }
+        const failedRule = rules.find((r) => !r.test(passwordInput.value));
+        if (failedRule) {
+          showMessage("Password too weak — check the requirements.");
+          return;
+        }
+        if (!consentCheckbox.checked) {
+          showMessage("You must accept the Data Privacy Policy to enlist.");
+          return;
+        }
+
+        const formData = {
+          ign: document.getElementById("ign").value.trim(),
+          email: document.getElementById("email").value.trim(),
+          password: passwordInput.value.trim(),
+          birthDate: birthdayInput.value,
+          pronouns:
+            pronounsSelect.value === "custom"
+              ? customPronouns.value.trim()
+              : pronounsSelect.value,
+          firstName: document.getElementById("firstName").value.trim(),
+          lastName: document.getElementById("lastName").value.trim(),
+          phone: document.getElementById("phone").value.trim(),
+        };
+
+        try {
+          submitBtn.disabled = true;
+          submitBtn.textContent = "▶  ENLISTING...";
+          document.getElementById("loadingModal").style.display = "flex";
+
+          const res = await registerUser(formData);
+          document.getElementById("loadingModal").style.display = "none";
+
+          if (!res.success) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = "▶ &nbsp;ENLIST AS HUNTER";
+            const msg = (res.message || "").toLowerCase();
+            if (
+              msg.includes("ign") ||
+              msg.includes("username") ||
+              msg.includes("callsign")
+            ) {
+              setMsg("ignMsg", "✗ IGN already taken", false);
+              document.getElementById("ign").classList.add("invalid");
+              showMessage(
+                "IGN already taken. Choose a different Hunter callsign.",
+              );
+            } else if (msg.includes("email")) {
+              setMsg("emailMsg", "✗ Email already registered", false);
+              document.getElementById("email").classList.add("invalid");
+              showMessage("Email already registered. Sign in instead.");
+            } else if (msg.includes("phone")) {
+              showMessage(
+                "Phone number already linked to an existing account.",
+              );
+            } else {
+              showMessage("Error: " + (res.message || "Registration failed."));
+            }
+            return;
+          }
+
+          showMessage(
+            "Registration successful! Check your email to verify your account.",
+            true,
+          );
+          signupForm.reset();
+          customPronouns.style.display = "none";
+          consentCheckbox.checked = false;
+          pwStrength.classList.remove("visible");
+        } catch (err) {
+          document.getElementById("loadingModal").style.display = "none";
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = "▶ &nbsp;ENLIST AS HUNTER";
+          console.error(err);
+          showMessage("Server error. Please try again later.");
+        }
+      });
+    </script>
+
+    <script>
+      // ══════════════════════════════════════
+      //  SIGN-UP SOUND ENGINE — Web Audio API
+      // ══════════════════════════════════════
+      const SFX = (() => {
+        let _ctx = null;
+        function ctx() {
+          if (!_ctx)
+            _ctx = new (window.AudioContext || window.webkitAudioContext)();
+          if (_ctx.state === "suspended") _ctx.resume();
+          return _ctx;
+        }
+
+        function osc(freq, type, dur, vol, freqEnd) {
+          const c = ctx(),
+            o = c.createOscillator(),
+            g = c.createGain();
+          o.connect(g);
+          g.connect(c.destination);
+          o.type = type;
+          o.frequency.setValueAtTime(freq, c.currentTime);
+          if (freqEnd !== undefined)
+            o.frequency.linearRampToValueAtTime(freqEnd, c.currentTime + dur);
+          g.gain.setValueAtTime(vol, c.currentTime);
+          g.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + dur);
+          o.start(c.currentTime);
+          o.stop(c.currentTime + dur);
+        }
+
+        function noise(dur = 0.06, vol = 0.04) {
+          const c = ctx(),
+            buf = c.createBuffer(1, c.sampleRate * dur, c.sampleRate);
+          const d = buf.getChannelData(0);
+          for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+          const src = c.createBufferSource(),
+            g = c.createGain();
+          src.buffer = buf;
+          src.connect(g);
+          g.connect(c.destination);
+          g.gain.setValueAtTime(vol, c.currentTime);
+          g.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + dur);
+          src.start();
+          src.stop(c.currentTime + dur);
+        }
+
+        function distort(freq, dur, vol) {
+          const c = ctx(),
+            o = c.createOscillator(),
+            w = c.createWaveShaper(),
+            g = c.createGain();
+          const curve = new Float32Array(256);
+          for (let i = 0; i < 256; i++) {
+            const x = (i * 2) / 256 - 1;
+            curve[i] = ((Math.PI + 400) * x) / (Math.PI + 400 * Math.abs(x));
+          }
+          w.curve = curve;
+          o.connect(w);
+          w.connect(g);
+          g.connect(c.destination);
+          o.type = "sawtooth";
+          o.frequency.setValueAtTime(freq, c.currentTime);
+          g.gain.setValueAtTime(vol, c.currentTime);
+          g.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + dur);
+          o.start();
+          o.stop(c.currentTime + dur);
+        }
+
+        return {
+          // Keystroke — soft tick
+          key() {
+            osc(1600, "square", 0.018, 0.025);
+          },
+
+          // Hover — subtle blip
+          hover() {
+            osc(900, "square", 0.03, 0.04);
+          },
+
+          // Modal open — ascending sweep
+          modalOpen() {
+            osc(480, "sine", 0.04, 0.055);
+            setTimeout(() => osc(680, "sine", 0.07, 0.055), 50);
+          },
+
+          // Modal close — descending sweep
+          modalClose() {
+            osc(680, "sine", 0.04, 0.05);
+            setTimeout(() => osc(380, "sine", 0.08, 0.05), 50);
+          },
+
+          // Privacy accept — short confirm blip
+          accept() {
+            osc(660, "triangle", 0.04, 0.06);
+            setTimeout(() => osc(880, "triangle", 0.08, 0.06), 55);
+          },
+
+          // Form submit attempt — double click
+          submit() {
+            osc(500, "square", 0.03, 0.06);
+            setTimeout(() => osc(700, "square", 0.06, 0.06), 40);
+          },
+
+          // Success — 3-note ascending fanfare
+          success() {
+            osc(440, "sine", 0.12, 0.07);
+            setTimeout(() => osc(660, "sine", 0.12, 0.08), 130);
+            setTimeout(() => {
+              osc(880, "sine", 0.22, 0.09);
+              osc(440, "triangle", 0.22, 0.05);
+            }, 260);
+          },
+
+          // Error — low distorted buzz
+          error() {
+            distort(160, 0.14, 0.09);
+            setTimeout(() => distort(120, 0.1, 0.07), 120);
+          },
+
+          // Password peek toggle — mechanical click
+          peek() {
+            osc(400, "square", 0.03, 0.06);
+            setTimeout(() => osc(600, "square", 0.04, 0.05), 30);
+          },
+
+          // Checkbox — satisfying tick
+          checkbox() {
+            osc(800, "triangle", 0.04, 0.07);
+            setTimeout(() => osc(1100, "triangle", 0.06, 0.06), 40);
+          },
+
+          // Loading start — rising tone + noise
+          loading() {
+            noise(0.1, 0.05);
+            setTimeout(() => osc(300, "sine", 0.2, 0.06, 600), 80);
+          },
+        };
+      })();
+
+      // ── Wire sounds to UI elements ──
+      document.addEventListener("DOMContentLoaded", () => {
+        // All text/email/password/date inputs — keypress tick
+        document
+          .querySelectorAll(
+            'input[type="text"], input[type="email"], input[type="password"], input[type="date"], input[type="tel"]',
+          )
+          .forEach((el) => el.addEventListener("keydown", () => SFX.key()));
+
+        // All buttons — hover blip
+        document
+          .querySelectorAll("button, .btn-submit, .oauth-btn")
+          .forEach((el) =>
+            el.addEventListener("mouseenter", () => SFX.hover()),
+          );
+
+        // Privacy link hover
+        const privacyLink = document.getElementById("openPrivacyModal");
+        if (privacyLink)
+          privacyLink.addEventListener("mouseenter", () => SFX.hover());
+
+        // Privacy modal open
+        document
+          .getElementById("openPrivacyModal")
+          ?.addEventListener("click", () => SFX.modalOpen());
+
+        // Privacy modal close
+        document
+          .getElementById("closePrivacyModal")
+          ?.addEventListener("click", () => SFX.modalClose());
+
+        // Privacy accept
+        document
+          .getElementById("acceptPrivacyModal")
+          ?.addEventListener("click", () => SFX.accept());
+
+        // Consent checkbox
+        document
+          .getElementById("consentCheckbox")
+          ?.addEventListener("change", () => SFX.checkbox());
+
+        // Password peek
+        document
+          .getElementById("peekPassword")
+          ?.addEventListener("click", () => SFX.peek());
+
+        // Select (pronouns) change
+        document
+          .getElementById("pronouns")
+          ?.addEventListener("change", () => SFX.key());
+
+        // Message modal close
+        document
+          .getElementById("closeMessageModal")
+          ?.addEventListener("click", () => SFX.modalClose());
+
+        // Form submit
+        const form = document.getElementById("signupForm");
+        if (form) {
+          form.addEventListener("submit", () => SFX.submit());
+        }
+
+        // Patch showMessage to play error/success sounds
+        // We intercept the loading modal display as a proxy
+        const loadingModal = document.getElementById("loadingModal");
+        if (loadingModal) {
+          const origDisplay = Object.getOwnPropertyDescriptor(
+            CSSStyleDeclaration.prototype,
+            "display",
+          );
+          // Watch for loading modal being shown
+          const observer = new MutationObserver(() => {
+            if (loadingModal.style.display === "flex") SFX.loading();
+          });
+          observer.observe(loadingModal, {
+            attributes: true,
+            attributeFilter: ["style"],
+          });
+        }
+
+        // Watch message modal for success/error detection
+        const msgModal = document.getElementById("messageModal");
+        const msgText = document.getElementById("messageModalText");
+        if (msgModal && msgText) {
+          const msgObserver = new MutationObserver(() => {
+            if (msgModal.style.display === "flex") {
+              const txt = msgText.textContent.toLowerCase();
+              if (txt.includes("success") || txt.includes("successful"))
+                SFX.success();
+              else SFX.error();
+            }
+          });
+          msgObserver.observe(msgModal, {
+            attributes: true,
+            attributeFilter: ["style"],
+          });
+        }
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bit-Pokemon</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: Arial, Helvetica, sans-serif;
+      }
+
+      body {
+        background: #0b0e14;
+        color: #fff;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* MAIN CONTENT */
+      main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        padding: 40px 10px;
+      }
+
+      .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 32px;
+        width: 100%;
+        max-width: 1100px;
+        margin-top: 24px;
+        justify-content: center;
+      }
+      .dashboard-card {
+        background: linear-gradient(135deg, #1a1f2e 60%, #232a3a 100%);
+        border-radius: 16px;
+        box-shadow: 0 8px 32px #000a;
+        overflow: hidden;
+        text-decoration: none;
+        position: relative;
+        transition:
+          transform 0.2s,
+          box-shadow 0.2s;
+        aspect-ratio: 1 / 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-end;
+        border: 2px solid transparent;
+      }
+      .dashboard-card:hover {
+        border-color: #4caf50;
+        box-shadow: 0 16px 48px #4caf5033;
+        transform: scale(1.05);
+      }
+      .dashboard-card img {
+        width: 100%;
+        height: 70%;
+        object-fit: cover;
+        display: block;
+        border-bottom: 2px solid #232a3a;
+      }
+      .card-title {
+        font-size: 22px;
+        color: #ffd700;
+        font-weight: bold;
+        margin: 18px 0 24px 0;
+        text-align: center;
+        letter-spacing: 1px;
+        text-shadow: 1px 1px 4px #000a;
+      }
+      .beautiful-welcome {
+        margin-bottom: 60px;
+        padding: 32px 0 16px 0;
+        background: linear-gradient(90deg, #232a3a 0%, #1a1f2e 100%);
+        border-radius: 16px;
+        box-shadow: 0 4px 24px #0008;
+      }
+
+      .content-wrapper {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .welcome {
+        text-align: center;
+        margin-bottom: 40px;
+        position: relative;
+        display: inline-block;
+      }
+
+      .welcome h1 {
+        font-size: 36px;
+        color: #4caf50;
+        font-weight: bold;
+        margin-bottom: 10px;
+        position: relative;
+        z-index: 1;
+        display: inline-block;
+      }
+
+      .slanted-pulse {
+        font-size: 24px;
+        color: #ffcc00;
+        font-weight: bold;
+        text-shadow: 2px 2px #000;
+        position: absolute;
+        top: -10px;
+        left: 95%;
+        transform: rotate(15deg);
+        animation: pulse 1s infinite alternate;
+        z-index: 2;
+        white-space: nowrap;
+      }
+
+      @keyframes pulse {
+        0% {
+          transform: rotate(15deg) scale(1);
+          opacity: 0.8;
+        }
+        50% {
+          transform: rotate(15deg) scale(1.1);
+          opacity: 1;
+        }
+        100% {
+          transform: rotate(15deg) scale(1);
+          opacity: 0.8;
+        }
+      }
+
+      .welcome p {
+        font-size: 18px;
+        color: #aaa;
+      }
+
+      /* Remove old grid styles */
+
+      /* FOOTER */
+      footer {
+        background: #11151f;
+        padding: 20px 24px;
+        text-align: center;
+        color: #aaa;
+        margin-top: auto;
+      }
+
+      footer a {
+        color: #4caf50;
+        margin: 0 10px;
+        text-decoration: none;
+        transition: color 0.2s;
+      }
+
+      footer a:hover {
+        color: #fff;
+      }
+
+      /* RESPONSIVE */
+      @media (max-width: 1024px) {
+        main {
+          flex-direction: column;
+          padding: 20px 10px;
+        }
+        .dashboard-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+      @media (max-width: 600px) {
+        .dashboard-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- DYNAMIC NAVBAR -->
+    <div id="navbar-placeholder"></div>
+
+    <!-- MAIN CONTENT -->
+    <main>
+      <div class="content-wrapper">
+        <div class="welcome beautiful-welcome">
+          <div class="slanted-pulse">Gotta catch them all</div>
+          <h1>WELCOME TO BIT-POKEMON</h1>
+          <p>Created by Kobe D. Estabalaya</p>
+        </div>
+        <div class="dashboard-grid">
+          <a href="game.html?map=1" class="dashboard-card">
+            <img src="../assets/img/mini_map1.jpg" alt="Map 1" />
+            <div class="card-title">Map 1</div>
+          </a>
+          <a href="game.html?map=2" class="dashboard-card">
+            <img src="../assets/img/mini_map2.jpg" alt="Map 2" />
+            <div class="card-title">Map 2</div>
+          </a>
+          <a href="game.html?map=3" class="dashboard-card">
+            <img src="../assets/img/map3.jpg" alt="Map 3" />
+            <div class="card-title">Map 3</div>
+          </a>
+          <a href="game.html?map=4" class="dashboard-card">
+            <img src="../assets/img/mini_map4.jpg" alt="Map 4" />
+            <div class="card-title">Map 4</div>
+          </a>
+          <a href="game.html?map=5" class="dashboard-card">
+            <img src="../assets/img/mini_map5.jpg" alt="Map 5" />
+            <div class="card-title">Map 5</div>
+          </a>
+          <a href="game.html?map=6" class="dashboard-card">
+            <img src="../assets/img/mini_map6.jpg" alt="Map 6" />
+            <div class="card-title">Map 6</div>
+          </a>
+          <a href="game.html?map=7" class="dashboard-card">
+            <img src="../assets/img/mini_map7.jpg" alt="Map 7" />
+            <div class="card-title">Map 7</div>
+          </a>
+        </div>
+      </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer>
+      <p>
+        <a href="#">Maps</a> | <a href="#">Profile</a> |
+        <a href="#">Pokemon</a> |
+        <a href="#">Battle</a>
+      </p>
+      <p>&copy; 2026 Bit-Pokemon by Kobe D. Estabalaya</p>
+    </footer>
+
+    <!-- CHECK USER POKEMON ON LOGIN -->
+    <script type="module">
+      import { API_BASE_URL } from "../api.js";
+      // Check if user has Pokémon in user_pokemons table, else redirect to firstpokemon.html
+      const user_id = localStorage.getItem("user_id");
+      const token = localStorage.getItem("token");
+      if (user_id && token) {
+        fetch(`${API_BASE_URL}/users/${user_id}/pokemon`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (
+              !data.success ||
+              !Array.isArray(data.data) ||
+              data.data.length === 0
+            ) {
+              window.location.href = "firstpokemon.html";
+            }
+          })
+          .catch(() => {
+            window.location.href = "firstpokemon.html";
+          });
+      } else {
+        // Not logged in, redirect to login page (optional)
+        window.location.href = "../index.html";
+      }
+    </script>
+
+    <!-- LOAD NAVBAR FROM navbar.html -->
+    <script>
+      fetch("navbar.html")
+        .then((response) => response.text())
+        .then((data) => {
+          document.getElementById("navbar-placeholder").innerHTML = data;
+          // Attach logout handler after navbar is loaded
+          const logoutBtn = document.getElementById("logout-btn");
+          if (logoutBtn) {
+            logoutBtn.addEventListener("click", function (e) {
+              e.preventDefault();
+              localStorage.clear();
+              sessionStorage.clear();
+              window.location.href = "index.html";
+            });
+          }
+        })
+        .catch((err) => console.error("Failed to load navbar:", err));
+    </script>
+    <script>
+      // Ensure logout button works if present in loaded navbar
+      document.addEventListener("DOMContentLoaded", function () {
+        function attachLogoutHandler() {
+          const logoutBtn = document.getElementById("logout-btn");
+          if (logoutBtn) {
+            logoutBtn.addEventListener("click", function (e) {
+              e.preventDefault();
+              localStorage.clear();
+              sessionStorage.clear();
+              window.location.href = "../index.html";
+            });
+          }
+        }
+        // Attach after navbar loads
+        const navbarPlaceholder = document.getElementById("navbar-placeholder");
+        if (navbarPlaceholder) {
+          const observer = new MutationObserver(function () {
+            attachLogoutHandler();
+          });
+          observer.observe(navbarPlaceholder, {
+            childList: true,
+            subtree: true,
+          });
+        }
+        // Fallback in case navbar is already loaded
+        attachLogoutHandler();
+      });
+    </script>
+  </body>
+</html>

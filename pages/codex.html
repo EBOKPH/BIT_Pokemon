@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<script>document.documentElement.classList.add('codex-page');</script>
+<title>BIT Pokémon – The Codex</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400;1,600&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --gold:#c9a84c; --gold-light:#f0d080;
+  --parch:#f0e6cc; --parch-dark:#e4d4aa; --parch-shadow:#c8b07a;
+  --ink:#1a1208; --ink2:#3a2e1a;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{
+  scrollbar-width:thin;
+  scrollbar-color:rgba(201,168,76,.6) rgba(12,8,7,.3);
+  overflow-y:auto;
+}
+html::-webkit-scrollbar{width:12px;}
+html::-webkit-scrollbar-track{background:rgba(12,8,7,.3);}
+html::-webkit-scrollbar-thumb{
+  background:linear-gradient(180deg,rgba(201,168,76,.4),rgba(201,168,76,.7),rgba(201,168,76,.4));
+  border-radius:6px;
+  border:2px solid rgba(12,8,7,.3);
+}
+html::-webkit-scrollbar-thumb:hover{
+  background:linear-gradient(180deg,rgba(201,168,76,.6),rgba(201,168,76,.9),rgba(201,168,76,.6));
+}
+
+html,body{width:100%;height:auto;overflow-x:hidden;background:#0c0807;font-family:'Crimson Text',serif;}
+
+/* ── BG ── */
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(ellipse 55% 70% at 10% 50%,rgba(120,40,0,.22) 0%,transparent 65%),
+    radial-gradient(ellipse 55% 70% at 90% 50%,rgba(0,30,100,.22) 0%,transparent 65%),
+    radial-gradient(ellipse 80% 40% at 50% 100%,rgba(60,20,0,.35) 0%,transparent 60%),
+    radial-gradient(ellipse 40% 30% at 50% 10%,rgba(160,100,0,.08) 0%,transparent 60%);}
+
+/* ── FLOATING ORB GLOWS ── */
+body::after{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(circle 300px at 8% 30%,rgba(200,140,40,.07) 0%,transparent 70%),
+    radial-gradient(circle 280px at 92% 60%,rgba(40,80,180,.07) 0%,transparent 70%),
+    radial-gradient(circle 200px at 50% 80%,rgba(160,80,0,.06) 0%,transparent 70%);
+  animation:bgPulse 8s ease-in-out infinite alternate;
+}
+@keyframes bgPulse{
+  0%  {opacity:.6;}
+  50% {opacity:1;}
+  100%{opacity:.7;}
+}
+
+/* Floating ambient particles */
+.bg-particle{
+  position:fixed;border-radius:50%;pointer-events:none;z-index:0;
+  animation:particleDrift linear infinite;
+  opacity:0;
+}
+@keyframes particleDrift{
+  0%  {transform:translateY(100vh) translateX(0);    opacity:0;}
+  10% {opacity:.6;}
+  90% {opacity:.3;}
+  100%{transform:translateY(-10vh) translateX(40px); opacity:0;}
+}
+
+/* ── HEADER ── */
+.hdr{flex-shrink:0;width:100%;text-align:center;padding:10px 20px 5px;position:relative;z-index:10;}
+.hdr h1{font-family:'Cinzel',serif;font-weight:900;font-size:clamp(15px,2.8vw,32px);letter-spacing:8px;
+  background:linear-gradient(135deg,#c9a84c,#f0d080,#c9a84c);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  filter:drop-shadow(0 0 18px rgba(200,160,60,.4));
+  animation:titleGlow 4s ease-in-out infinite;}
+@keyframes titleGlow{
+  0%,100%{filter:drop-shadow(0 0 18px rgba(200,160,60,.4));}
+  50%    {filter:drop-shadow(0 0 38px rgba(255,200,80,.85)) drop-shadow(0 0 70px rgba(200,140,20,.4));}
+}
+.hdr p{font-family:'Rajdhani',sans-serif;font-size:9px;letter-spacing:6px;color:rgba(200,180,120,.38);text-transform:uppercase;margin-top:2px;}
+.hline{width:220px;height:1px;margin:4px auto 0;background:linear-gradient(90deg,transparent,var(--gold),transparent);
+  animation:lineGlow 4s ease-in-out infinite;}
+@keyframes lineGlow{
+  0%,100%{box-shadow:none;opacity:.7;}
+  50%{box-shadow:0 0 12px rgba(200,160,60,.6),0 0 28px rgba(200,160,60,.2);opacity:1;}
+}
+
+/* ── BOOK TABS ── */
+.tabs-bar{
+  display:flex;align-items:center;justify-content:center;
+  gap:8px;padding:5px 14px 5px;position:relative;z-index:10;
+}
+.tabs{
+  display:flex;gap:5px;flex-wrap:nowrap;overflow-x:auto;
+  scrollbar-width:none;justify-content:center;align-items:center;
+}
+.tabs::-webkit-scrollbar{display:none;}
+/* Fullscreen buttons */
+.fs-btn{
+  flex-shrink:0;
+  font-family:'Cinzel',serif;font-size:8px;letter-spacing:2px;
+  color:rgba(200,170,100,.45);padding:5px 10px;
+  border:1px solid rgba(200,170,100,.18);border-radius:2px;
+  cursor:pointer;transition:all .2s;background:rgba(20,12,4,.5);
+  white-space:nowrap;text-transform:uppercase;
+  display:flex;align-items:center;gap:5px;
+}
+.fs-btn:hover{color:var(--gold-light);border-color:var(--gold);background:rgba(80,45,5,.7);}
+.fs-btn svg{opacity:.7;transition:opacity .2s;}
+.fs-btn:hover svg{opacity:1;}
+/* Divider between tab groups and buttons */
+.tabs-sep{width:1px;height:20px;background:rgba(200,160,60,.15);flex-shrink:0;}
+
+/* ── FULLSCREEN MODES ── */
+/* Reading mode: hide left panel, scroll takes full width */
+#app.read-mode .left-panel{display:none;}
+#app.read-mode .scroll-panel{padding:14px 40px;}
+
+/* Presentation mode: hide everything but book area */
+#app.present-mode .hdr{display:none;}
+#app.present-mode .tabs-bar{display:none;}
+#app.present-mode .left-panel .bookshelf{display:none;}
+#app.present-mode .panel-divider{display:none;}
+#app.present-mode .left-panel{width:260px;}
+#app.present-mode .display-table .table-label{display:none;}
+#app.present-mode .display-book{width:200px!important;height:270px!important;}
+/* Exit hint */
+.exit-hint{
+  display:none;position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+  font-family:'Cinzel',serif;font-size:9px;letter-spacing:3px;
+  color:rgba(200,160,60,.5);text-transform:uppercase;
+  background:rgba(10,8,4,.85);border:1px solid rgba(200,160,60,.2);
+  padding:6px 16px;border-radius:2px;z-index:100;pointer-events:none;
+}
+#app.read-mode .exit-hint,#app.present-mode .exit-hint{display:block;}
+.tab{flex-shrink:0;font-family:'Cinzel',serif;font-size:8px;letter-spacing:2px;color:rgba(200,170,100,.4);
+  padding:5px 10px;border:1px solid rgba(200,170,100,.15);border-radius:2px;cursor:pointer;
+  transition:all .2s;background:rgba(20,12,4,.5);white-space:nowrap;text-transform:uppercase;}
+.tab:hover{color:var(--gold-light);border-color:rgba(200,160,60,.5);}
+.tab.active{color:var(--gold-light);border-color:var(--gold);background:rgba(80,45,5,.8);box-shadow:0 0 8px rgba(200,160,60,.2),0 0 20px rgba(200,160,60,.1);
+  animation:tabGlow 3s ease-in-out infinite;}
+@keyframes tabGlow{0%,100%{box-shadow:0 0 8px rgba(200,160,60,.2);}50%{box-shadow:0 0 14px rgba(200,160,60,.5),0 0 28px rgba(200,160,60,.15);}}
+
+/* ── MAIN LAYOUT ── */
+.layout{display:flex;flex:1 1 0;min-height:0;width:100%;overflow:hidden;}
+
+/* ══════════════════════════════════════
+   LEFT PANEL — Bookshelf + Display Table
+   ══════════════════════════════════════ */
+.left-panel{
+  flex-shrink:0;width:380px;
+  display:flex;flex-direction:column;
+  background:linear-gradient(180deg,#0e0a04 0%,#150e06 40%,#0a0804 100%);
+  border-right:1px solid rgba(200,160,60,.12);
+  position:relative;overflow:hidden;
+}
+.left-panel::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:
+    linear-gradient(90deg,rgba(200,160,60,.04) 0%,transparent 50%),
+    repeating-linear-gradient(180deg,transparent,transparent 60px,rgba(200,160,60,.02) 60px,rgba(200,160,60,.02) 61px);
+}
+
+/* ── BOOKSHELF ── */
+.bookshelf{
+  flex-shrink:0;
+  padding:18px 16px 10px;
+  position:relative;
+}
+.shelf-label{
+  font-family:'Rajdhani',sans-serif;font-size:8px;letter-spacing:5px;
+  color:rgba(200,160,60,.35);text-transform:uppercase;
+  margin-bottom:12px;text-align:center;
+}
+
+/* Wood shelf board */
+.shelf-board{
+  position:relative;
+  display:flex;align-items:flex-end;justify-content:center;gap:6px;
+  padding:0 8px 0;
+}
+.shelf-board::after{
+  content:'';position:absolute;bottom:-10px;left:0;right:0;height:10px;
+  background:linear-gradient(180deg,#5a3a0a,#3a2206,#2a1804);
+  border-radius:0 0 2px 2px;
+  box-shadow:0 4px 16px rgba(0,0,0,.7),inset 0 1px 0 rgba(200,160,60,.15);
+}
+/* Shelf wood grain highlight */
+.shelf-board::before{
+  content:'';position:absolute;bottom:-10px;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,rgba(200,160,60,.2),rgba(255,220,100,.3),rgba(200,160,60,.2),transparent);
+  z-index:1;
+}
+
+/* Individual shelf book (spine view) */
+.shelf-book{
+  position:relative;
+  width:36px;height:110px;
+  cursor:pointer;
+  transition:transform .25s cubic-bezier(.25,.8,.25,1),filter .25s;
+  transform-origin:bottom center;
+  border-radius:1px 2px 2px 1px;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:2px 0 8px rgba(0,0,0,.6),inset 1px 0 0 rgba(255,255,255,.06);
+}
+.shelf-book:hover{transform:translateY(-8px) scaleX(1.05);filter:brightness(1.3);}
+.shelf-book.active{transform:translateY(-10px) scaleX(1.08);filter:brightness(1.4);}
+.shelf-book.active::after{
+  content:'';position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);
+  width:6px;height:6px;border-radius:50%;
+  background:var(--gold);
+  box-shadow:0 0 8px var(--gold),0 0 20px rgba(200,160,60,.6);
+  animation:dotPulse 1.5s ease-in-out infinite;
+}
+@keyframes dotPulse{0%,100%{box-shadow:0 0 8px var(--gold),0 0 16px rgba(200,160,60,.4);}50%{box-shadow:0 0 14px var(--gold),0 0 32px rgba(200,160,60,.7);}}
+/* Spine label */
+.shelf-book span{
+  font-family:'Cinzel',serif;font-weight:700;font-size:7px;letter-spacing:2px;
+  color:rgba(200,160,60,.8);text-transform:uppercase;
+  writing-mode:vertical-rl;transform:rotate(180deg);
+  white-space:nowrap;overflow:hidden;
+  text-shadow:0 1px 3px rgba(0,0,0,.6);
+}
+/* Spine colours */
+.sb1{background:linear-gradient(90deg,#1a0f02,#2e1a05,#1a0f02);}
+.sb2{background:linear-gradient(90deg,#200202,#3a0a0a,#200202);}
+.sb3{background:linear-gradient(90deg,#011a14,#02281e,#011a14);}
+.sb4{background:linear-gradient(90deg,#0c0418,#1a0828,#0c0418);}
+.sb5{background:linear-gradient(90deg,#030610,#06101e,#030610);}
+/* Spine top decoration */
+.shelf-book::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:6px;
+  background:linear-gradient(180deg,rgba(200,160,60,.25),transparent);
+  border-radius:1px 2px 0 0;
+}
+
+/* Shelf wall brackets */
+.shelf-bracket{
+  position:absolute;bottom:-10px;
+  width:8px;height:22px;
+  background:linear-gradient(90deg,#4a3008,#2a1a04);
+  box-shadow:inset 1px 0 0 rgba(200,160,60,.1);
+}
+.shelf-bracket.left{left:4px;border-radius:0 0 0 2px;}
+.shelf-bracket.right{right:4px;border-radius:0 0 2px 0;}
+
+/* Wall texture behind shelf */
+.shelf-wall{
+  position:absolute;inset:0;bottom:auto;height:100%;pointer-events:none;
+  background:
+    repeating-linear-gradient(90deg,transparent,transparent 40px,rgba(0,0,0,.08) 40px,rgba(0,0,0,.08) 41px),
+    repeating-linear-gradient(0deg,transparent,transparent 40px,rgba(0,0,0,.06) 40px,rgba(0,0,0,.06) 41px);
+  opacity:.5;
+}
+
+/* ── DIVIDER ── */
+.panel-divider{
+  flex-shrink:0;height:1px;margin:20px 16px 0;
+  background:linear-gradient(90deg,transparent,rgba(200,160,60,.25),transparent);
+}
+
+/* ── DISPLAY TABLE ── */
+.display-table{
+  flex:1 1 0;min-height:0;
+  display:flex;flex-direction:column;align-items:center;
+  padding:16px 14px 16px;
+  position:relative;
+}
+
+.table-label{
+  font-family:'Rajdhani',sans-serif;font-size:8px;letter-spacing:5px;
+  color:rgba(200,160,60,.35);text-transform:uppercase;
+  margin-bottom:14px;
+}
+
+/* The physical table surface */
+.table-surface{
+  width:100%;
+  background:linear-gradient(145deg,#2a1a06,#1e1204,#2a1a06);
+  border-radius:4px 4px 2px 2px;
+  padding:14px 12px 10px;
+  box-shadow:
+    0 8px 24px rgba(0,0,0,.7),
+    0 2px 0 rgba(200,160,60,.12),
+    inset 0 1px 0 rgba(200,160,60,.08);
+  border:1px solid rgba(200,160,60,.1);
+  position:relative;
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+}
+/* Table legs */
+.table-surface::after{
+  content:'';position:absolute;bottom:-12px;left:10%;right:10%;height:12px;
+  background:linear-gradient(90deg,#2a1604 0%,transparent 15%,transparent 85%,#2a1604 100%);
+  border-bottom:2px solid #1a1004;
+}
+
+/* Book displayed on table — front cover view */
+.display-book{
+  width:160px;height:215px;
+  position:relative;
+  border-radius:1px 3px 3px 1px;
+  box-shadow:
+    -4px 4px 16px rgba(0,0,0,.8),
+    4px 2px 10px rgba(0,0,0,.5),
+    inset -3px 0 8px rgba(0,0,0,.4);
+  transform:perspective(400px) rotateY(-4deg) rotateX(2deg);
+  transition:transform .4s ease, box-shadow .4s ease;
+  overflow:hidden;
+  cursor:default;
+}
+.display-book:hover{
+  transform:perspective(400px) rotateY(-2deg) rotateX(1deg) scale(1.04);
+  box-shadow:-6px 6px 22px rgba(0,0,0,.9),4px 2px 12px rgba(0,0,0,.6),inset -3px 0 8px rgba(0,0,0,.4);
+}
+/* Spine strip on display book */
+.display-book::before{
+  content:'';position:absolute;top:0;left:0;bottom:0;width:8px;
+  background:linear-gradient(90deg,rgba(0,0,0,.5),rgba(0,0,0,.2));
+  z-index:3;
+}
+/* Inner border */
+.display-book::after{
+  content:'';position:absolute;inset:6px;
+  border:1px solid rgba(200,160,60,.2);
+  pointer-events:none;z-index:4;
+}
+.db-inner{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:16px 12px;text-align:center;z-index:2;overflow:hidden;
+}
+.db-eye{font-family:'Rajdhani',sans-serif;font-size:7px;letter-spacing:4px;color:rgba(200,160,60,.5);text-transform:uppercase;margin-bottom:10px;}
+.db-title{font-family:'Cinzel',serif;font-weight:900;letter-spacing:2px;line-height:.9;font-size:16px;word-break:break-word;}
+.db-div{width:44px;height:1px;margin:10px auto;background:linear-gradient(90deg,transparent,var(--gold),transparent);}
+.db-quote{font-family:'Crimson Text',serif;font-style:italic;font-size:8.5px;color:rgba(200,160,60,.44);line-height:1.6;}
+.db-roman{font-family:'Cinzel',serif;font-weight:900;font-size:38px;color:rgba(200,160,60,.055);position:absolute;bottom:8px;right:10px;line-height:1;}
+
+/* Selected book title under table */
+.display-title{
+  font-family:'Cinzel',serif;font-size:8.5px;letter-spacing:3px;
+  color:rgba(200,160,60,.5);text-transform:uppercase;text-align:center;
+  margin-top:4px;
+}
+
+/* Table cloth/mat under book */
+.table-mat{
+  position:absolute;bottom:0;left:0;right:0;height:6px;
+  background:linear-gradient(180deg,rgba(180,140,60,.05),rgba(180,140,60,.12));
+  border-radius:0 0 4px 4px;
+}
+
+/* ══════════════════════════════════════
+   RIGHT PANEL — Decorated Scroll
+   ══════════════════════════════════════ */
+.scroll-panel{
+  flex:1 1 0;min-width:0;
+  display:flex;flex-direction:column;
+  padding:14px 20px 14px 14px;
+  background:linear-gradient(180deg,#080604 0%,#0c0906 100%);
+  position:relative;
+}
+
+/* Outer frame — like a picture frame around the scroll */
+.scroll-frame{
+  flex:1 1 0;min-height:0;
+  position:relative;
+  border:1px solid rgba(200,160,60,.2);
+  border-radius:3px;
+  box-shadow:
+    0 0 0 4px rgba(10,8,4,.8),
+    0 0 0 5px rgba(200,160,60,.1),
+    0 0 40px rgba(0,0,0,.6),
+    inset 0 0 80px rgba(0,0,0,.2);
+}
+/* Frame corner ornaments */
+.scroll-frame::before,.scroll-frame::after{
+  font-family:'serif';font-size:14px;color:rgba(200,160,60,.4);
+  position:absolute;z-index:10;pointer-events:none;line-height:1;
+}
+.scroll-frame::before{content:'❧';top:6px;left:8px;}
+.scroll-frame::after{content:'❧';bottom:6px;right:8px;transform:rotate(180deg);}
+
+/* Corner pieces (CSS) */
+.frame-corner{position:absolute;width:20px;height:20px;z-index:10;pointer-events:none;}
+.frame-corner.tl{top:-1px;left:-1px;border-top:2px solid rgba(200,160,60,.55);border-left:2px solid rgba(200,160,60,.55);}
+.frame-corner.tr{top:-1px;right:-1px;border-top:2px solid rgba(200,160,60,.55);border-right:2px solid rgba(200,160,60,.55);}
+.frame-corner.bl{bottom:-1px;left:-1px;border-bottom:2px solid rgba(200,160,60,.55);border-left:2px solid rgba(200,160,60,.55);}
+.frame-corner.br{bottom:-1px;right:-1px;border-bottom:2px solid rgba(200,160,60,.55);border-right:2px solid rgba(200,160,60,.55);}
+.frame-corner{animation:cornerPulse 4s ease-in-out infinite;}
+@keyframes cornerPulse{0%,100%{opacity:.55;}50%{opacity:1;filter:drop-shadow(0 0 4px rgba(200,160,60,.6));}}
+
+/* Top + bottom scroll rollers */
+.scroll-roller{
+  position:absolute;left:-2px;right:-2px;height:24px;z-index:6;
+  background:linear-gradient(180deg,#4a3410,#7a5a1e,#9a7030,#7a5a1e,#4a3410);
+  box-shadow:0 4px 14px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,220,100,.25),inset 0 -1px 0 rgba(0,0,0,.4),0 0 18px rgba(200,140,40,.12);
+  animation:rollerGlow 5s ease-in-out infinite;
+}
+@keyframes rollerGlow{
+  0%,100%{box-shadow:0 4px 14px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,220,100,.25),0 0 12px rgba(200,140,40,.08);}
+  50%    {box-shadow:0 4px 14px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,220,100,.4), 0 0 28px rgba(200,140,40,.28);}
+}
+.scroll-roller.top{top:-2px;border-radius:3px 3px 0 0;}
+.scroll-roller.bot{bottom:-2px;border-radius:0 0 3px 3px;}
+/* Roller ring engravings */
+.scroll-roller::before{
+  content:'';position:absolute;top:50%;left:12px;right:12px;height:3px;transform:translateY(-50%);
+  background:linear-gradient(90deg,transparent,rgba(200,160,60,.4),rgba(255,230,120,.6),rgba(200,160,60,.4),transparent);
+  border-radius:2px;
+}
+.scroll-roller::after{
+  content:'';position:absolute;top:4px;bottom:4px;left:0;right:0;
+  background:
+    linear-gradient(90deg,rgba(0,0,0,.3) 0%,transparent 8%,transparent 92%,rgba(0,0,0,.3) 100%);
+}
+/* Roller end caps */
+.roller-cap{
+  position:absolute;top:0;bottom:0;width:12px;
+  background:linear-gradient(90deg,#2a1808,#5a3a12);
+  z-index:7;
+}
+.roller-cap.l{left:-2px;border-radius:3px 0 0 3px;box-shadow:inset 2px 0 4px rgba(0,0,0,.5);}
+.roller-cap.r{right:-2px;border-radius:0 3px 3px 0;box-shadow:inset -2px 0 4px rgba(0,0,0,.5);}
+
+/* Parchment scroll area */
+.scroll-inner{
+  position:absolute;top:22px;bottom:22px;left:0;right:0;
+  overflow-y:auto;
+  background:
+    linear-gradient(180deg,rgba(30,18,4,.25) 0%,transparent 5%,transparent 95%,rgba(30,18,4,.25) 100%),
+    linear-gradient(135deg,#f5ecd4 0%,#f0e3c0 25%,#f8efd8 50%,#ead8b0 75%,#f2e5c8 100%);
+  scrollbar-width:thin;
+  scrollbar-color:rgba(180,140,60,.35) transparent;
+}
+.scroll-inner::-webkit-scrollbar{width:6px;}
+.scroll-inner::-webkit-scrollbar-track{background:transparent;}
+.scroll-inner::-webkit-scrollbar-thumb{background:rgba(180,140,60,.3);border-radius:3px;}
+
+/* Fade top/bottom of parchment */
+.scroll-fade{
+  position:absolute;left:0;right:0;height:36px;z-index:4;pointer-events:none;
+}
+.scroll-fade.top{top:22px;background:linear-gradient(180deg,rgba(240,220,160,.4),transparent);}
+.scroll-fade.bot{bottom:22px;background:linear-gradient(0deg,rgba(240,220,160,.4),transparent);}
+
+/* ── SCROLL CONTENT TYPOGRAPHY ── */
+.scroll-content{
+  padding:32px 52px 44px;
+  background-image:repeating-linear-gradient(0deg,transparent,transparent 27px,rgba(100,60,10,.022) 27px,rgba(100,60,10,.022) 28px);
+  min-height:100%;
+}
+.s-bookhead{font-family:'Cinzel',serif;font-size:9px;letter-spacing:5px;color:rgba(100,70,20,.42);text-transform:uppercase;margin-bottom:22px;padding-bottom:8px;border-bottom:1px solid rgba(180,140,60,.22);}
+.s-chapter-block{text-align:center;padding:28px 16px 24px;margin-bottom:26px;border-top:1px solid rgba(180,140,60,.18);border-bottom:1px solid rgba(180,140,60,.18);background:rgba(180,140,60,.035);}
+.s-ch-num{font-family:'Cinzel',serif;font-weight:900;font-size:68px;color:rgba(100,70,20,.05);line-height:1;margin-bottom:-8px;}
+.s-ch-label{font-family:'Rajdhani',sans-serif;font-size:9px;letter-spacing:6px;color:rgba(100,70,20,.38);text-transform:uppercase;}
+.s-ch-title{font-family:'Cinzel',serif;font-weight:700;font-size:clamp(15px,2vw,20px);color:var(--ink);letter-spacing:2px;line-height:1.3;margin:8px 0;}
+.s-ch-orn{color:var(--gold);font-size:13px;opacity:.55;margin:5px 0;}
+.s-ch-intro{font-family:'Crimson Text',serif;font-style:italic;font-size:13px;color:rgba(50,35,10,.52);max-width:400px;margin:0 auto;line-height:1.65;}
+.s-section{font-family:'Cinzel',serif;font-weight:700;font-size:9.5px;letter-spacing:3px;color:var(--ink);text-transform:uppercase;margin:20px 0 7px;padding-bottom:3px;border-bottom:1px solid rgba(180,140,60,.22);}
+.s-p{font-family:'Crimson Text',serif;font-size:15px;line-height:1.78;color:var(--ink2);text-align:justify;hyphens:auto;margin-bottom:13px;}
+.s-p:last-child{margin-bottom:0;}
+.s-drop::first-letter{font-family:'Cinzel',serif;font-weight:900;font-size:50px;line-height:.8;float:left;margin:4px 8px 0 0;color:var(--ink);}
+.s-quote{border-left:3px solid rgba(180,140,60,.38);padding:9px 16px;margin:16px 0;font-style:italic;color:rgba(50,35,10,.62);font-size:14px;background:rgba(180,140,60,.055);line-height:1.65;border-radius:0 3px 3px 0;}
+.s-divider{width:100px;height:1px;margin:22px auto;background:linear-gradient(90deg,transparent,rgba(180,140,60,.38),transparent);}
+.s-ornament{text-align:center;color:var(--gold);font-size:11px;opacity:.45;margin:16px 0;letter-spacing:6px;}
+.s-poke{display:flex;flex-direction:column;align-items:center;margin:18px 0 8px;gap:3px;}
+.s-poke img{image-rendering:auto;opacity:0;transition:opacity .5s;filter:drop-shadow(0 4px 14px rgba(0,0,0,.22));}
+.s-poke img.vis{opacity:1;}
+.s-poke-cap{font-family:'Cinzel',serif;font-size:9px;letter-spacing:4px;color:rgba(100,70,20,.48);text-transform:uppercase;}
+.s-poke-sub{font-family:'Crimson Text',serif;font-style:italic;font-size:12px;color:rgba(80,55,15,.4);}
+.s-faction{margin:18px 0 8px;padding:14px 16px;border:1px solid rgba(180,140,60,.16);background:rgba(180,140,60,.035);border-radius:3px;}
+.s-faction-flag{display:flex;justify-content:center;margin-bottom:8px;}
+.s-faction-name{font-family:'Cinzel',serif;font-weight:900;font-size:15px;letter-spacing:3px;text-align:center;margin-bottom:2px;}
+.s-faction-motto{font-family:'Crimson Text',serif;font-style:italic;font-size:12.5px;text-align:center;opacity:.62;margin-bottom:8px;}
+.s-chips{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px;}
+.s-chip{background:rgba(0,0,0,.065);border:1px solid rgba(0,0,0,.11);border-radius:2px;padding:2px 7px;font-family:'Rajdhani',sans-serif;font-size:9.5px;letter-spacing:1px;color:rgba(30,20,5,.58);}
+
+/* Whole app */
+#app{display:flex;flex-direction:column;height:100vh;overflow:hidden;position:relative;z-index:1;}
+.faction-svg{display:block;}
+
+</style>
+
+<!-- SVG FLAGS -->
+<div id="svg-store" style="display:none">
+  <div id="flag-ironclad">
+    <svg class="faction-svg" width="180" height="120" viewBox="0 0 180 120" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="icB" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#3d0808"/><stop offset="100%" stop-color="#1a0303"/></linearGradient>
+        <linearGradient id="icM" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#c0c0c0"/><stop offset="50%" stop-color="#888"/><stop offset="100%" stop-color="#bbb"/></linearGradient>
+      </defs>
+      <rect width="180" height="120" fill="url(#icB)" rx="2"/>
+      <rect x="3" y="3" width="174" height="114" fill="none" stroke="#7b1212" stroke-width="1.5" rx="1"/>
+      <rect x="0" y="52" width="180" height="16" fill="#7b1212" opacity=".32"/>
+      <path d="M90 20 L112 33 L112 64 Q112 80 90 91 Q68 80 68 64 L68 33 Z" fill="#1a0303" stroke="#7b1212" stroke-width="2"/>
+      <path d="M90 27 L106 38 L106 62 Q106 74 90 82 Q74 74 74 62 L74 38 Z" fill="url(#icB)" stroke="#999" stroke-width=".8" opacity=".5"/>
+      <rect x="82" y="48" width="16" height="20" rx="2" fill="url(#icM)" opacity=".9"/>
+      <rect x="80" y="44" width="4" height="13" rx="1" fill="url(#icM)"/>
+      <rect x="85" y="42" width="4" height="8" rx="1" fill="url(#icM)"/>
+      <rect x="90" y="43" width="4" height="7" rx="1" fill="url(#icM)"/>
+      <rect x="95" y="44" width="4" height="8" rx="1" fill="url(#icM)"/>
+      <text x="14" y="26" font-size="12" fill="#bbb" opacity=".45" font-family="serif">✦</text>
+      <text x="157" y="26" font-size="12" fill="#bbb" opacity=".45" font-family="serif">✦</text>
+      <text x="14" y="112" font-size="12" fill="#bbb" opacity=".45" font-family="serif">✦</text>
+      <text x="157" y="112" font-size="12" fill="#bbb" opacity=".45" font-family="serif">✦</text>
+      <text x="90" y="114" font-size="7" fill="#bbb" opacity=".6" text-anchor="middle" font-family="Georgia,serif" letter-spacing="3">IRONCLAD</text>
+    </svg>
+  </div>
+  <div id="flag-echo">
+    <svg class="faction-svg" width="180" height="120" viewBox="0 0 180 120" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="ecB" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#02082a"/><stop offset="100%" stop-color="#010418"/></linearGradient>
+        <radialGradient id="ecG" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#4488ff" stop-opacity=".28"/><stop offset="100%" stop-color="transparent"/></radialGradient>
+      </defs>
+      <rect width="180" height="120" fill="url(#ecB)" rx="2"/>
+      <rect x="3" y="3" width="174" height="114" fill="none" stroke="#1a3a8b" stroke-width="1.5" rx="1"/>
+      <circle cx="90" cy="60" r="40" fill="url(#ecG)"/>
+      <circle cx="90" cy="60" r="28" fill="none" stroke="#2255cc" stroke-width="1.5"/>
+      <circle cx="90" cy="60" r="18" fill="none" stroke="#3366dd" stroke-width=".8" opacity=".5"/>
+      <circle cx="90" cy="60" r="6" fill="#2255cc" opacity=".8"/>
+      <circle cx="90" cy="60" r="3.5" fill="#88aaff"/>
+      <circle cx="90" cy="32" r="3" fill="#4488ff" opacity=".8"/>
+      <circle cx="90" cy="88" r="3" fill="#4488ff" opacity=".8"/>
+      <circle cx="62" cy="60" r="3" fill="#4488ff" opacity=".8"/>
+      <circle cx="118" cy="60" r="3" fill="#4488ff" opacity=".8"/>
+      <line x1="90" y1="35" x2="90" y2="54" stroke="#4488ff" stroke-width="1" opacity=".5"/>
+      <line x1="90" y1="66" x2="90" y2="85" stroke="#4488ff" stroke-width="1" opacity=".5"/>
+      <line x1="65" y1="60" x2="84" y2="60" stroke="#4488ff" stroke-width="1" opacity=".5"/>
+      <line x1="96" y1="60" x2="115" y2="60" stroke="#4488ff" stroke-width="1" opacity=".5"/>
+      <text x="90" y="114" font-size="6" fill="#4488ff" opacity=".6" text-anchor="middle" font-family="Georgia,serif" letter-spacing="3">ECHO SYNDICATE</text>
+    </svg>
+  </div>
+  <div id="flag-hollow">
+    <svg class="faction-svg" width="180" height="120" viewBox="0 0 180 120" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="hlB" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#080210"/><stop offset="100%" stop-color="#040108"/></linearGradient>
+        <radialGradient id="hlG" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#9933ff" stop-opacity=".22"/><stop offset="100%" stop-color="transparent"/></radialGradient>
+      </defs>
+      <rect width="180" height="120" fill="url(#hlB)" rx="2"/>
+      <rect x="3" y="3" width="174" height="114" fill="none" stroke="#6622bb" stroke-width="1.5" rx="1"/>
+      <line x1="90" y1="60" x2="28" y2="10" stroke="#4411aa" stroke-width=".5" opacity=".4"/>
+      <line x1="90" y1="60" x2="152" y2="14" stroke="#4411aa" stroke-width=".5" opacity=".4"/>
+      <line x1="90" y1="60" x2="20" y2="95" stroke="#4411aa" stroke-width=".5" opacity=".4"/>
+      <line x1="90" y1="60" x2="160" y2="96" stroke="#4411aa" stroke-width=".5" opacity=".4"/>
+      <circle cx="90" cy="60" r="42" fill="url(#hlG)"/>
+      <path d="M90 28 A32 32 0 1 1 89.9 28" fill="none" stroke="#7722cc" stroke-width="2" stroke-dasharray="10 5"/>
+      <ellipse cx="90" cy="60" rx="22" ry="14" fill="none" stroke="#9933ff" stroke-width="1.5"/>
+      <circle cx="90" cy="60" r="8" fill="#6622bb" opacity=".8"/>
+      <circle cx="90" cy="60" r="4" fill="#bb44ff"/>
+      <circle cx="92" cy="58" r="1.5" fill="white" opacity=".55"/>
+      <line x1="90" y1="74" x2="85" y2="95" stroke="#9933ff" stroke-width="1" opacity=".5"/>
+      <line x1="90" y1="74" x2="95" y2="94" stroke="#9933ff" stroke-width="1" opacity=".5"/>
+      <text x="14" y="24" font-size="14" fill="#6622bb" opacity=".42" font-family="serif">✗</text>
+      <text x="156" y="24" font-size="14" fill="#6622bb" opacity=".42" font-family="serif">✗</text>
+      <text x="90" y="114" font-size="7" fill="#9933ff" opacity=".6" text-anchor="middle" font-family="Georgia,serif" letter-spacing="3">THE HOLLOW</text>
+    </svg>
+  </div>
+</div>
+
+<!-- Navbar -->
+<div id="navbar-placeholder"></div>
+
+<div id="app">
+  <div class="hdr">
+    <h1>THE BIT CODEX</h1>
+    <p>Lore of the Fractured World</p>
+    <div class="hline"></div>
+  </div>
+  <div class="tabs-bar">
+    <button class="fs-btn" id="readModeBtn" title="Reading mode: expand the scroll panel">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4">
+        <rect x="1" y="3" width="10" height="6" rx="1"/>
+        <line x1="3" y1="6" x2="9" y2="6"/>
+      </svg>
+      Read
+    </button>
+    <div class="tabs-sep"></div>
+    <div class="tabs" id="tabs"></div>
+    <div class="tabs-sep"></div>
+    <button class="fs-btn" id="focusModeBtn" title="Focus mode: show large cover + scroll">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4">
+        <path d="M1 4V1h3M8 1h3v3M11 8v3H8M4 11H1V8"/>
+      </svg>
+      Focus
+    </button>
+  </div>
+  <div class="exit-hint" id="exitHint">Press ESC or click to exit &mdash; &#10022;</div>
+  <div class="layout">
+
+    <!-- LEFT PANEL: Shelf + Display Table -->
+    <div class="left-panel">
+      <div class="shelf-wall"></div>
+
+      <!-- BOOKSHELF -->
+      <div class="bookshelf">
+        <div class="shelf-label">The Codex</div>
+        <div class="shelf-board" id="shelfBoard">
+          <div class="shelf-bracket left"></div>
+          <!-- books injected by JS -->
+          <div class="shelf-bracket right"></div>
+        </div>
+      </div>
+
+      <div class="panel-divider"></div>
+
+      <!-- DISPLAY TABLE -->
+      <div class="display-table">
+        <div class="table-label">Currently Reading</div>
+        <div class="table-surface">
+          <!-- display book cover -->
+          <div class="display-book" id="displayBook">
+            <div class="db-inner" id="dbInner">
+              <div class="db-eye" id="dbEye">The BIT Codex · Vol. I</div>
+              <div class="db-title g1" id="dbTitle">THE AGE<br>BEFORE</div>
+              <div class="db-div"></div>
+              <div class="db-quote" id="dbQuote">"They walked beside us once.<br>We did not deserve them."</div>
+              <div class="db-roman" id="dbRoman">I</div>
+            </div>
+          </div>
+          <div class="display-title" id="displayTitle">Book I &mdash; The Age Before</div>
+          <div class="table-mat"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL: Decorated Parchment Scroll -->
+    <div class="scroll-panel">
+      <div class="scroll-frame">
+        <div class="frame-corner tl"></div>
+        <div class="frame-corner tr"></div>
+        <div class="frame-corner bl"></div>
+        <div class="frame-corner br"></div>
+        <div class="scroll-roller top">
+          <div class="roller-cap l"></div>
+          <div class="roller-cap r"></div>
+        </div>
+        <div class="scroll-fade top"></div>
+        <div class="scroll-inner" id="scrollInner">
+          <div class="scroll-content" id="scrollContent">
+            <!-- content injected by JS -->
+          </div>
+        </div>
+        <div class="scroll-fade bot"></div>
+        <div class="scroll-roller bot">
+          <div class="roller-cap l"></div>
+          <div class="roller-cap r"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+var ART = function(id){ return 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/' + id + '.png'; };
+var getFlag = function(id){ var el=document.getElementById(id); return el ? el.innerHTML : ''; };
+
+function pkHtml(id, sz) {
+  sz = sz||160;
+  return '<div class="s-poke"><img src="'+ART(id)+'" width="'+sz+'" height="'+sz+'" style="object-fit:contain" onload="this.classList.add(\'vis\')" onerror="this.style.display=\'none\'"></div>';
+}
+
+function ch(num, title, intro) {
+  return '<div class="s-chapter-block">'+
+    '<div class="s-ch-num">'+num+'</div>'+
+    '<div class="s-ch-label">Chapter '+num+'</div>'+
+    '<div class="s-ch-title">'+title+'</div>'+
+    '<div class="s-ch-orn">&mdash; &#10022; &mdash;</div>'+
+    '<div class="s-ch-intro">'+intro+'</div>'+
+  '</div>';
+}
+
+function faction(flagId, nameColor, name, mottoColor, motto, body, chips) {
+  var c = chips.map(function(x){ return '<div class="s-chip">'+x+'</div>'; }).join('');
+  return '<div class="s-faction">'+
+    '<div class="s-faction-flag">'+getFlag(flagId)+'</div>'+
+    '<div class="s-faction-name" style="color:'+nameColor+'">'+name+'</div>'+
+    '<div class="s-faction-motto" style="color:'+mottoColor+'">'+motto+'</div>'+
+    '<div class="s-p">'+body+'</div>'+
+    '<div class="s-chips">'+c+'</div>'+
+  '</div>';
+}
+
+// ── BOOK CONTENT ──
+// Each book is one big scroll of HTML
+var BOOK_COVERS = [
+  { bk:'bk1', grad:'g1', vol:'I',  title:'THE AGE<br>BEFORE',    quote:'"They walked beside us once.<br>We did not deserve them."',       roman:'I',   spine:'The Age Before',   label:'Book I &mdash; The Age Before',   roman_txt:'I'   },
+  { bk:'bk2', grad:'g2', vol:'II', title:'THE<br>FRACTURE',       quote:'"The day the world forgot how to be whole."',                      roman:'II',  spine:'The Fracture',      label:'Book II &mdash; The Fracture',     roman_txt:'II'  },
+  { bk:'bk3', grad:'g3', vol:'III',title:'THE<br>FRAGMENTS',      quote:'"He could not save their bodies.<br>So he saved their souls."',    roman:'III', spine:'The Fragments',     label:'Book III &mdash; The Fragments',   roman_txt:'III' },
+  { bk:'bk4', grad:'g4', vol:'IV', title:'THE<br>FACTIONS',       quote:'"Three visions of the future.<br>Only one can be right."',         roman:'IV',  spine:'The Factions',      label:'Book IV &mdash; The Factions',     roman_txt:'IV'  },
+  { bk:'bk5', grad:'g5', vol:'V',  title:'THE<br>HUNTER\'S PATH', quote:'"Your PIP is strapped to your wrist.<br>The beam fires."',         roman:'V',   spine:'The Hunter\'s Path',label:'Book V &mdash; The Hunter\'s Path', roman_txt:'V'   },
+];
+
+var BOOKS = {
+1:
+  '<div class="s-bookhead">Book I &mdash; The Age Before</div>'+
+
+  '<div class="s-section">A Note to the Reader</div>'+
+  '<p class="s-p s-drop">What you hold is not a history book. History requires objectivity. What follows is a reckoning &mdash; a piecing-together of fragments both literal and figurative, assembled from corrupted data drives, oral testimonies, and the rare intact archive that survived the Fracture.</p>'+
+  '<p class="s-p">Scholars disagree on the dates. They disagree on the causes. They disagree on almost everything. What no one disputes is the shape of the world that came before, and the shape of the world that came after. The difference between those two shapes is the story of everything.</p>'+
+  '<div class="s-quote">&ldquo;Do not mourn what was. Understand it. Only then can you decide what comes next.&rdquo; &mdash; Fragment recovered from Voss Institute, origin unknown</div>'+
+  '<p class="s-p">This is Book One. The age of green fields and open skies. The age when the creatures called Pok&eacute;mon were not weapons, not myths, not memories &mdash; but neighbours.</p>'+
+
+  '<div class="s-divider"></div>'+
+
+  ch('I','A World Alive','"Before the silence, there was a sound unlike anything the new world has ever known &mdash; ten thousand different calls rising from ten thousand different creatures, echoing across a world that was, for all its conflicts, genuinely alive."')+
+
+  '<p class="s-p s-drop">Long before circuits and steel, the world breathed differently. The forests were thick and loud. The oceans ran deep and clean. And in every environment that existed &mdash; from volcanic peaks to frozen tundra, from coral reefs to grassy plains &mdash; there were creatures that defied every category the old scientists tried to put them in.</p>'+
+  '<p class="s-p">They called them Pok&eacute;mon. The word predates the era itself, an ancient compound that had come to mean something specific and irreplaceable: a living being of extraordinary power that chose, of its own will, to share that power with a human companion.</p>'+
+  '<p class="s-p">That last part mattered enormously. The choice was theirs. A Charizard did not breathe fire because it was commanded to. It breathed fire because it decided the person beside it was worth fighting for.</p>'+
+  '<div class="s-quote">&ldquo;A Pok&eacute;mon that has bonded with a trainer is not a pet, not a weapon, not a tool. It is a partner. The distinction is not philosophical &mdash; it is practical. Partners fight harder.&rdquo;</div>'+
+
+  pkHtml(6, 180)+
+  '<div class="s-poke-cap" style="text-align:center;font-family:\'Cinzel\',serif;font-size:9px;letter-spacing:4px;color:rgba(100,70,20,.5);text-transform:uppercase">Charizard &middot; No. 006</div>'+
+  '<div class="s-poke-sub" style="text-align:center;font-family:\'Crimson Text\',serif;font-style:italic;font-size:12px;color:rgba(80,55,15,.42);margin-bottom:12px">&ldquo;The apex of an unbroken bond between trainer and flame.&rdquo;</div>'+
+
+  '<div class="s-section">The Bond</div>'+
+  '<p class="s-p s-drop">Trainers carried their Pok&eacute;mon in devices called Pok&eacute;balls &mdash; compact spheres that converted a living creature into stored energy. Children received their first Pok&eacute;ball at age ten. That was the tradition. A ten-year-old would walk into the tall grass alone for the first time, heart hammering, and there &mdash; in that terrifying, glorious moment &mdash; would meet the creature that might become the companion of a lifetime.</p>'+
+  '<p class="s-p">Most trainers never forgot their first encounter. The shaking grass. The cry. The moment of recognition that changed everything.</p>'+
+  '<div class="s-quote">&ldquo;I choose you.&rdquo; Three words. The most important three words in a world that no longer exists.</div>'+
+  '<p class="s-p">The battles were real, and the bonds were realer. When a trainer lost a Pok&eacute;mon in battle, they didn\'t lose property. They lost a friend.</p>'+
+
+  '<div class="s-divider"></div>'+
+
+  ch('II','The Last Days of Green','"The warnings came quietly, the way they always do. Not as catastrophe &mdash; as inconvenience. A slightly smaller harvest. A species spotted far from its usual range. A sky that stayed grey a day longer than it should."')+
+
+  '<p class="s-p s-drop">The old world did not end suddenly. It ended the way all things end that are too large to comprehend &mdash; gradually, then all at once.</p>'+
+  '<p class="s-p">The first signs were ecological. Pok&eacute;mon populations in certain regions began declining sharply. The species most sensitive to environmental change started disappearing from their recorded territories. Researchers filed reports. Governments debated. Industries lobbied. Nothing changed fast enough.</p>'+
+  '<div class="s-section">The Collapse of the Wild</div>'+
+  '<p class="s-p">When Pok&eacute;mon began disappearing from the wild in earnest, the effect on human civilization was immediate and devastating. The bond between human and Pok&eacute;mon was not merely emotional &mdash; it was infrastructural. Entire economies depended on Pok&eacute;mon labour, Pok&eacute;mon energy generation, Pok&eacute;mon-assisted construction and agriculture.</p>'+
+  '<p class="s-p">When the wild Pok&eacute;mon vanished, the ecosystem they maintained vanished with them. Rivers silted up. Weather patterns destabilised. Food chains collapsed at speeds that no one had modelled because no one had seriously imagined this scenario.</p>'+
+  '<div class="s-quote">&ldquo;We had fifteen hundred known species of Pok&eacute;mon. We studied their biology, their habitats, their power signatures. We never once studied what the world would look like without them.&rdquo;</div>',
+
+2:
+  '<div class="s-bookhead">Book II &mdash; The Fracture</div>'+
+
+  '<div class="s-section">Preface: On Naming the Wound</div>'+
+  '<p class="s-p s-drop">Historians argue about what to call it. The Collapse. The Silence. The Great Unmaking. The faction known as the Hollow calls it the Reckoning &mdash; capital R, as if it were something deserved. Ironclad soldiers call it the Break and move on. Scientists in the Echo Syndicate refuse to name it at all, claiming that naming implies understanding, and we do not yet understand.</p>'+
+  '<p class="s-p">Most people just call it the Fracture. The word is imprecise. But imprecise words have a way of surviving when precise ones don\'t.</p>'+
+  '<div class="s-quote">&ldquo;The Fracture did not kill the old world. It revealed that the old world had been dying for a long time, and we had simply been too busy living in it to notice.&rdquo; &mdash; Echo Syndicate Archive, Document 0044-F</div>'+
+
+  '<div class="s-divider"></div>'+
+
+  ch('III','The Day the Grid Died','"No one remembers exactly where they were. Everyone remembers the moment the lights went out and did not come back on."')+
+
+  '<p class="s-p s-drop">The cascading failure began in the energy infrastructure &mdash; the vast network of power stations, many of which ran on Pok&eacute;mon-assisted generation systems that had been standard for decades. When the Pok&eacute;mon stopped coming, the stations began running on backup systems that were never designed to be primary systems.</p>'+
+  '<p class="s-p">They held for eleven months. Then, in rapid succession, they didn\'t.</p>'+
+  '<p class="s-p">Within seventy-two hours of the first major grid failure, thirty-four cities lost primary power. Within a week, a third of the populated world was operating on backup generators, and the fuel was running out faster than anyone could resupply.</p>'+
+  '<div class="s-quote">&ldquo;A frightened Pok&eacute;mon is not a threat. A frightened Pok&eacute;mon that has lost the trainer who gave it context is something else entirely.&rdquo;</div>'+
+
+  pkHtml(150, 180)+
+  '<div class="s-poke-cap" style="text-align:center;font-family:\'Cinzel\',serif;font-size:9px;letter-spacing:4px;color:rgba(100,70,20,.5);text-transform:uppercase">Mewtwo &middot; No. 150</div>'+
+  '<div class="s-poke-sub" style="text-align:center;font-family:\'Crimson Text\',serif;font-style:italic;font-size:12px;color:rgba(80,55,15,.42);margin-bottom:12px">&ldquo;The most powerful Pok&eacute;mon ever recorded. And the most alone.&rdquo;</div>'+
+
+  '<div class="s-divider"></div>'+
+
+  ch('IV','Silence','"My daughter was born three years after the Fracture. She has never heard a Pidgey sing. She doesn\'t know what she\'s missing. I envy her for that." &mdash; Oral history recording, settlement unknown')+
+
+  '<p class="s-p s-drop">The silence that followed the Fracture was not metaphorical. In the old world, Pok&eacute;mon cries were omnipresent. They were background noise that humanity had lived with for so long it had stopped being heard. When it stopped, everyone heard it stop.</p>'+
+  '<p class="s-p">The world that rebuilt itself from the ashes of the Fracture did not rebuild the relationship between humans and Pok&eacute;mon. It couldn\'t. There were no Pok&eacute;mon left to rebuild with. That relationship, like so much else, became history. Then myth. Then legend.</p>'+
+  '<p class="s-p">Until the chips.</p>',
+
+3:
+  '<div class="s-bookhead">Book III &mdash; The Fragments</div>'+
+
+  '<div class="s-section">Preface: The Man Who Refused</div>'+
+  '<p class="s-p s-drop">Every age of catastrophe produces, eventually, someone who refuses to accept what has happened. Someone whose refusal is so total, so consuming, that it becomes its own kind of creation. In the years immediately following the Fracture, that person was Dr. Elias Voss.</p>'+
+  '<p class="s-p">He was not the most decorated scientist of the old world. He was not the most funded. He was, by most accounts, difficult &mdash; obsessive, dismissive of authority, prone to working in isolation for months at a time.</p>'+
+  '<div class="s-quote">&ldquo;The Pok&eacute;mon are not gone. They cannot be gone. Energy does not disappear &mdash; it transforms. I am going to find where it went.&rdquo; &mdash; Dr. Elias Voss, personal journal, Year 2 Post-Fracture</div>'+
+
+  '<div class="s-divider"></div>'+
+
+  ch('V','Doctor Voss and the Thirty-Year Obsession','"He outlived his funding, his colleagues, and his reputation. He did not outlive his work."')+
+
+  '<p class="s-p s-drop">Elias Voss began his research in the ruins of what had been a prominent Pok&eacute;mon research institute. He set up in what remained of the east wing, alone, with salvaged equipment and a theoretical framework that his former colleagues would have described as either brilliant or delusional depending on the day.</p>'+
+  '<p class="s-p">His core hypothesis: that a Pok&eacute;mon\'s identity &mdash; its power signature, its behavioural patterns, its willingness to bond &mdash; was not stored in its body but in a layered bioelectric field that surrounded and interpenetrated its physical form. He called this the <em>neural essence</em>.</p>'+
+  '<div class="s-section">The Neural Essence Theory</div>'+
+  '<p class="s-p">If the neural essence could be mapped &mdash; every frequency, every pattern, every recursive loop that made a specific Pikachu <em>that</em> Pikachu &mdash; then in theory it could be recorded. Stored. Reproduced.</p>'+
+  '<p class="s-p">Voss spent twelve years developing what he called the Fragment substrate &mdash; a crystalline lattice structure of his own design, capable of holding bioelectric information at densities no previous storage technology had approached.</p>'+
+  '<div class="s-quote">&ldquo;When I held the first successful Fragment in my hand, it vibrated. Not physically. But I could feel it. Thirty years of work, and it fit between two fingers.&rdquo; &mdash; Voss Journal, Year 31</div>'+
+
+  '<div class="s-divider"></div>'+
+
+  ch('VI','The PIP Device','"A beam fires toward the ground. The neural essence propagates along it. Where the beam strikes, mass coalesces. The Pok&eacute;mon forms fully in seconds."')+
+
+  pkHtml(25, 170)+
+  '<div class="s-poke-cap" style="text-align:center;font-family:\'Cinzel\',serif;font-size:9px;letter-spacing:4px;color:rgba(100,70,20,.5);text-transform:uppercase">Pikachu &middot; No. 025</div>'+
+  '<div class="s-poke-sub" style="text-align:center;font-family:\'Crimson Text\',serif;font-style:italic;font-size:12px;color:rgba(80,55,15,.42);margin-bottom:12px">&ldquo;The first successful Fragment summoning. The electricity shorted out Voss\'s entire lab.&rdquo;</div>'+
+
+  '<div class="s-section">The Particle Interface Projector</div>'+
+  '<p class="s-p s-drop">The PIP &mdash; Particle Interface Projector &mdash; is worn as a bracer on the forearm. At its core is a Fragment reader: a precisely calibrated receiver that interfaces with the crystalline lattice of a loaded chip and reads the bioelectric signature encoded within. When activated, the PIP fires a focused beam of structured photonic energy toward the ground. The Pok&eacute;mon forms fully in seconds. Real mass. Real power. Real presence.</p>'+
+  '<div class="s-section">The Five-Slot Architecture</div>'+
+  '<p class="s-p">Voss designed the PIP with five active reader slots &mdash; not by accident, but by careful calculation. His field tests showed that maintaining more than five simultaneous Fragment resonance fields created destructive interference between signatures, destabilising all active summons. Five was the hard limit that physics imposed. A Hunter may carry as many chips as they can acquire. But only five may be loaded into the PIP at any given time. Choosing which five is one of the most consequential tactical decisions a Hunter makes.</p>'+
+  '<div class="s-section">The 200-Fragment Vault</div>'+
+  '<p class="s-p">Each Fragment chip is not simply a single data point. Voss designed his storage substrate to hold up to <strong>200 distinct neural essence records</strong> on a single chip. This means a single chip in a Hunter\'s pocket could contain two hundred Pok&eacute;mon &mdash; two hundred fragments of the old world, waiting in silence, patient as crystal.</p>'+
+  '<div class="s-section">Real-World Consequences</div>'+
+  '<p class="s-p">When Pikachu fires a Thunderbolt in the wasteland, the electricity is real. It will kill. It will arc through every conductor in range and stun anyone caught in its field. When Blastoise releases a Hydro Cannon in a narrow street, the concussive force will bring down walls. When a Gengar\'s Shadow Ball tears through the air, it leaves a cold wound that lingers for hours.</p>'+
+  '<div class="s-quote">&ldquo;We used to worry about guns. Guns are quaint. A gun fires one bullet. A Charizard fires everything, everywhere, and it does it because it chose to.&rdquo; &mdash; Ironclad Field Manual, Chapter 1</div>'+
+  '<div class="s-section">The Slot-In Protocol</div>'+
+  '<p class="s-p">In the old world, a trainer would reach for a Pok&eacute;ball and say the words: <em>I choose you.</em> In this world, a Hunter reaches for a chip, presses it into the active reader slot of their PIP, and activates the beam. The wasteland calls this <em>slotting in.</em> The words are different. The weight of the moment &mdash; the Pok&eacute;mon opening its eyes, assessing you, making its choice &mdash; that part is exactly the same.</p>',
+
+4:
+  '<div class="s-bookhead">Book IV &mdash; The Factions</div>'+
+
+  '<div class="s-section">A World Divided</div>'+
+  '<p class="s-p s-drop">The PIP changed the balance of power in the wasteland as completely as any weapon in history. Within a generation of Voss\'s schematics leaking to the black market, the old structures of governance and control had been dissolved and replaced by something new, something harder, something that operates on a simpler and more brutal logic: whoever holds the strongest Fragments holds power.</p>'+
+  '<p class="s-p">Three major factions rose from this new reality. Their reach extends across the entire known world. Their decisions shape the lives of everyone whether those people have chosen a side or not.</p>'+
+  '<div class="s-quote">&ldquo;There are no neutral parties in a world where the most powerful weapons wear the faces of creatures your grandparents loved.&rdquo; &mdash; Fragment Hunter proverb</div>'+
+  '<p class="s-p">Each faction believes it is right. Each faction has evidence for that belief. This is what makes them dangerous.</p>'+
+
+  '<div class="s-divider"></div>'+
+
+  faction('flag-ironclad','#6b1a1a','IRONCLAD','#8b3030','&ldquo;Order through dominance.&rdquo;',
+    'The largest and most militarised faction in the wasteland. Ironclad emerged from the remnants of old-world private security corporations. They recognised immediately that Fragment-summoned Pok&eacute;mon were the most powerful weapons ever created, and weapons required governance. Ironclad enforcers wear heavy-plated PIPs capable of holding two active Fragments simultaneously, specialising in tank-class Pok&eacute;mon whose physical mass and brute-force can level city blocks.',
+    ['Machamp','Golem','Rhydon','Snorlax','Tyranitar'])+
+
+  pkHtml(68, 160)+
+  '<div class="s-poke-cap" style="text-align:center;font-family:\'Cinzel\',serif;font-size:9px;letter-spacing:4px;color:rgba(100,70,20,.5);text-transform:uppercase">Machamp &middot; Ironclad Frontliner</div>'+
+  '<div class="s-poke-sub" style="text-align:center;font-family:\'Crimson Text\',serif;font-style:italic;font-size:12px;color:rgba(80,55,15,.42);margin-bottom:12px">&ldquo;Four arms. Zero hesitation.&rdquo;</div>'+
+  '<div class="s-quote">&ldquo;The alternative to us is not freedom. The alternative to us is chaos. We have seen chaos. We chose this.&rdquo; &mdash; Ironclad Commander\'s Oath</div>'+
+
+  '<div class="s-divider"></div>'+
+
+  faction('flag-echo','#1a3a8b','THE ECHO SYNDICATE','#2a5abb','&ldquo;Knowledge is the only currency.&rdquo;',
+    'If Ironclad is the fist, the Echo Syndicate is the mind. Founded by scientists and hackers who believe Voss\'s work was only the beginning, the Syndicate\'s obsession is not power but understanding. They trade in Fragment data &mdash; decoded neural maps, not the chips themselves. Their real secret: they believe Voss encoded something inside the Fragment system he called <strong>Project Genesis</strong> &mdash; a way to restore Pok&eacute;mon to the world permanently. Without chips. Without PIPs.',
+    ['Alakazam','Mewtwo','Starmie','Gengar','Espeon'])+
+
+  '<div class="s-divider"></div>'+
+
+  faction('flag-hollow','#6622bb','THE HOLLOW','#9933ff','&ldquo;They belonged to the world. The world should burn.&rdquo;',
+    'The most dangerous faction, and the hardest to understand. The Hollow began as a survivor cult &mdash; people who lost everything in Fragment-related violence. Their belief: Pok&eacute;mon were not meant to be weaponised. They have found a way to <em>corrupt</em> Fragments &mdash; stripping the Pok&eacute;mon\'s loyalty, turning them feral. A corrupted Fragment summons something that obeys no one. They deploy these deliberately in populated areas as acts of what they call justice.',
+    ['Gengar','Haunter','Gyarados','Dragonite','Charizard &#10007;'])+
+
+  '<div class="s-quote">&ldquo;We are not the monsters. We are the consequence.&rdquo; &mdash; The Hollow, recovered manifesto</div>',
+
+5:
+  '<div class="s-bookhead">Book V &mdash; The Hunter\'s Path</div>'+
+
+  '<div class="s-section">You</div>'+
+  '<p class="s-p s-drop">You are a Fragment Hunter. The term is functional, not romantic. You find Fragments &mdash; in ruins, in vaults, in the hands of people who don\'t know what they have or people who know exactly what they have and intend to keep it. You recover them. You trade them, use them, study them.</p>'+
+  '<p class="s-p">You are not aligned with any faction. Not yet. In this world, that independence is simultaneously your greatest asset and your greatest liability. Every faction wants Fragment Hunters working for them. Every faction will turn on a Hunter the moment it becomes convenient.</p>'+
+  '<div class="s-quote">&ldquo;A Fragment Hunter who survives their first year is either very skilled, very lucky, or very careful about which jobs they take. Usually all three.&rdquo; &mdash; Wasteland saying</div>'+
+  '<p class="s-p">The PIP on your wrist was your first real investment. The chip slotted into the reader was your first Fragment &mdash; smaller than a thumbnail, heavier than it looks, warm to the touch in a way that no crystal should be warm.</p>'+
+  '<p class="s-p">When you activate it for the first time and the beam fires and the Pok&eacute;mon materialises in front of you &mdash; its eyes open, its power radiating, looking at you the way only a Pok&eacute;mon looks at a person, with that specific and terrifying question of <em>are you worth it</em> &mdash; that is the moment the journey begins.</p>'+
+
+  '<div class="s-divider"></div>'+
+
+  ch('VII','Project Genesis and the Question That Changes Everything','"What if the chips were never meant to be permanent? What if they were always a bridge &mdash; and Voss built the other side?"')+
+
+  '<p class="s-p s-drop">The Echo Syndicate has spent decades trying to decode the signal they believe Voss embedded in the Fragment substrate itself &mdash; not in any individual chip, but in the base structure of the medium. A message written not in text but in the mathematics of the crystal lattice.</p>'+
+  '<p class="s-p">What they have decoded so far suggests something that most of their own members find difficult to believe: the Fragment system was never intended to be the final form of Voss\'s work. It was a preservation method. A stasis. A way of keeping Pok&eacute;mon safe until something else could be built.</p>'+
+  '<div class="s-section">The Other Side of the Bridge</div>'+
+  '<p class="s-p">Project Genesis, as best as the Syndicate has reconstructed it, is a system for reversing the Fracture\'s effect on the physical world &mdash; creating conditions under which Pok&eacute;mon could once again exist in the physical world permanently, without chips, without PIPs. Alive. Wild. Themselves.</p>'+
+  '<div class="s-quote">&ldquo;Voss didn\'t just want to preserve Pok&eacute;mon. He wanted to give them back to a world that was finally ready to deserve them again.&rdquo; &mdash; Echo Syndicate, Internal Report 0089-G</div>'+
+
+  pkHtml(149, 180)+
+  '<div class="s-poke-cap" style="text-align:center;font-family:\'Cinzel\',serif;font-size:9px;letter-spacing:4px;color:rgba(100,70,20,.5);text-transform:uppercase">Dragonite &middot; No. 149</div>'+
+  '<div class="s-poke-sub" style="text-align:center;font-family:\'Crimson Text\',serif;font-style:italic;font-size:12px;color:rgba(80,55,15,.42);margin-bottom:12px">&ldquo;Last confirmed wild sighting: Year 0 of the Fracture. Fragment value: incalculable.&rdquo;</div>'+
+
+  '<div class="s-section">The Real Stakes</div>'+
+  '<p class="s-p">Fragment battles accumulate damage on the world. Scorched ground. Psychic pressure zones. Structural decay. The world is already broken. Every Fragment battle breaks it a little more.</p>'+
+  '<p class="s-p">That is the real question underneath everything else: are you helping rebuild the old world &mdash; or are you just finishing what the Fracture started?</p>'+
+  '<div class="s-ornament">&#10022; &middot; &middot; &middot; &#10022;</div>',
+};
+
+// ── ENGINE ──
+var curBook = 1;
+
+// Shelf spine colours
+var spineClasses = ['sb1','sb2','sb3','sb4','sb5'];
+var displayBgClasses = {
+  bk1:'background:linear-gradient(145deg,#1a0f02,#3a2008,#1a0f02)',
+  bk2:'background:linear-gradient(145deg,#200202,#3a0808,#160202)',
+  bk3:'background:linear-gradient(145deg,#011a16,#023028,#011008)',
+  bk4:'background:linear-gradient(145deg,#0c0418,#1c0830,#080210)',
+  bk5:'background:linear-gradient(145deg,#030610,#08101e,#020408)'
+};
+
+// Build tabs
+var tabNames = ['I \u2014 The Age Before','II \u2014 The Fracture','III \u2014 The Fragments','IV \u2014 The Factions','V \u2014 The Hunter'];
+var tabsEl = document.getElementById('tabs');
+tabNames.forEach(function(n, i) {
+  var t = document.createElement('div');
+  t.className = 'tab' + (i===0?' active':'');
+  t.innerHTML = 'Book ' + n;
+  t.dataset.book = i+1;
+  t.addEventListener('click', function(){ loadBook(i+1); });
+  tabsEl.appendChild(t);
+});
+
+// Build shelf books (spine view)
+var shelfBoard = document.getElementById('shelfBoard');
+var bracketL = shelfBoard.querySelector('.shelf-bracket.left');
+var bracketR = shelfBoard.querySelector('.shelf-bracket.right');
+
+BOOK_COVERS.forEach(function(c, i) {
+  var book = document.createElement('div');
+  book.className = 'shelf-book ' + spineClasses[i] + (i===0?' active':'');
+  book.dataset.book = i+1;
+  var span = document.createElement('span');
+  span.textContent = c.spine;
+  book.appendChild(span);
+  book.addEventListener('click', function(){ loadBook(i+1); });
+  // Insert before right bracket
+  shelfBoard.insertBefore(book, bracketR);
+});
+
+function loadBook(num) {
+  curBook = num;
+  var c = BOOK_COVERS[num-1];
+
+  // Update shelf active state
+  document.querySelectorAll('.shelf-book').forEach(function(b){
+    b.classList.toggle('active', parseInt(b.dataset.book)===num);
+  });
+
+  // Update display table book cover
+  var dbEl = document.getElementById('displayBook');
+  dbEl.style.cssText = displayBgClasses[c.bk] + ';width:160px;height:215px;position:relative;border-radius:1px 3px 3px 1px;box-shadow:-4px 4px 16px rgba(0,0,0,.8),4px 2px 10px rgba(0,0,0,.5),inset -3px 0 8px rgba(0,0,0,.4);transform:perspective(400px) rotateY(-4deg) rotateX(2deg);transition:transform .4s ease,box-shadow .4s ease;overflow:hidden;cursor:default;';
+
+  document.getElementById('dbEye').textContent = 'The BIT Codex \u00b7 Vol. ' + c.vol;
+  document.getElementById('dbTitle').className = 'db-title ' + c.grad;
+  document.getElementById('dbTitle').innerHTML = c.title;
+  document.getElementById('dbQuote').innerHTML = c.quote;
+  document.getElementById('dbRoman').textContent = c.roman;
+  document.getElementById('displayTitle').innerHTML = c.label;
+
+  // Update tabs
+  document.querySelectorAll('.tab').forEach(function(t){
+    t.classList.toggle('active', parseInt(t.dataset.book)===num);
+  });
+
+  // Inject scroll content + scroll to top
+  document.getElementById('scrollContent').innerHTML = BOOKS[num];
+  document.getElementById('scrollInner').scrollTop = 0;
+
+  // Animate shelf book pull-out + display book entrance
+  var activeBook = document.querySelector('.shelf-book.active');
+  if (activeBook) {
+    activeBook.style.transition = 'transform .1s ease-in';
+    activeBook.style.transform = 'translateY(-14px) scaleX(1.1)';
+    setTimeout(function(){
+      activeBook.style.transition = 'transform .3s cubic-bezier(.25,.8,.25,1)';
+      activeBook.style.transform = '';
+    }, 120);
+  }
+
+  // Display book entrance animation
+  var db = document.getElementById('displayBook');
+  db.style.opacity = '0';
+  db.style.transform = 'perspective(400px) rotateY(-15deg) rotateX(4deg) scale(.92)';
+  setTimeout(function(){
+    db.style.transition = 'opacity .35s ease, transform .35s cubic-bezier(.25,.8,.25,1)';
+    db.style.opacity = '1';
+    db.style.transform = 'perspective(400px) rotateY(-4deg) rotateX(2deg)';
+    setTimeout(function(){ db.style.transition = ''; }, 400);
+  }, 60);
+}
+
+// Hover on display book
+document.getElementById('displayBook').addEventListener('mouseenter', function(){
+  this.style.transform = 'perspective(400px) rotateY(-2deg) rotateX(1deg) scale(1.04)';
+});
+document.getElementById('displayBook').addEventListener('mouseleave', function(){
+  this.style.transform = 'perspective(400px) rotateY(-4deg) rotateX(2deg)';
+});
+
+// Init
+loadBook(1);
+
+// ── AMBIENT PARTICLES ──
+(function spawnParticles() {
+  const colors = [
+    'rgba(200,160,60,',
+    'rgba(255,200,80,',
+    'rgba(160,100,20,',
+    'rgba(255,220,100,',
+  ];
+  for (let i = 0; i < 18; i++) {
+    const p = document.createElement('div');
+    p.className = 'bg-particle';
+    const size   = 1 + Math.random() * 3;
+    const left   = 5 + Math.random() * 90;
+    const dur    = 12 + Math.random() * 20;
+    const delay  = Math.random() * 18;
+    const color  = colors[Math.floor(Math.random() * colors.length)];
+    const op     = (0.3 + Math.random() * 0.5).toFixed(2);
+    p.style.cssText = `
+      width:${size}px;height:${size}px;
+      left:${left}%;bottom:-10px;
+      background:${color}${op});
+      box-shadow:0 0 ${size*3}px ${color}0.4);
+      animation-duration:${dur}s;
+      animation-delay:-${delay}s;
+    `;
+    document.body.appendChild(p);
+  }
+})();
+
+// ── LOAD NAVBAR ──
+fetch('navbar.html')
+  .then((res) => res.text())
+  .then((data) => {
+    document.getElementById('navbar-placeholder').innerHTML = data;
+    // Apply codex theme — set on both html and body so CSS vars cascade correctly
+    document.documentElement.classList.add('codex-page');
+    document.body.classList.add('codex-page');
+    // Run navbar init functions after injection
+    if (typeof window.attachLogoutHandler === 'function') window.attachLogoutHandler();
+    if (typeof window.loadProfileName      === 'function') window.loadProfileName();
+    if (typeof window.updateWPCBalance     === 'function') window.updateWPCBalance();
+  });
+
+// ── MODE BUTTONS ──
+var app = document.getElementById('app');
+var readBtn   = document.getElementById('readModeBtn');
+var focusBtn  = document.getElementById('focusModeBtn');
+var exitHint  = document.getElementById('exitHint');
+
+readBtn.addEventListener('click', function() {
+  var isOn = app.classList.toggle('read-mode');
+  app.classList.remove('present-mode');
+  readBtn.style.color  = isOn ? 'var(--gold-light)' : '';
+  readBtn.style.borderColor = isOn ? 'var(--gold)' : '';
+  focusBtn.style.color = '';
+  focusBtn.style.borderColor = '';
+});
+
+focusBtn.addEventListener('click', function() {
+  var isOn = app.classList.toggle('present-mode');
+  app.classList.remove('read-mode');
+  focusBtn.style.color = isOn ? 'var(--gold-light)' : '';
+  focusBtn.style.borderColor = isOn ? 'var(--gold)' : '';
+  readBtn.style.color  = '';
+  readBtn.style.borderColor = '';
+});
+
+// ESC to exit any mode
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    app.classList.remove('read-mode','present-mode');
+    readBtn.style.color  = '';
+    readBtn.style.borderColor = '';
+    focusBtn.style.color = '';
+    focusBtn.style.borderColor = '';
+  }
+});
+
+// Click exit hint to exit
+exitHint.addEventListener('click', function() {
+  app.classList.remove('read-mode','present-mode');
+  readBtn.style.color  = '';
+  readBtn.style.borderColor = '';
+  focusBtn.style.color = '';
+  focusBtn.style.borderColor = '';
+});
+</script>
+</body>
+</html>

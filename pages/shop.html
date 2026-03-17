@@ -1,0 +1,704 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pokémon Shop</title>
+    <link rel="stylesheet" href="../assets/css/soft-ui-dashboard.css?v=1.1.0" />
+    <link rel="stylesheet" href="../assets/css/navbar.css" />
+    <link rel="stylesheet" href="../assets/css/style.css" />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: Arial, Helvetica, sans-serif;
+      }
+      body,
+      .navbar,
+      .nav-link,
+      .dropdown a,
+      .logo {
+        font-family: Arial, Helvetica, sans-serif !important;
+        color: #fff;
+      }
+      body {
+        background: #0b0e14;
+        color: #fff;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      main {
+        flex: 1;
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        padding: 40px 10px;
+        gap: 10px;
+      }
+      .ad-placeholder {
+        background: #181c24;
+        width: 110px;
+        min-width: 80px;
+        height: 600px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #888;
+        font-size: 13px;
+        flex-shrink: 0;
+        opacity: 0.7;
+        box-shadow: 0 2px 8px #0004;
+      }
+      .content-wrapper {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .shop-title {
+        text-align: center;
+        font-size: 32px;
+        color: #4caf50;
+        font-weight: bold;
+        margin-bottom: 10px;
+        margin-top: 10px;
+        letter-spacing: 1px;
+      }
+      .wallet-balance {
+        text-align: center;
+        font-size: 17px;
+        color: #ffd700;
+        margin-bottom: 18px;
+        font-weight: bold;
+        letter-spacing: 0.5px;
+      }
+      .timer-container {
+        text-align: center;
+        margin-bottom: 18px;
+        font-size: 15px;
+        color: #aaa;
+      }
+      .shop-section {
+        width: 100%;
+        max-width: 800px;
+        background: #1a1f2e;
+        border-radius: 16px;
+        margin-bottom: 32px;
+        padding: 32px 32px 24px 32px;
+        box-shadow: 0 4px 24px #000a;
+      }
+      .shop-section h2 {
+        color: #4caf50;
+        font-size: 22px;
+        font-weight: bold;
+        margin-bottom: 16px;
+        text-align: center;
+        letter-spacing: 0.5px;
+      }
+      .shop-items {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 32px;
+        justify-content: center;
+        margin-bottom: 10px;
+        width: 100%;
+      }
+      .shop-item {
+        background: #23273a;
+        border-radius: 16px;
+        padding: 20px 16px 16px 16px;
+        width: 200px;
+        min-width: 200px;
+        max-width: 200px;
+        min-height: 340px;
+        max-height: 420px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        box-shadow: 0 2px 12px #0008;
+      }
+      .shop-item.pokemon {
+        width: 260px;
+        min-width: 260px;
+        max-width: 260px;
+        min-height: 480px;
+        max-height: 520px;
+      }
+      .shop-item img {
+        margin-bottom: 8px;
+        /* background: #fff; */
+        border-radius: 12px;
+        max-width: 128px;
+        max-height: 128px;
+        min-width: 96px;
+        min-height: 96px;
+        box-shadow: 0 2px 8px #0002;
+        object-fit: contain;
+        image-rendering: auto;
+        background: transparent !important;
+      }
+      .shop-item input[type="checkbox"] {
+        margin-bottom: 8px;
+        transform: scale(1.2);
+        display: block;
+      }
+      .poke-details {
+        font-size: 16px;
+        color: #aaa;
+        margin-bottom: 12px;
+        min-height: 60px;
+        text-align: center;
+        word-break: break-word;
+        line-height: 1.4;
+      }
+      .shop-item input[type="number"] {
+        width: 60px;
+        margin-bottom: 8px;
+        border-radius: 6px;
+        border: 1px solid #444;
+        padding: 4px 6px;
+        background: #181c24;
+        color: #fff;
+        font-size: 15px;
+        text-align: center;
+      }
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 9999;
+        left: 0;
+        top: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.7);
+        align-items: center;
+        justify-content: center;
+      }
+      .modal-content {
+        background: #23273a;
+        color: #fff;
+        border-radius: 16px;
+        padding: 32px 24px 24px 24px;
+        min-width: 320px;
+        max-width: 90vw;
+        box-shadow: 0 4px 32px #000a;
+        text-align: center;
+      }
+      .modal-content h3 {
+        margin-bottom: 18px;
+        color: #4caf50;
+      }
+      .modal-content ul {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 18px 0;
+      }
+      .modal-content li {
+        margin-bottom: 8px;
+        font-size: 16px;
+      }
+      .modal-content button {
+        margin: 0 10px;
+        padding: 8px 24px;
+        border-radius: 8px;
+        border: none;
+        font-size: 16px;
+        font-weight: bold;
+        background: #4caf50;
+        color: #fff;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+      .modal-content button:hover {
+        background: #388e3c;
+      }
+      .poke-rarity {
+        font-weight: bold;
+        font-size: 14px;
+        margin-bottom: 4px;
+        letter-spacing: 0.5px;
+      }
+      .item-name {
+        font-size: 15px;
+        font-weight: bold;
+        margin-bottom: 2px;
+        color: #fff;
+        text-align: center;
+        letter-spacing: 0.2px;
+      }
+      .item-price {
+        font-size: 14px;
+        color: #4caf50;
+        margin-bottom: 8px;
+        text-align: center;
+        font-weight: bold;
+      }
+      .btn.btn-encounter {
+        background: linear-gradient(90deg, #4caf50 60%, #388e3c 100%);
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 10px 32px;
+        font-size: 17px;
+        cursor: pointer;
+        margin-top: 10px;
+        font-weight: bold;
+        letter-spacing: 0.5px;
+        box-shadow: 0 2px 8px #0003;
+        transition:
+          background 0.2s,
+          box-shadow 0.2s;
+      }
+      .btn.btn-encounter:hover {
+        background: linear-gradient(90deg, #388e3c 60%, #4caf50 100%);
+        box-shadow: 0 4px 16px #0005;
+      }
+      /* Responsive */
+      @media (max-width: 1024px) {
+        main {
+          flex-direction: column;
+          padding: 20px 10px;
+        }
+        .ad-placeholder {
+          width: 100%;
+          height: 100px;
+          margin-bottom: 10px;
+        }
+        .shop-section {
+          max-width: 100%;
+        }
+        .shop-item {
+          min-width: 140px;
+          max-width: 160px;
+        }
+      }
+      @media (max-width: 600px) {
+        .shop-items {
+          flex-direction: column;
+          gap: 12px;
+        }
+        .shop-section {
+          padding: 12px 4px;
+        }
+      }
+      footer {
+        background: #11151f;
+        padding: 20px 24px;
+        text-align: center;
+        color: #aaa;
+        margin-top: auto;
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 15px;
+      }
+      footer a {
+        color: #4caf50;
+        margin: 0 10px;
+        text-decoration: none;
+        transition: color 0.2s;
+      }
+      footer a:hover {
+        color: #fff;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="navbar-placeholder"></div>
+    <main>
+      <div class="ad-placeholder">AD LEFT</div>
+      <div class="content-wrapper">
+        <div class="shop-title">Pokémon Shop</div>
+        <div class="wallet-balance">
+          Your Balance: <span id="wallet-balance">0</span> WPC
+        </div>
+        <div class="timer-container">
+          <span>Next refresh in: <span id="refresh-timer">--:--:--</span></span>
+          <span style="font-size: 12px; color: #aaa"
+            >(Refreshes daily at 8:00 AM PH Time)</span
+          >
+        </div>
+        <div class="shop-section">
+          <h2>Pokéballs</h2>
+          <form id="pokeball-shop-form">
+            <div class="shop-items" id="pokeball-shop-list">
+              <!-- Pokéballs for sale will be rendered here -->
+            </div>
+            <div style="text-align: center; margin-top: 18px">
+              <button type="submit" class="btn btn-encounter">
+                Buy Selected
+              </button>
+            </div>
+          </form>
+          <div id="pokeball-modal" class="modal">
+            <div class="modal-content">
+              <h3>Confirm Purchase</h3>
+              <ul id="pokeball-receipt-list"></ul>
+              <div style="margin-top: 18px">
+                <button id="confirm-pokeball-purchase">Confirm</button>
+                <button id="cancel-pokeball-purchase">Cancel</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="shop-section">
+          <h2>Today's Pokémon</h2>
+          <form id="pokemon-shop-form">
+            <div class="shop-items" id="pokemon-shop-list">
+              <!-- Pokémon for sale will be rendered here -->
+            </div>
+          </form>
+        </div>
+      </div>
+      <div class="ad-placeholder">AD RIGHT</div>
+    </main>
+    <footer>
+      <p>
+        <a href="#">Maps</a> | <a href="#">Profile</a> |
+        <a href="#">Pokemon</a> |
+        <a href="#">Battle</a>
+      </p>
+      <p>&copy; 2026 Bit-Pokemon by Kobe D. Estabalaya</p>
+    </footer>
+
+    <script type="module">
+      // Render Pokéballs for sale
+      const pokeballShopList = document.getElementById("pokeball-shop-list");
+      const pokeballForm = document.getElementById("pokeball-shop-form");
+      const pokeballs = [
+        {
+          name: "Pokéball",
+          type: "pokeball",
+          price: 5,
+          img: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png",
+        },
+        {
+          name: "Great Ball",
+          type: "greatball",
+          price: 10,
+          img: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/great-ball.png",
+        },
+        {
+          name: "Ultra Ball",
+          type: "ultraball",
+          price: 20,
+          img: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/ultra-ball.png",
+        },
+        {
+          name: "Master Ball",
+          type: "masterball",
+          price: 30,
+          img: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/master-ball.png",
+        },
+      ];
+      if (pokeballShopList && pokeballForm) {
+        pokeballShopList.innerHTML = "";
+        pokeballs.forEach((ball, idx) => {
+          const div = document.createElement("div");
+          div.className = "shop-item";
+          div.innerHTML = `
+            <input type="checkbox" id="pokeball-check-${idx}" name="pokeball-check" value="${idx}" />
+            <img src="${ball.img}" alt="${ball.name}" />
+            <div class="item-name">${ball.name}</div>
+            <div class="item-price">${ball.price} WPC</div>
+            <input type="number" id="pokeball-qty-${idx}" name="pokeball-qty-${idx}" min="1" max="99" value="1" style="width:60px;" />
+          `;
+          pokeballShopList.appendChild(div);
+        });
+
+        const modal = document.getElementById("pokeball-modal");
+        const receiptList = document.getElementById("pokeball-receipt-list");
+        const confirmBtn = document.getElementById("confirm-pokeball-purchase");
+        const cancelBtn = document.getElementById("cancel-pokeball-purchase");
+        let pokeballPurchaseQueue = [];
+
+        pokeballForm.onsubmit = (e) => {
+          e.preventDefault();
+          const checked = Array.from(
+            pokeballForm.querySelectorAll(
+              'input[name="pokeball-check"]:checked',
+            ),
+          );
+          if (!checked.length)
+            return alert("Select at least one Pokéball to buy.");
+          pokeballPurchaseQueue = checked.map((c) => {
+            const idx = c.value;
+            const qty = Math.max(
+              1,
+              parseInt(document.getElementById(`pokeball-qty-${idx}`).value) ||
+                1,
+            );
+            return { ...pokeballs[idx], qty };
+          });
+          // Show modal
+          receiptList.innerHTML = pokeballPurchaseQueue
+            .map(
+              (ball) =>
+                `<li>${ball.name} × ${ball.qty} = <span style='color:#ffd700'>${ball.price * ball.qty} WPC</span></li>`,
+            )
+            .join("");
+          modal.style.display = "flex";
+        };
+
+        confirmBtn.onclick = async () => {
+          if (!pokeballPurchaseQueue.length) return;
+          let bought = [];
+          for (const ball of pokeballPurchaseQueue) {
+            if (!user_id || !token) return alert("Please log in.");
+            const res = await buyPokeball(user_id, ball.type, ball.qty, token);
+            if (res.success) {
+              bought.push(`${ball.name} × ${ball.qty}`);
+            } else {
+              alert(res.message || `Failed to buy ${ball.name}`);
+            }
+          }
+          if (bought.length) {
+            alert(`Purchased: ${bought.join(", ")}`);
+            updateNavbarWPC();
+          }
+          modal.style.display = "none";
+          pokeballPurchaseQueue = [];
+        };
+        cancelBtn.onclick = () => {
+          modal.style.display = "none";
+          pokeballPurchaseQueue = [];
+        };
+        // Hide modal on outside click
+        modal.onclick = (e) => {
+          if (e.target === modal) {
+            modal.style.display = "none";
+            pokeballPurchaseQueue = [];
+          }
+        };
+      }
+      import {
+        buyPokeball,
+        buyPokemon,
+        getWPC,
+      } from "../assets/js/shop-api.js";
+
+      // --- Helper: Generate 5 Pokémon (4 common, 1 rare/legendary/evo) ---
+      function getRandomPokemonSet() {
+        // Example pool (should be replaced with backend fetch)
+        const commons = [
+          {
+            name: "Pidgey",
+            type: "Normal/Flying",
+            rarity: "Common",
+            price: 100,
+            details: "A common bird Pokémon.",
+          },
+          {
+            name: "Rattata",
+            type: "Normal",
+            rarity: "Common",
+            price: 100,
+            details: "A quick and nimble rodent.",
+          },
+          {
+            name: "Caterpie",
+            type: "Bug",
+            rarity: "Common",
+            price: 100,
+            details: "A worm-like Pokémon.",
+          },
+          {
+            name: "Poliwag",
+            type: "Water",
+            rarity: "Common",
+            price: 100,
+            details: "A tadpole Pokémon.",
+          },
+          {
+            name: "Oddish",
+            type: "Grass/Poison",
+            rarity: "Common",
+            price: 100,
+            details: "A weed Pokémon.",
+          },
+        ];
+        const rares = [
+          {
+            name: "Gengar",
+            type: "Ghost/Poison",
+            rarity: "Rare",
+            price: 1000,
+            details: "A shadowy Pokémon with a mischievous grin.",
+          },
+          {
+            name: "Dragonair",
+            type: "Dragon",
+            rarity: "Rare",
+            price: 1000,
+            details: "A mystical dragon Pokémon.",
+          },
+          {
+            name: "Charmeleon",
+            type: "Fire",
+            rarity: "Rare",
+            price: 1000,
+            details: "The evolved form of Charmander.",
+          },
+        ];
+        const legendaries = [
+          {
+            name: "Mewtwo",
+            type: "Psychic",
+            rarity: "Legendary",
+            price: 5000,
+            details: "A legendary Pokémon created by science.",
+          },
+          {
+            name: "Zapdos",
+            type: "Electric/Flying",
+            rarity: "Legendary",
+            price: 5000,
+            details: "A legendary bird Pokémon.",
+          },
+        ];
+        // Pick 4 random commons
+        const shuffled = commons.sort(() => 0.5 - Math.random());
+        const selectedCommons = shuffled.slice(0, 4);
+        // 80% rare, 20% legendary
+        const isLegendary = Math.random() < 0.2;
+        let special;
+        if (isLegendary) {
+          special = legendaries[Math.floor(Math.random() * legendaries.length)];
+        } else {
+          special = rares[Math.floor(Math.random() * rares.length)];
+        }
+        return [...selectedCommons, special];
+      }
+
+      // --- Timer for next refresh (8am PH time) ---
+      function updateRefreshTimer() {
+        const now = new Date();
+        // PH time is UTC+8
+        const phNow = new Date(
+          now.getTime() + (0 - now.getTimezoneOffset() / 60) * 60 * 60 * 1000,
+        );
+        let next = new Date(phNow);
+        next.setHours(8, 0, 0, 0);
+        if (phNow.getHours() >= 8) next.setDate(next.getDate() + 1);
+        const diff = next - phNow;
+        const h = String(Math.floor(diff / 3600000)).padStart(2, "0");
+        const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, "0");
+        const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, "0");
+        const timerElem = document.getElementById("refresh-timer");
+        if (timerElem) timerElem.textContent = `${h}:${m}:${s}`;
+      }
+      setInterval(updateRefreshTimer, 1000);
+      updateRefreshTimer();
+
+      // --- Main logic ---
+      document.addEventListener("DOMContentLoaded", () => {
+        // Get user_id and token from localStorage
+        const user_id = localStorage.getItem("user_id");
+        const token = localStorage.getItem("token");
+
+        // Load navbar and update WPC dynamically
+        fetch("navbar.html")
+          .then((res) => res.text())
+          .then((html) => {
+            const nav = document.getElementById("navbar-placeholder");
+            if (nav) nav.innerHTML = html;
+            updateNavbarWPC();
+          });
+
+        async function updateNavbarWPC() {
+          if (!user_id || !token) return;
+          const res = await getWPC(user_id, token);
+          const wpc = res && res.wpc ? res.wpc : 0;
+          const coinDisplay = document.querySelector(".coin-display");
+          if (coinDisplay) {
+            coinDisplay.textContent = `WPC = ${wpc}`;
+          }
+          const walletElem = document.getElementById("wallet-balance");
+          if (walletElem) walletElem.textContent = wpc;
+        }
+
+        // Render Pokémon for sale
+        const pokemonShopList = document.getElementById("pokemon-shop-list");
+        // Store the daily Pokémon set so it doesn't change on reload
+        let todaysPokemon = getRandomPokemonSet();
+        if (pokemonShopList) {
+          pokemonShopList.innerHTML = "";
+          todaysPokemon.forEach((poke, idx) => {
+            // Map name to Pokédex ID for GIFs
+            const nameToId = {
+              Pidgey: 16,
+              Rattata: 19,
+              Caterpie: 10,
+              Poliwag: 60,
+              Oddish: 43,
+              Gengar: 94,
+              Dragonair: 148,
+              Charmeleon: 5,
+              Mewtwo: 150,
+              Zapdos: 145,
+            };
+            const pokeId = nameToId[poke.name];
+            // Use PokéAPI animated GIF sprite if possible
+            const pokeApiGif = pokeId
+              ? `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/${pokeId}.gif`
+              : "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png";
+            const fallbackImg =
+              "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png";
+            const div = document.createElement("div");
+            div.className = "shop-item pokemon";
+            div.innerHTML = `
+              <input type="checkbox" id="poke-check-${idx}" name="poke-check" value="${idx}" />
+              <img src="${pokeApiGif}" alt="${poke.name}" onerror=\"this.onerror=null;this.src='${fallbackImg}'\" />
+              <div class="poke-rarity" style="color:${poke.rarity === "Legendary" ? "#ffd700" : poke.rarity === "Rare" ? "#4cafef" : "#aaa"}">${poke.rarity}</div>
+              <div class="item-name">${poke.name}</div>
+              <div class="poke-details">${poke.type} <br>${poke.details}</div>
+              <div class="item-price">${poke.price} WPC</div>
+              <button class="btn btn-encounter" onclick="window.buyPokemonShop(${idx})">Buy</button>
+            `;
+            pokemonShopList.appendChild(div);
+          });
+        }
+
+        // Buy Pokémon logic for shop
+        window.buyPokemonShop = async function (idx) {
+          const poke = todaysPokemon[idx];
+          if (!user_id || !token) return alert("Please log in.");
+          const res = await buyPokemon(user_id, poke, token);
+          if (res.success) {
+            alert(`Purchased: ${poke.name}`);
+            updateNavbarWPC();
+          } else {
+            alert(res.message || `Failed to buy ${poke.name}`);
+          }
+        };
+
+        // Buy Pokéball logic
+        window.buyItem = async function (type, price) {
+          if (!user_id || !token) return alert("Please log in.");
+          // Map type to backend type
+          let backendType = type;
+          if (
+            type === "pokeball" ||
+            type === "greatball" ||
+            type === "ultraball" ||
+            type === "masterball"
+          ) {
+            const res = await buyPokeball(user_id, backendType, 1, token);
+            if (res.success) {
+              alert(
+                `Purchased 1 ${type.charAt(0).toUpperCase() + type.slice(1)}!`,
+              );
+              updateNavbarWPC();
+            } else {
+              alert(res.message || "Purchase failed");
+            }
+          }
+        };
+
+        // Initial WPC fetch
+        updateNavbarWPC();
+      });
+    </script>
+  </body>
+</html>

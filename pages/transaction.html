@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Purchase WPC</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: Arial, Helvetica, sans-serif;
+      }
+      body {
+        background: #0b0e14;
+        color: #fff;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      #content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 10px;
+      }
+      h1 {
+        font-size: 36px;
+        color: #4caf50;
+        margin-bottom: 20px;
+      }
+      p {
+        color: #aaa;
+        margin-bottom: 20px;
+      }
+      button {
+        padding: 12px 20px;
+        font-size: 16px;
+        border: none;
+        border-radius: 8px;
+        background: #4caf50;
+        color: #fff;
+        cursor: pointer;
+        transition: 0.3s;
+      }
+      button:hover {
+        background: #45a049;
+      }
+      input {
+        padding: 10px;
+        font-size: 16px;
+        margin-bottom: 10px;
+        border-radius: 8px;
+        border: none;
+        width: 200px;
+      }
+      #status {
+        margin-top: 20px;
+        color: #ffcc00;
+      }
+      #balance {
+        margin-top: 10px;
+        color: #4caf50;
+        font-weight: bold;
+      }
+      footer {
+        background: #11151f;
+        padding: 20px 24px;
+        text-align: center;
+        color: #aaa;
+        margin-top: auto;
+      }
+      footer a {
+        color: #4caf50;
+        margin: 0 10px;
+        text-decoration: none;
+      }
+      footer a:hover {
+        color: #fff;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- NAVBAR -->
+    <div id="navbar-placeholder"></div>
+
+    <div id="content">
+      <h1>Purchase WPC</h1>
+      <p>Send Sepolia ETH and receive WPC tokens automatically.</p>
+
+      <form
+        id="transactionForm"
+        style="
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 10px;
+        "
+      >
+        <input
+          type="number"
+          id="ethAmount"
+          placeholder="Enter Sepolia ETH (e.g. 0.0001)"
+          step="0.0001"
+          min="0.0001"
+          required
+        />
+        <div id="wpcCalc" style="color: #4caf50; font-weight: bold"></div>
+        <button type="submit" id="transactBtn">Transact</button>
+      </form>
+      <form
+        id="manualWalletForm"
+        style="
+          display: none;
+          flex-direction: column;
+          align-items: center;
+          gap: 10px;
+          margin-top: 20px;
+        "
+      >
+        <label for="manualWalletInput" style="color: #fff"
+          >Put your Meta Mask Wallet here:</label
+        >
+        <input
+          type="text"
+          id="manualWalletInput"
+          placeholder="0x..."
+          style="width: 250px"
+          required
+        />
+        <button type="submit">Submit Wallet</button>
+      </form>
+      <div id="status"></div>
+    </div>
+
+    <footer>
+      <p>
+        <a href="#">Maps</a> | <a href="#">Profile</a> |
+        <a href="#">Pokemon</a> | <a href="#">Battle</a>
+      </p>
+      <p>&copy; 2026 Bit-Pokemon by Kobe D. Estabalaya</p>
+    </footer>
+
+    <script type="module">
+      import { ethers } from "https://cdn.jsdelivr.net/npm/ethers/dist/ethers.esm.min.js";
+
+      let userAddress;
+      const statusDiv = document.getElementById("status");
+      const transactionForm = document.getElementById("transactionForm");
+      const ethAmountInput = document.getElementById("ethAmount");
+      const wpcCalc = document.getElementById("wpcCalc");
+      const manualWalletForm = document.getElementById("manualWalletForm");
+      const manualWalletInput = document.getElementById("manualWalletInput");
+
+      // WPC Contract
+      const yourWallet = "0xA10F750d5A533468e4A825be131f17ff9A692Ba9";
+      let wpcContract;
+
+      // Save wallet to server (manual)
+      async function saveManualWalletToServer(wallet) {
+        if (!wallet) return false;
+        try {
+          const token = localStorage.getItem("token");
+          if (!token) return false;
+          const response = await fetch("http://localhost:4000/users/wallet", {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ walletAddress: wallet }),
+          });
+          const result = await response.json();
+          if (result.success) {
+            statusDiv.innerText = "Wallet saved to your profile!";
+            userAddress = wallet;
+            manualWalletForm.style.display = "none";
+            transactionForm.style.display = "flex";
+            return true;
+          } else {
+            statusDiv.innerText = `Failed to save wallet: ${result.message}`;
+            return false;
+          }
+        } catch (err) {
+          console.error(err);
+          statusDiv.innerText = "Error saving wallet. See console.";
+          return false;
+        }
+      }
+
+      // Auto-calculate WPC
+      ethAmountInput.addEventListener("input", () => {
+        const eth = parseFloat(ethAmountInput.value);
+        if (eth && eth > 0) {
+          const wpc = eth / 0.0001;
+          wpcCalc.innerText = `You will receive: ${wpc} WPC`;
+        } else {
+          wpcCalc.innerText = "";
+        }
+      });
+
+      // Manual wallet form submit
+      manualWalletForm.onsubmit = async (e) => {
+        e.preventDefault();
+        const wallet = manualWalletInput.value.trim();
+        if (!/^0x[a-fA-F0-9]{40}$/.test(wallet)) {
+          statusDiv.innerText = "Invalid Ethereum address.";
+          return;
+        }
+        await saveManualWalletToServer(wallet);
+      };
+
+      // Handle transaction form submit
+      transactionForm.onsubmit = async (e) => {
+        e.preventDefault();
+        if (!userAddress) {
+          statusDiv.innerText = "Please submit your wallet address first.";
+          return;
+        }
+        const ethInput = parseFloat(ethAmountInput.value);
+        if (!ethInput || ethInput <= 0) {
+          alert("Enter ETH amount");
+          return;
+        }
+        const wpc = ethInput / 0.0001;
+        // Here you would prompt MetaMask/send transaction if you want, or just update backend
+        try {
+          statusDiv.innerText = `Transaction complete! You purchased ${wpc} WPC.`;
+          // Update user_ingame_wallet in backend
+          const token = localStorage.getItem("token");
+          if (token) {
+            await fetch("http://localhost:4000/users/me", {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({ user_ingame_wallet: wpc }),
+            });
+          }
+        } catch (err) {
+          console.error(err);
+          statusDiv.innerText = "Transaction failed. See console for details.";
+        }
+      };
+
+      // On page load: check user wallet
+      window.addEventListener("DOMContentLoaded", async () => {
+        // Load navbar
+        fetch("navbar.html")
+          .then((res) => res.text())
+          .then(
+            (data) =>
+              (document.getElementById("navbar-placeholder").innerHTML = data),
+          )
+          .catch((err) => console.error("Failed to load navbar:", err));
+
+        const user_id = localStorage.getItem("user_id");
+        if (!user_id) {
+          statusDiv.innerText = "Please log in to your account first.";
+          manualWalletForm.style.display = "none";
+          transactionForm.style.display = "none";
+          return;
+        }
+        // Get user profile by user_id (ign)
+        try {
+          const res = await fetch(
+            `http://localhost:4000/users/me?user_id=${user_id}`,
+          );
+          const data = await res.json();
+          if (!data.success || !data.data) {
+            statusDiv.innerText =
+              "Failed to fetch user profile. Please log in again.";
+            manualWalletForm.style.display = "none";
+            transactionForm.style.display = "none";
+            return;
+          }
+          // Check walletAddress
+          if (!data.data.walletAddress) {
+            statusDiv.innerText =
+              "No wallet address found. Please enter your MetaMask wallet address.";
+            manualWalletForm.style.display = "flex";
+            transactionForm.style.display = "none";
+          } else {
+            userAddress = data.data.walletAddress;
+            statusDiv.innerText = `Wallet on file: ${userAddress}`;
+            manualWalletForm.style.display = "none";
+            transactionForm.style.display = "flex";
+          }
+        } catch (err) {
+          statusDiv.innerText = "Error fetching user profile.";
+          manualWalletForm.style.display = "none";
+          transactionForm.style.display = "none";
+        }
+      });
+        try {
+          const res = await fetch(`http://localhost:4000/users/me-nonjwt?user_id=${user_id}`);
+          const data = await res.json();
+          if (!data.success || !data.data) {
+            statusDiv.innerText = "Failed to fetch user profile. Please log in again.";
+            manualWalletForm.style.display = "none";
+            transactionForm.style.display = "none";
+            return;
+          }
+          // Check walletAddress
+          if (!data.data.walletAddress) {
+            statusDiv.innerText = "No wallet address found. Please enter your MetaMask wallet address.";
+            manualWalletForm.style.display = "flex";
+            transactionForm.style.display = "none";
+          } else {
+            userAddress = data.data.walletAddress;
+            statusDiv.innerText = `Wallet on file: ${userAddress}`;
+            manualWalletForm.style.display = "none";
+            transactionForm.style.display = "flex";
+          }
+        } catch (err) {
+          statusDiv.innerText = "Error fetching user profile.";
+          manualWalletForm.style.display = "none";
+          transactionForm.style.display = "none";
+        }

@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bit-Pokemon - Profile</title>
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Inter", sans-serif;
+      }
+      body {
+        background: #0b0e14;
+        color: #fff;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      main {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        padding: 40px 10px;
+      }
+      .profile-wrapper {
+        background: #1a1f2e;
+        padding: 24px;
+        border-radius: 12px;
+        width: 100%;
+        max-width: 500px;
+      }
+      .profile-title {
+        text-align: center;
+        font-size: 22px;
+        margin-bottom: 16px;
+        color: #ffd700;
+        font-weight: bold;
+      }
+      .profile-field {
+        margin-bottom: 14px;
+      }
+      .profile-field label {
+        display: block;
+        font-size: 13px;
+        color: #ccc;
+        margin-bottom: 4px;
+      }
+      .profile-field input {
+        width: 100%;
+        padding: 10px 12px;
+        border-radius: 8px;
+        border: none;
+        background: #0f1422;
+        color: #fff;
+      }
+      .profile-field input:focus {
+        outline: 2px solid #4caf50;
+      }
+      .btn {
+        width: 100%;
+        padding: 12px;
+        margin-top: 12px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        font-weight: bold;
+      }
+      .btn-update {
+        background: #4caf50;
+        color: #000;
+      }
+      .btn-delete {
+        background: #e53935;
+        color: #fff;
+      }
+      .success-msg {
+        color: #4caf50;
+        text-align: center;
+        margin-top: 10px;
+      }
+      .error-msg {
+        color: #e53935;
+        text-align: center;
+        margin-top: 10px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <main>
+      <div class="profile-wrapper">
+        <div class="profile-title">Your Profile</div>
+
+        <div class="profile-field">
+          <label>IGN</label>
+          <input id="ign" />
+        </div>
+
+        <div class="profile-field">
+          <label>Email</label>
+          <input id="email" disabled />
+        </div>
+
+        <div class="profile-field">
+          <label>Birthdate</label>
+          <input type="date" id="birth_date" />
+        </div>
+
+        <div class="profile-field">
+          <label>Pronouns</label>
+          <input id="pronouns" />
+        </div>
+
+        <hr style="margin: 16px 0" />
+
+        <div class="profile-field">
+          <label>New Password</label>
+          <input type="password" id="password" />
+        </div>
+
+        <div class="profile-field">
+          <label>Confirm Password</label>
+          <input type="password" id="confirm_password" />
+        </div>
+
+        <button class="btn btn-update" id="updateBtn">Update Profile</button>
+        <button class="btn btn-delete" id="deleteBtn">Delete Account</button>
+
+        <div class="success-msg" id="successMsg"></div>
+        <div class="error-msg" id="errorMsg"></div>
+      </div>
+    </main>
+
+    <script type="module">
+      import { API_BASE_URL } from "../api.js";
+
+      const token = localStorage.getItem("token");
+      if (!token) {
+        window.location.href = "../index.html";
+      }
+
+      const ign = document.getElementById("ign");
+      const email = document.getElementById("email");
+      const birth = document.getElementById("birth_date");
+      const pronouns = document.getElementById("pronouns");
+      const password = document.getElementById("password");
+      const confirmPassword = document.getElementById("confirm_password");
+      const successMsg = document.getElementById("successMsg");
+      const errorMsg = document.getElementById("errorMsg");
+
+      let user_id = null;
+
+      // ================= LOAD PROFILE =================
+      async function loadProfile() {
+        try {
+          const res = await fetch(`${API_BASE_URL}/users/me`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+
+          const data = await res.json();
+
+          if (!res.ok || !data.success) {
+            throw new Error("Unauthorized");
+          }
+
+          const user = data.data;
+          user_id = user._id || user.id;
+
+          ign.value = user.ign || "";
+          email.value = user.email || "";
+          birth.value = user.birth_date ? user.birth_date.split("T")[0] : "";
+          pronouns.value = user.pronouns || "";
+        } catch (err) {
+          console.error(err);
+          localStorage.removeItem("token");
+          window.location.href = "../index.html";
+        }
+      }
+
+      loadProfile();
+
+      // ================= UPDATE =================
+      document.getElementById("updateBtn").onclick = async () => {
+        errorMsg.textContent = "";
+        successMsg.textContent = "";
+
+        if (password.value && password.value !== confirmPassword.value) {
+          errorMsg.textContent = "Passwords do not match";
+          return;
+        }
+
+        const payload = {
+          ign: ign.value,
+          birth_date: birth.value,
+          pronouns: pronouns.value,
+        };
+
+        if (password.value) {
+          payload.password = password.value;
+        }
+
+        try {
+          const res = await fetch(`${API_BASE_URL}/users/${user_id}`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(payload),
+          });
+
+          const data = await res.json();
+
+          if (data.success) {
+            successMsg.textContent = "Profile updated!";
+            password.value = "";
+            confirmPassword.value = "";
+          } else {
+            errorMsg.textContent = data.message;
+          }
+        } catch {
+          errorMsg.textContent = "Update failed";
+        }
+      };
+
+      // ================= DELETE =================
+      document.getElementById("deleteBtn").onclick = async () => {
+        if (!confirm("Delete account permanently?")) return;
+
+        await fetch(`${API_BASE_URL}/users/${user_id}`, {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        localStorage.removeItem("token");
+        window.location.href = "../index.html";
+      };
+    </script>
+  </body>
+</html>
