@@ -10,14 +10,29 @@ export const API_BASE_URL =
 // ========================
 // PAGE BASE URL — Handles both local and GitHub Pages deployment
 // ========================
-// Detects if running on GitHub Pages (/BIT_Pokemon/) or locally (/)
+// Strategy:
+//   1. If on localhost / 127.0.0.1 → no base prefix needed
+//   2. If on GitHub Pages (*.github.io) with a project repo → first path segment is the repo name
+//   3. If on a custom domain / user Pages (ebokph.github.io served at root) → no prefix needed
 export const PAGE_BASE_URL = (() => {
-  const pathname = window.location.pathname;
-  // If path includes 'BIT_Pokemon', we're on GitHub Pages
-  if (pathname.includes("BIT_Pokemon")) {
-    return "/BIT_Pokemon";
+  const { hostname, pathname } = window.location;
+
+  // Local development — no prefix
+  if (hostname === "localhost" || hostname === "127.0.0.1") {
+    return "";
   }
-  // Otherwise, running locally or on a standard server
+
+  // GitHub Pages project site: username.github.io/REPO_NAME/...
+  // The first path segment will be the repo name (non-empty, not "pages", not a .html file)
+  if (hostname.endsWith("github.io")) {
+    const firstSegment = pathname.split("/").filter(Boolean)[0] || "";
+    // If the first segment looks like a repo name (not a page file), use it as base
+    if (firstSegment && !firstSegment.includes(".")) {
+      return "/" + firstSegment;
+    }
+  }
+
+  // Custom domain or user Pages root (e.g. ebokph.github.io served at /)
   return "";
 })();
 
