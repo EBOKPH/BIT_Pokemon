@@ -239,7 +239,7 @@
 
     <!-- CHECK USER POKEMON ON LOGIN -->
     <script type="module">
-      import { API_BASE_URL } from "../api.js";
+      import { API_BASE_URL, getPageLink } from "../api.js";
       // Check if user has Pokémon in user_pokemons table, else redirect to firstpokemon.html
       const user_id = localStorage.getItem("user_id");
       const token = localStorage.getItem("token");
@@ -258,15 +258,15 @@
               !Array.isArray(data.data) ||
               data.data.length === 0
             ) {
-              window.location.href = "firstpokemon.html";
+              window.location.href = getPageLink("pages/firstpokemon.html");
             }
           })
           .catch(() => {
-            window.location.href = "firstpokemon.html";
+            window.location.href = getPageLink("pages/firstpokemon.html");
           });
       } else {
         // Not logged in, redirect to login page (optional)
-        window.location.href = "../index.html";
+        window.location.href = getPageLink("index.html");
       }
     </script>
 
@@ -283,7 +283,7 @@
               e.preventDefault();
               localStorage.clear();
               sessionStorage.clear();
-              window.location.href = "index.html";
+              window.location.href = getPageLink("index.html");
             });
           }
         })
@@ -299,7 +299,7 @@
               e.preventDefault();
               localStorage.clear();
               sessionStorage.clear();
-              window.location.href = "../index.html";
+              window.location.href = getPageLink("index.html");
             });
           }
         }

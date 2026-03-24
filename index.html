@@ -1624,7 +1624,13 @@
           <button class="start-btn" id="startBtn">
             ▶ &nbsp;INITIALIZE PIP
           </button>
-          <a class="register-link" href="/pages/sign-up.html"
+          <a
+            class="register-link"
+            href="#"
+            onclick="
+              window.location.href = getPageLink('pages/sign-up.html');
+              return false;
+            "
             >New hunter? Register here</a
           >
         </div>
@@ -1669,7 +1675,14 @@
           </form>
           <div class="modal-footer">
             Don't have an account?
-            <a href="/pages/sign-up.html">Sign up here</a>
+            <a
+              href="#"
+              onclick="
+                window.location.href = getPageLink('pages/sign-up.html');
+                return false;
+              "
+              >Sign up here</a
+            >
           </div>
         </div>
       </div>
@@ -1687,7 +1700,7 @@
     </div>
 
     <script type="module">
-      import { API_BASE_URL } from "./api.js";
+      import { API_BASE_URL, getPageLink } from "./api.js";
 
       // ══════════════════════════════════════════
       //  SOUND ENGINE — Web Audio API (same as pip_interface)
@@ -2055,16 +2068,16 @@
       // ── LOGIN — same API as original ──
       loginForm.addEventListener("submit", async (e) => {
         e.preventDefault();
-        const email    = document.getElementById("email").value.trim();
+        const email = document.getElementById("email").value.trim();
         const password = document.getElementById("password").value.trim();
         const loginBtn = loginForm.querySelector(".login-btn");
-        loginBtn.disabled    = true;
+        loginBtn.disabled = true;
         loginBtn.textContent = "AUTHENTICATING...";
         try {
-          const res    = await fetch(`${API_BASE_URL}/users/login`, {
-            method:  "POST",
+          const res = await fetch(`${API_BASE_URL}/users/login`, {
+            method: "POST",
             headers: { "Content-Type": "application/json" },
-            body:    JSON.stringify({ email, password }),
+            body: JSON.stringify({ email, password }),
           });
           const result = await res.json();
 
@@ -2072,26 +2085,29 @@
             // ── Store session ──
             if (result.data.user.user_id != null)
               localStorage.setItem("user_id", result.data.user.user_id);
-            localStorage.setItem("ign",   result.data.user.ign || result.data.user.username);
+            localStorage.setItem(
+              "ign",
+              result.data.user.ign || result.data.user.username,
+            );
             localStorage.setItem("token", result.data.token);
 
             SFX.modalConfirm();
-            loginBtn.textContent      = "ACCESS GRANTED ✓";
-            loginBtn.style.background = "linear-gradient(160deg,#304a14,#3e5e18)";
-            loginBtn.style.color      = "#d0e8a0";
+            loginBtn.textContent = "ACCESS GRANTED ✓";
+            loginBtn.style.background =
+              "linear-gradient(160deg,#304a14,#3e5e18)";
+            loginBtn.style.color = "#d0e8a0";
 
             setTimeout(() => {
-              window.location.href = "/pages/pip_interface.html";
+              window.location.href = getPageLink("pages/pip_interface.html");
             }, 1200);
-
           } else {
-            loginBtn.disabled    = false;
+            loginBtn.disabled = false;
             loginBtn.textContent = "Sign In";
             showError(result.message || "Invalid login credentials");
           }
         } catch (err) {
           console.error(err);
-          loginBtn.disabled    = false;
+          loginBtn.disabled = false;
           loginBtn.textContent = "Sign In";
           showError("Server error. Please try again.");
         }

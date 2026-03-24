@@ -475,11 +475,12 @@
   function attachLogoutHandler() {
     const btn = document.getElementById("logout-btn");
     if (btn) {
-      btn.addEventListener("click", function (e) {
+      btn.addEventListener("click", async function (e) {
         e.preventDefault();
+        const { getPageLink } = await import("../api.js");
         localStorage.clear();
         sessionStorage.clear();
-        window.location.href = "index.html";
+        window.location.href = getPageLink("index.html");
       });
     }
   }
@@ -496,18 +497,18 @@
       const user_id = localStorage.getItem("user_id");
       if (!user_id) return;
       (async () => {
-        const { API_BASE_URL } = await import('../api.js');
+        const { API_BASE_URL } = await import("../api.js");
         fetch(`${API_BASE_URL}/users/me-nonjwt?user_id=` + user_id)
-        .then(r => r.json())
-        .then(data => {
-          if (data.success && data.data) {
-            const name = data.data.username || data.data.ign || "Hunter";
-            localStorage.setItem("ign", name);
-            if (nameEl) nameEl.textContent = name;
-            if (initEl) initEl.textContent = name.charAt(0).toUpperCase();
-          }
-        })
-        .catch(() => {});
+          .then((r) => r.json())
+          .then((data) => {
+            if (data.success && data.data) {
+              const name = data.data.username || data.data.ign || "Hunter";
+              localStorage.setItem("ign", name);
+              if (nameEl) nameEl.textContent = name;
+              if (initEl) initEl.textContent = name.charAt(0).toUpperCase();
+            }
+          })
+          .catch(() => {});
       })();
     }
   }
@@ -515,7 +516,7 @@
     const user_id = localStorage.getItem("user_id");
     if (!user_id) return;
     try {
-      const { API_BASE_URL } = await import('../api.js');
+      const { API_BASE_URL } = await import("../api.js");
       const res = await fetch(
         `${API_BASE_URL}/users/me-nonjwt?user_id=` + user_id,
       );
@@ -523,7 +524,8 @@
       if (data.success && data.data) {
         const el = document.getElementById("coin-amount");
         // pokecoins is the FRG wallet column in your DB
-        const balance = data.data.pokecoins ?? data.data.user_ingame_wallet ?? 0;
+        const balance =
+          data.data.pokecoins ?? data.data.user_ingame_wallet ?? 0;
         if (el) el.textContent = balance + " FRG";
       }
     } catch {}

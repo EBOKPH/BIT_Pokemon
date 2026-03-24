@@ -6,6 +6,28 @@
 
 export const API_BASE_URL =
   window.API_BASE_URL || "https://bit-pokemon-backend.onrender.com";
+
+// ========================
+// PAGE BASE URL — Handles both local and GitHub Pages deployment
+// ========================
+// Detects if running on GitHub Pages (/BIT_Pokemon/) or locally (/)
+export const PAGE_BASE_URL = (() => {
+  const pathname = window.location.pathname;
+  // If path includes 'BIT_Pokemon', we're on GitHub Pages
+  if (pathname.includes("BIT_Pokemon")) {
+    return "/BIT_Pokemon";
+  }
+  // Otherwise, running locally or on a standard server
+  return "";
+})();
+
+// Helper function to generate correct page links
+export function getPageLink(pagePath) {
+  // Remove leading slash if present
+  const cleanPath = pagePath.startsWith("/") ? pagePath.slice(1) : pagePath;
+  return `${PAGE_BASE_URL}/${cleanPath}`;
+}
+
 // ========================
 // USERS
 // ========================

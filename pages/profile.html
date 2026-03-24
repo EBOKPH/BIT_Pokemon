@@ -135,11 +135,11 @@
     </main>
 
     <script type="module">
-      import { API_BASE_URL } from "../api.js";
+      import { API_BASE_URL, getPageLink } from "../api.js";
 
       const token = localStorage.getItem("token");
       if (!token) {
-        window.location.href = "../index.html";
+        window.location.href = getPageLink("index.html");
       }
 
       const ign = document.getElementById("ign");
@@ -178,7 +178,7 @@
         } catch (err) {
           console.error(err);
           localStorage.removeItem("token");
-          window.location.href = "../index.html";
+          window.location.href = getPageLink("index.html");
         }
       }
 
@@ -238,7 +238,7 @@
         });
 
         localStorage.removeItem("token");
-        window.location.href = "../index.html";
+        window.location.href = getPageLink("index.html");
       };
     </script>
   </body>

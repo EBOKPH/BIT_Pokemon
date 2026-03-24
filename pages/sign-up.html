@@ -976,7 +976,15 @@
         <!-- FOOTER -->
         <div class="card-footer">
           <p>
-            Already have an account? <a href="../index.html">Sign in here</a>
+            Already have an account?
+            <a
+              href="#"
+              onclick="
+                window.location.href = getPageLink('index.html');
+                return false;
+              "
+              >Sign in here</a
+            >
           </p>
         </div>
       </div>
@@ -1078,7 +1086,12 @@
     </div>
 
     <script type="module">
-      import { registerUser, checkIGN, checkEmail } from "../api.js";
+      import {
+        registerUser,
+        checkIGN,
+        checkEmail,
+        getPageLink,
+      } from "../api.js";
 
       // Privacy Modal
       const privacyModal = document.getElementById("privacyModal");
@@ -1211,7 +1224,7 @@
         messageModal.style.display = "flex";
         document.getElementById("closeMessageModal").onclick = () => {
           messageModal.style.display = "none";
-          if (redirect) window.location.href = "../index.html";
+          if (redirect) window.location.href = getPageLink("index.html");
         };
       };
 

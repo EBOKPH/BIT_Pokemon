@@ -61,7 +61,14 @@
         Sorry, your email verification link is invalid or has expired.<br />
         Please try registering again or contact support if you need help.
       </p>
-      <a href="/pages/sign-up.html" class="btn">Go to Sign Up</a>
+      <a href="#" id="signupLink" class="btn">Go to Sign Up</a>
     </div>
+    <script type="module">
+      import { getPageLink } from "../api.js";
+      document.getElementById("signupLink").onclick = (e) => {
+        e.preventDefault();
+        window.location.href = getPageLink("pages/sign-up.html");
+      };
+    </script>
   </body>
 </html>

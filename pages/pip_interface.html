@@ -845,33 +845,46 @@
 
       /* Cursor blink in console input */
       @keyframes cursorBlink {
-        0%, 100% { opacity: 1; }
-        50%       { opacity: 0; }
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0;
+        }
       }
 
       /* ── PIP SCREEN PROFILE VIEW ── */
       /* Replaces the default idle screen when a profile action is active */
       .screen-profile {
-        position: absolute; inset: 0;
-        display: flex; flex-direction: column;
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
         padding: 8% 10% 6%;
         gap: 0;
         overflow: hidden;
-        background: rgba(0,0,0,.15);
-        animation: profileIn .25s ease;
+        background: rgba(0, 0, 0, 0.15);
+        animation: profileIn 0.25s ease;
         pointer-events: none;
       }
       @keyframes profileIn {
-        from { opacity:0; transform:translateY(4px); }
-        to   { opacity:1; transform:none; }
+        from {
+          opacity: 0;
+          transform: translateY(4px);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
       }
       .sp-header {
         font-family: var(--mono);
-        font-size: clamp(5px, .85vw, 8px);
+        font-size: clamp(5px, 0.85vw, 8px);
         letter-spacing: 3px;
-        color: rgba(74,255,106,.45);
+        color: rgba(74, 255, 106, 0.45);
         text-transform: uppercase;
-        border-bottom: 1px solid rgba(74,255,106,.12);
+        border-bottom: 1px solid rgba(74, 255, 106, 0.12);
         padding-bottom: 4%;
         margin-bottom: 4%;
         display: flex;
@@ -880,7 +893,7 @@
       }
       .sp-title {
         font-family: var(--mono);
-        font-size: clamp(6px, .95vw, 9px);
+        font-size: clamp(6px, 0.95vw, 9px);
         letter-spacing: 4px;
         color: var(--green);
         text-shadow: 0 0 8px var(--green);
@@ -895,16 +908,16 @@
       }
       .sp-lbl {
         font-family: var(--mono);
-        font-size: clamp(4px, .7vw, 7px);
+        font-size: clamp(4px, 0.7vw, 7px);
         letter-spacing: 2px;
-        color: rgba(74,255,106,.38);
+        color: rgba(74, 255, 106, 0.38);
         text-transform: uppercase;
         white-space: nowrap;
         flex-shrink: 0;
       }
       .sp-val {
         font-family: var(--mono);
-        font-size: clamp(5px, .8vw, 8px);
+        font-size: clamp(5px, 0.8vw, 8px);
         letter-spacing: 1px;
         color: var(--text);
         text-align: right;
@@ -912,20 +925,27 @@
         text-overflow: ellipsis;
         white-space: nowrap;
       }
-      .sp-val.green { color: var(--green); }
-      .sp-val.amber { color: var(--amber); }
-      .sp-val.red   { color: var(--red); }
+      .sp-val.green {
+        color: var(--green);
+      }
+      .sp-val.amber {
+        color: var(--amber);
+      }
+      .sp-val.red {
+        color: var(--red);
+      }
       .sp-divider {
         border: none;
-        border-top: 1px solid rgba(74,255,106,.1);
+        border-top: 1px solid rgba(74, 255, 106, 0.1);
         margin: 3% 0;
       }
       .sp-cursor {
         display: inline-block;
-        width: 1px; height: .85em;
+        width: 1px;
+        height: 0.85em;
         background: var(--green);
         margin-left: 2px;
-        animation: cursorBlink .8s ease-in-out infinite;
+        animation: cursorBlink 0.8s ease-in-out infinite;
         vertical-align: middle;
       }
 
@@ -938,12 +958,14 @@
         margin-bottom: 10px;
         width: 100%;
       }
-      .pip-action-bar.visible { display: flex; }
+      .pip-action-bar.visible {
+        display: flex;
+      }
       .pip-action-label {
         font-family: var(--mono);
         font-size: 9px;
         letter-spacing: 3px;
-        color: rgba(74,255,106,.4);
+        color: rgba(74, 255, 106, 0.4);
         text-transform: uppercase;
       }
       .pip-action-chips {
@@ -958,199 +980,272 @@
         letter-spacing: 3px;
         text-transform: uppercase;
         padding: 5px 14px;
-        background: rgba(0,0,0,.4);
-        border: 1px solid rgba(74,255,106,.2);
+        background: rgba(0, 0, 0, 0.4);
+        border: 1px solid rgba(74, 255, 106, 0.2);
         color: var(--text-dim);
         cursor: pointer;
-        transition: all .15s;
+        transition: all 0.15s;
       }
       .pip-chip:hover {
         border-color: var(--green);
         color: var(--green);
-        box-shadow: 0 0 10px rgba(74,255,106,.12);
+        box-shadow: 0 0 10px rgba(74, 255, 106, 0.12);
       }
       .pip-chip.primary {
-        border-color: rgba(74,255,106,.4);
+        border-color: rgba(74, 255, 106, 0.4);
         color: var(--green);
-        background: rgba(74,255,106,.08);
+        background: rgba(74, 255, 106, 0.08);
       }
       .pip-chip.primary:hover {
-        background: rgba(74,255,106,.16);
-        box-shadow: 0 0 14px rgba(74,255,106,.2);
+        background: rgba(74, 255, 106, 0.16);
+        box-shadow: 0 0 14px rgba(74, 255, 106, 0.2);
       }
       .pip-chip.danger {
-        border-color: rgba(255,68,68,.3);
+        border-color: rgba(255, 68, 68, 0.3);
         color: var(--red);
-        background: rgba(255,68,68,.06);
+        background: rgba(255, 68, 68, 0.06);
       }
       .pip-chip.danger:hover {
-        background: rgba(255,68,68,.14);
-        box-shadow: 0 0 10px rgba(255,68,68,.15);
+        background: rgba(255, 68, 68, 0.14);
+        box-shadow: 0 0 10px rgba(255, 68, 68, 0.15);
       }
       .pip-chip.amber-chip {
-        border-color: rgba(255,184,48,.3);
+        border-color: rgba(255, 184, 48, 0.3);
         color: var(--amber);
-        background: rgba(255,184,48,.06);
+        background: rgba(255, 184, 48, 0.06);
       }
 
       /* ── KEYBOARD MODAL ── */
       .kbd-overlay {
         display: none;
-        position: fixed; inset: 0; z-index: 3000;
-        background: rgba(0,0,0,.88);
-        align-items: center; justify-content: center;
+        position: fixed;
+        inset: 0;
+        z-index: 3000;
+        background: rgba(0, 0, 0, 0.88);
+        align-items: center;
+        justify-content: center;
         backdrop-filter: blur(4px);
       }
-      .kbd-overlay.open { display: flex; }
+      .kbd-overlay.open {
+        display: flex;
+      }
 
       .kbd-box {
         background: linear-gradient(160deg, #0c1008 0%, #080c04 100%);
-        border: 1px solid rgba(74,255,106,.3);
+        border: 1px solid rgba(74, 255, 106, 0.3);
         width: min(540px, 94vw);
-        box-shadow: 0 0 0 1px rgba(74,255,106,.06), 0 0 60px rgba(74,255,106,.08), 0 32px 80px rgba(0,0,0,.95);
-        animation: modalIn .2s cubic-bezier(.25,.8,.25,1);
+        box-shadow:
+          0 0 0 1px rgba(74, 255, 106, 0.06),
+          0 0 60px rgba(74, 255, 106, 0.08),
+          0 32px 80px rgba(0, 0, 0, 0.95);
+        animation: modalIn 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
       }
       .kbd-header {
-        display: flex; align-items: center; justify-content: space-between;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
         padding: 12px 16px 10px;
-        border-bottom: 1px solid rgba(74,255,106,.1);
-        background: rgba(74,255,106,.03);
+        border-bottom: 1px solid rgba(74, 255, 106, 0.1);
+        background: rgba(74, 255, 106, 0.03);
       }
       .kbd-title {
         font-family: var(--mono);
-        font-size: 10px; letter-spacing: 4px;
-        color: var(--green); text-transform: uppercase;
+        font-size: 10px;
+        letter-spacing: 4px;
+        color: var(--green);
+        text-transform: uppercase;
       }
       .kbd-close {
-        background: none; border: 1px solid rgba(74,255,106,.15);
-        color: var(--text-dim); font-size: 12px;
-        width: 24px; height: 24px;
-        display: flex; align-items: center; justify-content: center;
-        cursor: pointer; transition: all .15s;
+        background: none;
+        border: 1px solid rgba(74, 255, 106, 0.15);
+        color: var(--text-dim);
+        font-size: 12px;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.15s;
       }
-      .kbd-close:hover { border-color: var(--red); color: var(--red); }
+      .kbd-close:hover {
+        border-color: var(--red);
+        color: var(--red);
+      }
 
-      .kbd-body { padding: 16px 16px 0; }
+      .kbd-body {
+        padding: 16px 16px 0;
+      }
       .kbd-field-label {
         font-family: var(--mono);
-        font-size: 8px; letter-spacing: 3px;
-        color: rgba(74,255,106,.4); text-transform: uppercase;
-        margin-bottom: 8px; display: block;
+        font-size: 8px;
+        letter-spacing: 3px;
+        color: rgba(74, 255, 106, 0.4);
+        text-transform: uppercase;
+        margin-bottom: 8px;
+        display: block;
       }
       .kbd-input-wrap {
-        display: flex; align-items: center;
-        background: rgba(0,0,0,.5);
-        border: 1px solid rgba(74,255,106,.25);
+        display: flex;
+        align-items: center;
+        background: rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(74, 255, 106, 0.25);
         border-left: 3px solid var(--green);
         margin-bottom: 10px;
-        transition: border-color .2s;
+        transition: border-color 0.2s;
       }
       .kbd-input-wrap:focus-within {
-        border-color: rgba(74,255,106,.5);
-        box-shadow: 0 0 16px rgba(74,255,106,.06);
+        border-color: rgba(74, 255, 106, 0.5);
+        box-shadow: 0 0 16px rgba(74, 255, 106, 0.06);
       }
       .kbd-prompt {
-        font-family: var(--mono); font-size: 11px;
-        color: rgba(74,255,106,.4); padding: 10px 10px 10px 12px;
+        font-family: var(--mono);
+        font-size: 11px;
+        color: rgba(74, 255, 106, 0.4);
+        padding: 10px 10px 10px 12px;
         flex-shrink: 0;
       }
       .kbd-input {
-        flex: 1; background: transparent; border: none; outline: none;
-        font-family: var(--mono); font-size: 13px; letter-spacing: 1px;
-        color: var(--green); caret-color: var(--green);
+        flex: 1;
+        background: transparent;
+        border: none;
+        outline: none;
+        font-family: var(--mono);
+        font-size: 13px;
+        letter-spacing: 1px;
+        color: var(--green);
+        caret-color: var(--green);
         padding: 10px 12px 10px 0;
       }
-      .kbd-input::placeholder { color: rgba(74,255,106,.2); }
+      .kbd-input::placeholder {
+        color: rgba(74, 255, 106, 0.2);
+      }
       .kbd-hint {
-        font-family: var(--mono); font-size: 8px; letter-spacing: 2px;
-        color: rgba(74,255,106,.25); margin-bottom: 14px;
+        font-family: var(--mono);
+        font-size: 8px;
+        letter-spacing: 2px;
+        color: rgba(74, 255, 106, 0.25);
+        margin-bottom: 14px;
       }
 
       /* The keyboard rows */
       .kbd-keys {
-        display: flex; flex-direction: column; gap: 5px;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
         padding: 12px 16px 16px;
-        background: rgba(0,0,0,.2);
-        border-top: 1px solid rgba(74,255,106,.06);
+        background: rgba(0, 0, 0, 0.2);
+        border-top: 1px solid rgba(74, 255, 106, 0.06);
       }
       .kbd-row {
-        display: flex; gap: 4px; justify-content: center;
+        display: flex;
+        gap: 4px;
+        justify-content: center;
       }
       .key {
         font-family: var(--mono);
-        font-size: 10px; letter-spacing: 0;
-        min-width: 32px; height: 30px;
+        font-size: 10px;
+        letter-spacing: 0;
+        min-width: 32px;
+        height: 30px;
         padding: 0 6px;
         background: linear-gradient(180deg, #1a2010 0%, #111508 100%);
-        border: 1px solid rgba(74,255,106,.15);
-        border-bottom: 2px solid rgba(74,255,106,.1);
+        border: 1px solid rgba(74, 255, 106, 0.15);
+        border-bottom: 2px solid rgba(74, 255, 106, 0.1);
         color: var(--text);
         cursor: pointer;
-        display: flex; align-items: center; justify-content: center;
-        transition: all .08s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.08s;
         user-select: none;
         position: relative;
       }
       .key:hover {
         background: linear-gradient(180deg, #222c14 0%, #181e0c 100%);
-        border-color: rgba(74,255,106,.35);
+        border-color: rgba(74, 255, 106, 0.35);
         color: var(--green);
-        box-shadow: 0 0 6px rgba(74,255,106,.1);
+        box-shadow: 0 0 6px rgba(74, 255, 106, 0.1);
       }
       .key:active {
         transform: translateY(1px);
         border-bottom-width: 1px;
-        background: rgba(74,255,106,.1);
+        background: rgba(74, 255, 106, 0.1);
       }
-      .key.wide  { min-width: 54px; }
-      .key.wider { min-width: 80px; }
-      .key.space { flex: 1; max-width: 220px; }
+      .key.wide {
+        min-width: 54px;
+      }
+      .key.wider {
+        min-width: 80px;
+      }
+      .key.space {
+        flex: 1;
+        max-width: 220px;
+      }
       .key.action-key {
-        background: rgba(74,255,106,.06);
-        border-color: rgba(74,255,106,.25);
+        background: rgba(74, 255, 106, 0.06);
+        border-color: rgba(74, 255, 106, 0.25);
         color: var(--green);
-        font-size: 9px; letter-spacing: 2px;
+        font-size: 9px;
+        letter-spacing: 2px;
       }
       .key.action-key:hover {
-        background: rgba(74,255,106,.14);
-        box-shadow: 0 0 10px rgba(74,255,106,.15);
+        background: rgba(74, 255, 106, 0.14);
+        box-shadow: 0 0 10px rgba(74, 255, 106, 0.15);
       }
       .key.backspace-key {
-        background: rgba(255,80,80,.05);
-        border-color: rgba(255,80,80,.2);
+        background: rgba(255, 80, 80, 0.05);
+        border-color: rgba(255, 80, 80, 0.2);
         color: var(--red);
         min-width: 60px;
       }
-      .key.backspace-key:hover { background: rgba(255,80,80,.12); }
+      .key.backspace-key:hover {
+        background: rgba(255, 80, 80, 0.12);
+      }
 
       .kbd-footer {
-        display: flex; gap: 8px; justify-content: flex-end;
+        display: flex;
+        gap: 8px;
+        justify-content: flex-end;
         padding: 10px 16px 14px;
-        border-top: 1px solid rgba(74,255,106,.08);
+        border-top: 1px solid rgba(74, 255, 106, 0.08);
       }
       .kbd-btn {
-        font-family: var(--mono); font-size: 10px; letter-spacing: 3px;
-        text-transform: uppercase; padding: 8px 18px;
-        cursor: pointer; border: 1px solid; transition: all .15s;
+        font-family: var(--mono);
+        font-size: 10px;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        padding: 8px 18px;
+        cursor: pointer;
+        border: 1px solid;
+        transition: all 0.15s;
         background: none;
       }
       .kbd-btn.cancel {
-        border-color: rgba(74,255,106,.15); color: var(--text-dim);
+        border-color: rgba(74, 255, 106, 0.15);
+        color: var(--text-dim);
       }
-      .kbd-btn.cancel:hover { border-color: rgba(74,255,106,.3); color: var(--text); }
+      .kbd-btn.cancel:hover {
+        border-color: rgba(74, 255, 106, 0.3);
+        color: var(--text);
+      }
       .kbd-btn.confirm {
-        background: rgba(74,255,106,.08);
-        border-color: rgba(74,255,106,.4); color: var(--green);
+        background: rgba(74, 255, 106, 0.08);
+        border-color: rgba(74, 255, 106, 0.4);
+        color: var(--green);
       }
       .kbd-btn.confirm:hover {
-        background: rgba(74,255,106,.16);
-        box-shadow: 0 0 14px rgba(74,255,106,.15);
+        background: rgba(74, 255, 106, 0.16);
+        box-shadow: 0 0 14px rgba(74, 255, 106, 0.15);
       }
       .kbd-btn.danger {
-        background: rgba(255,68,68,.08);
-        border-color: rgba(255,68,68,.35); color: var(--red);
+        background: rgba(255, 68, 68, 0.08);
+        border-color: rgba(255, 68, 68, 0.35);
+        color: var(--red);
       }
-      .kbd-btn.danger:hover { background: rgba(255,68,68,.16); }
+      .kbd-btn.danger:hover {
+        background: rgba(255, 68, 68, 0.16);
+      }
 
       /* Boot animation */
       .boot-overlay {
@@ -1285,9 +1380,16 @@
           <label class="kbd-field-label" id="kbdFieldLabel">VALUE</label>
           <div class="kbd-input-wrap">
             <div class="kbd-prompt">&gt;_</div>
-            <input class="kbd-input" id="kbdInput" autocomplete="off" spellcheck="false"/>
+            <input
+              class="kbd-input"
+              id="kbdInput"
+              autocomplete="off"
+              spellcheck="false"
+            />
           </div>
-          <div class="kbd-hint" id="kbdHint">// edit value above · use keyboard below or your physical keyboard</div>
+          <div class="kbd-hint" id="kbdHint">
+            // edit value above · use keyboard below or your physical keyboard
+          </div>
         </div>
         <div class="kbd-keys" id="kbdKeys">
           <!-- rows injected by JS -->
@@ -1311,7 +1413,9 @@
         <div class="pip-centre">
           <!-- Action bar — appears above PIP when a profile action is active -->
           <div class="pip-action-bar" id="pipActionBar">
-            <div class="pip-action-label" id="pipActionLabel">// select action</div>
+            <div class="pip-action-label" id="pipActionLabel">
+              // select action
+            </div>
             <div class="pip-action-chips" id="pipActionChips"></div>
           </div>
 
@@ -1326,9 +1430,13 @@
               <div class="screen-glow"></div>
               <!-- Default idle screen content -->
               <div class="screen-content" id="screenContent">
-                <div class="screen-line dim" id="screenStatus">SYSTEM READY</div>
+                <div class="screen-line dim" id="screenStatus">
+                  SYSTEM READY
+                </div>
                 <div class="screen-line bright" id="screenMain">PIP MK.I</div>
-                <div class="screen-line dim" id="screenSub">FRAGMENT HUNTER INTERFACE</div>
+                <div class="screen-line dim" id="screenSub">
+                  FRAGMENT HUNTER INTERFACE
+                </div>
                 <div class="screen-slots" id="screenSlots">
                   <div class="screen-slot loaded"></div>
                   <div class="screen-slot loaded"></div>
@@ -1338,7 +1446,15 @@
                 </div>
               </div>
               <!-- Profile panel — injected by JS, replaces idle screen -->
-              <div id="screenProfile" style="display:none;position:absolute;inset:0;pointer-events:none;"></div>
+              <div
+                id="screenProfile"
+                style="
+                  display: none;
+                  position: absolute;
+                  inset: 0;
+                  pointer-events: none;
+                "
+              ></div>
             </div>
           </div>
         </div>
@@ -1375,133 +1491,303 @@
     </div>
 
     <script type="module">
-      // Import API_BASE_URL from api.js
-      import { API_BASE_URL } from '../api.js';
+      // Import API_BASE_URL and getPageLink from api.js
+      import { API_BASE_URL, getPageLink } from "../api.js";
       window.API_BASE_URL = API_BASE_URL;
 
       // ── LEFT BUTTONS: Profile CRUD ────────────────────────
       const leftButtons = [
-        { id:"L1", label:"View\nProfile",    sub:"READ DATA",    color:"green",  action:"viewProfile"   },
-        { id:"L2", label:"Edit\nCallsign",   sub:"UPDATE IGN",   color:"green",  action:"editIgn"       },
-        { id:"L3", label:"Change\nPassword", sub:"UPDATE AUTH",  color:"amber",  action:"changePassword"},
-        { id:"L4", label:"Edit\nPronouns",   sub:"UPDATE RECORD",color:"green",  action:"editPronouns"  },
-        { id:"L5", label:"Delete\nAccount",  sub:"WIPE HUNTER",  color:"red",    action:"deleteAccount" },
+        {
+          id: "L1",
+          label: "View\nProfile",
+          sub: "READ DATA",
+          color: "green",
+          action: "viewProfile",
+        },
+        {
+          id: "L2",
+          label: "Edit\nCallsign",
+          sub: "UPDATE IGN",
+          color: "green",
+          action: "editIgn",
+        },
+        {
+          id: "L3",
+          label: "Change\nPassword",
+          sub: "UPDATE AUTH",
+          color: "amber",
+          action: "changePassword",
+        },
+        {
+          id: "L4",
+          label: "Edit\nPronouns",
+          sub: "UPDATE RECORD",
+          color: "green",
+          action: "editPronouns",
+        },
+        {
+          id: "L5",
+          label: "Delete\nAccount",
+          sub: "WIPE HUNTER",
+          color: "red",
+          action: "deleteAccount",
+        },
       ];
 
       // ── RIGHT BUTTONS: Navigation ─────────────────────────
       const rightButtons = [
-        { id:"R1", label:"Field\nOperations", sub:"OPEN MAP",       color:"green",  action:"goMap"      },
-        { id:"R2", label:"Fragment\nVault",   sub:"VIEW INVENTORY", color:"green",  action:"goInventory"},
-        { id:"R3", label:"Shop\nTerminal",    sub:"BUY ITEMS",      color:"amber",  action:"goShop"     },
-        { id:"R4", label:"Codex\nArchive",    sub:"LORE DATABASE",  color:"amber",  action:"goCodex"    },
-        { id:"R5", label:"Sign\nOut",         sub:"LOGOUT HUNTER",  color:"red",    action:"signOut"    },
+        {
+          id: "R1",
+          label: "Field\nOperations",
+          sub: "OPEN MAP",
+          color: "green",
+          action: "goMap",
+        },
+        {
+          id: "R2",
+          label: "Fragment\nVault",
+          sub: "VIEW INVENTORY",
+          color: "green",
+          action: "goInventory",
+        },
+        {
+          id: "R3",
+          label: "Shop\nTerminal",
+          sub: "BUY ITEMS",
+          color: "amber",
+          action: "goShop",
+        },
+        {
+          id: "R4",
+          label: "Codex\nArchive",
+          sub: "LORE DATABASE",
+          color: "amber",
+          action: "goCodex",
+        },
+        {
+          id: "R5",
+          label: "Sign\nOut",
+          sub: "LOGOUT HUNTER",
+          color: "red",
+          action: "signOut",
+        },
       ];
 
       // ── BTN SOUNDS ────────────────────────────────────────
       const BTN_SOUNDS = {
-        L1:"hunterProfile", L2:"slotIn",    L3:"recall",
-        L4:"fragmentVault", L5:"emergencyPurge",
-        R1:"geolocation",   R2:"fragmentVault", R3:"factionComms",
-        R4:"scanFragments", R5:"emergencyPurge",
+        L1: "hunterProfile",
+        L2: "slotIn",
+        L3: "recall",
+        L4: "fragmentVault",
+        L5: "emergencyPurge",
+        R1: "geolocation",
+        R2: "fragmentVault",
+        R3: "factionComms",
+        R4: "scanFragments",
+        R5: "emergencyPurge",
       };
 
       // ── SOUND ENGINE ─────────────────────────────────────
       const SFX = (() => {
         let _ctx = null;
         function ctx() {
-          if (!_ctx) _ctx = new (window.AudioContext||window.webkitAudioContext)();
-          if (_ctx.state==="suspended") _ctx.resume();
+          if (!_ctx)
+            _ctx = new (window.AudioContext || window.webkitAudioContext)();
+          if (_ctx.state === "suspended") _ctx.resume();
           return _ctx;
         }
-        function osc(freq,type,dur,vol,freqEnd) {
-          const c=ctx(),o=c.createOscillator(),g=c.createGain();
-          o.connect(g); g.connect(c.destination);
-          o.type=type; o.frequency.setValueAtTime(freq,c.currentTime);
-          if(freqEnd!==undefined) o.frequency.linearRampToValueAtTime(freqEnd,c.currentTime+dur);
-          g.gain.setValueAtTime(vol,c.currentTime);
-          g.gain.exponentialRampToValueAtTime(0.0001,c.currentTime+dur);
-          o.start(c.currentTime); o.stop(c.currentTime+dur);
+        function osc(freq, type, dur, vol, freqEnd) {
+          const c = ctx(),
+            o = c.createOscillator(),
+            g = c.createGain();
+          o.connect(g);
+          g.connect(c.destination);
+          o.type = type;
+          o.frequency.setValueAtTime(freq, c.currentTime);
+          if (freqEnd !== undefined)
+            o.frequency.linearRampToValueAtTime(freqEnd, c.currentTime + dur);
+          g.gain.setValueAtTime(vol, c.currentTime);
+          g.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + dur);
+          o.start(c.currentTime);
+          o.stop(c.currentTime + dur);
         }
-        function noise(dur=0.08,vol=0.05) {
-          const c=ctx(),buf=c.createBuffer(1,c.sampleRate*dur,c.sampleRate);
-          const d=buf.getChannelData(0);
-          for(let i=0;i<d.length;i++) d[i]=Math.random()*2-1;
-          const src=c.createBufferSource(),g=c.createGain();
-          src.buffer=buf; src.connect(g); g.connect(c.destination);
-          g.gain.setValueAtTime(vol,c.currentTime);
-          g.gain.exponentialRampToValueAtTime(0.0001,c.currentTime+dur);
-          src.start(); src.stop(c.currentTime+dur);
+        function noise(dur = 0.08, vol = 0.05) {
+          const c = ctx(),
+            buf = c.createBuffer(1, c.sampleRate * dur, c.sampleRate);
+          const d = buf.getChannelData(0);
+          for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+          const src = c.createBufferSource(),
+            g = c.createGain();
+          src.buffer = buf;
+          src.connect(g);
+          g.connect(c.destination);
+          g.gain.setValueAtTime(vol, c.currentTime);
+          g.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + dur);
+          src.start();
+          src.stop(c.currentTime + dur);
         }
-        function distort(freq,dur,vol) {
-          const c=ctx(),o=c.createOscillator(),w=c.createWaveShaper(),g=c.createGain();
-          const curve=new Float32Array(256);
-          for(let i=0;i<256;i++){const x=(i*2)/256-1;curve[i]=((Math.PI+400)*x)/(Math.PI+400*Math.abs(x));}
-          w.curve=curve; o.connect(w); w.connect(g); g.connect(c.destination);
-          o.type="sawtooth"; o.frequency.setValueAtTime(freq,c.currentTime);
-          g.gain.setValueAtTime(vol,c.currentTime);
-          g.gain.exponentialRampToValueAtTime(0.0001,c.currentTime+dur);
-          o.start(); o.stop(c.currentTime+dur);
+        function distort(freq, dur, vol) {
+          const c = ctx(),
+            o = c.createOscillator(),
+            w = c.createWaveShaper(),
+            g = c.createGain();
+          const curve = new Float32Array(256);
+          for (let i = 0; i < 256; i++) {
+            const x = (i * 2) / 256 - 1;
+            curve[i] = ((Math.PI + 400) * x) / (Math.PI + 400 * Math.abs(x));
+          }
+          w.curve = curve;
+          o.connect(w);
+          w.connect(g);
+          g.connect(c.destination);
+          o.type = "sawtooth";
+          o.frequency.setValueAtTime(freq, c.currentTime);
+          g.gain.setValueAtTime(vol, c.currentTime);
+          g.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + dur);
+          o.start();
+          o.stop(c.currentTime + dur);
         }
-        function reverb(freq,type,dur,vol) {
-          const c=ctx(),o=c.createOscillator(),g=c.createGain(),d=c.createDelay();
-          d.delayTime.value=0.08; o.connect(g); g.connect(d); d.connect(c.destination); g.connect(c.destination);
-          o.type=type; o.frequency.setValueAtTime(freq,c.currentTime);
-          g.gain.setValueAtTime(vol,c.currentTime);
-          g.gain.exponentialRampToValueAtTime(0.0001,c.currentTime+dur);
-          o.start(); o.stop(c.currentTime+dur);
+        function reverb(freq, type, dur, vol) {
+          const c = ctx(),
+            o = c.createOscillator(),
+            g = c.createGain(),
+            d = c.createDelay();
+          d.delayTime.value = 0.08;
+          o.connect(g);
+          g.connect(d);
+          d.connect(c.destination);
+          g.connect(c.destination);
+          o.type = type;
+          o.frequency.setValueAtTime(freq, c.currentTime);
+          g.gain.setValueAtTime(vol, c.currentTime);
+          g.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + dur);
+          o.start();
+          o.stop(c.currentTime + dur);
         }
         return {
           hover(color) {
-            if(color==="red") osc(280,"sawtooth",0.05,0.055);
-            else if(color==="amber") osc(660,"triangle",0.06,0.065);
-            else osc(920,"square",0.04,0.05);
+            if (color === "red") osc(280, "sawtooth", 0.05, 0.055);
+            else if (color === "amber") osc(660, "triangle", 0.06, 0.065);
+            else osc(920, "square", 0.04, 0.05);
           },
-          scanFragments() { noise(0.12,0.07); setTimeout(()=>osc(1200,"sine",0.1,0.06),60); },
-          slotIn()        { osc(300,"square",0.04,0.08); setTimeout(()=>osc(600,"square",0.08,0.07),50); },
-          recall()        { osc(880,"sine",0.06,0.07); setTimeout(()=>osc(660,"sine",0.1,0.06),60); },
-          fragmentVault() { reverb(740,"triangle",0.18,0.07); },
-          hunterProfile() { osc(600,"triangle",0.05,0.06); setTimeout(()=>osc(800,"triangle",0.08,0.06),60); },
-          battleMode()    { distort(80,0.15,0.09); setTimeout(()=>osc(160,"sawtooth",0.1,0.07),80); },
-          factionComms()  { noise(0.05,0.04); setTimeout(()=>osc(440,"sine",0.14,0.06),40); setTimeout(()=>noise(0.04,0.03),120); },
-          fragmentForge() { osc(200,"sawtooth",0.06,0.07); setTimeout(()=>osc(400,"triangle",0.1,0.07),70); setTimeout(()=>osc(800,"sine",0.1,0.06),150); },
-          geolocation()   { for(let i=0;i<3;i++) setTimeout(()=>osc(1400,"sine",0.04,0.05),i*80); },
-          emergencyPurge(){ for(let i=0;i<5;i++) setTimeout(()=>distort(120,0.08,0.1),i*100); },
-          modalOpen()     { osc(500,"sine",0.04,0.06); setTimeout(()=>osc(700,"sine",0.08,0.06),50); },
-          modalClose()    { osc(700,"sine",0.04,0.05); setTimeout(()=>osc(400,"sine",0.1,0.05),50); },
-          modalConfirm()  { osc(660,"sine",0.05,0.06); setTimeout(()=>osc(880,"sine",0.1,0.07),60); },
-          modalError()    { distort(150,0.12,0.08); },
-          consoleKey()    { osc(1800,"square",0.02,0.03); },
-          consoleEnter()  { osc(600,"square",0.03,0.04); setTimeout(()=>osc(900,"square",0.04,0.04),30); },
-          consoleError()  { osc(220,"sawtooth",0.1,0.07); },
-          keyPress()      { osc(1400,"square",0.015,0.022); },
+          scanFragments() {
+            noise(0.12, 0.07);
+            setTimeout(() => osc(1200, "sine", 0.1, 0.06), 60);
+          },
+          slotIn() {
+            osc(300, "square", 0.04, 0.08);
+            setTimeout(() => osc(600, "square", 0.08, 0.07), 50);
+          },
+          recall() {
+            osc(880, "sine", 0.06, 0.07);
+            setTimeout(() => osc(660, "sine", 0.1, 0.06), 60);
+          },
+          fragmentVault() {
+            reverb(740, "triangle", 0.18, 0.07);
+          },
+          hunterProfile() {
+            osc(600, "triangle", 0.05, 0.06);
+            setTimeout(() => osc(800, "triangle", 0.08, 0.06), 60);
+          },
+          battleMode() {
+            distort(80, 0.15, 0.09);
+            setTimeout(() => osc(160, "sawtooth", 0.1, 0.07), 80);
+          },
+          factionComms() {
+            noise(0.05, 0.04);
+            setTimeout(() => osc(440, "sine", 0.14, 0.06), 40);
+            setTimeout(() => noise(0.04, 0.03), 120);
+          },
+          fragmentForge() {
+            osc(200, "sawtooth", 0.06, 0.07);
+            setTimeout(() => osc(400, "triangle", 0.1, 0.07), 70);
+            setTimeout(() => osc(800, "sine", 0.1, 0.06), 150);
+          },
+          geolocation() {
+            for (let i = 0; i < 3; i++)
+              setTimeout(() => osc(1400, "sine", 0.04, 0.05), i * 80);
+          },
+          emergencyPurge() {
+            for (let i = 0; i < 5; i++)
+              setTimeout(() => distort(120, 0.08, 0.1), i * 100);
+          },
+          modalOpen() {
+            osc(500, "sine", 0.04, 0.06);
+            setTimeout(() => osc(700, "sine", 0.08, 0.06), 50);
+          },
+          modalClose() {
+            osc(700, "sine", 0.04, 0.05);
+            setTimeout(() => osc(400, "sine", 0.1, 0.05), 50);
+          },
+          modalConfirm() {
+            osc(660, "sine", 0.05, 0.06);
+            setTimeout(() => osc(880, "sine", 0.1, 0.07), 60);
+          },
+          modalError() {
+            distort(150, 0.12, 0.08);
+          },
+          consoleKey() {
+            osc(1800, "square", 0.02, 0.03);
+          },
+          consoleEnter() {
+            osc(600, "square", 0.03, 0.04);
+            setTimeout(() => osc(900, "square", 0.04, 0.04), 30);
+          },
+          consoleError() {
+            osc(220, "sawtooth", 0.1, 0.07);
+          },
+          keyPress() {
+            osc(1400, "square", 0.015, 0.022);
+          },
           boot() {
-            setTimeout(()=>osc(220,"sine",0.2,0.06),200);
-            setTimeout(()=>osc(330,"sine",0.2,0.07),500);
-            setTimeout(()=>osc(440,"sine",0.2,0.07),800);
-            setTimeout(()=>osc(660,"square",0.15,0.08),1100);
-            setTimeout(()=>{osc(880,"sine",0.3,0.09);noise(0.1,0.04);},1400);
-            setTimeout(()=>{osc(1100,"sine",0.4,0.07);osc(550,"triangle",0.4,0.06);},1800);
+            setTimeout(() => osc(220, "sine", 0.2, 0.06), 200);
+            setTimeout(() => osc(330, "sine", 0.2, 0.07), 500);
+            setTimeout(() => osc(440, "sine", 0.2, 0.07), 800);
+            setTimeout(() => osc(660, "square", 0.15, 0.08), 1100);
+            setTimeout(() => {
+              osc(880, "sine", 0.3, 0.09);
+              noise(0.1, 0.04);
+            }, 1400);
+            setTimeout(() => {
+              osc(1100, "sine", 0.4, 0.07);
+              osc(550, "triangle", 0.4, 0.06);
+            }, 1800);
           },
         };
       })();
 
       // ── API HELPERS ───────────────────────────────────────
       function getAuth() {
-        return { user_id: localStorage.getItem("user_id"), token: localStorage.getItem("token") };
+        return {
+          user_id: localStorage.getItem("user_id"),
+          token: localStorage.getItem("token"),
+        };
       }
       async function apiGet(path) {
-        const {token} = getAuth();
-        const r = await fetch(`${API_BASE_URL}${path}`,{headers:{Authorization:`Bearer ${token}`}});
+        const { token } = getAuth();
+        const r = await fetch(`${API_BASE_URL}${path}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         return r.json();
       }
       async function apiPut(path, body) {
-        const {token} = getAuth();
-        const r = await fetch(`${API_BASE_URL}${path}`,{method:"PUT",headers:{"Content-Type":"application/json",Authorization:`Bearer ${token}`},body:JSON.stringify(body)});
+        const { token } = getAuth();
+        const r = await fetch(`${API_BASE_URL}${path}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(body),
+        });
         return r.json();
       }
       async function apiDelete(path) {
-        const {token} = getAuth();
-        const r = await fetch(`${API_BASE_URL}${path}`,{method:"DELETE",headers:{Authorization:`Bearer ${token}`}});
+        const { token } = getAuth();
+        const r = await fetch(`${API_BASE_URL}${path}`, {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        });
         return r.json();
       }
 
@@ -1509,24 +1795,27 @@
       let _profileData = null;
 
       async function fetchProfile() {
-        const {user_id} = getAuth();
+        const { user_id } = getAuth();
         try {
           const r = await apiGet(`/users/${user_id}`);
-          if (r.success && r.data) { _profileData = r.data; return r.data; }
-        } catch(e) {}
+          if (r.success && r.data) {
+            _profileData = r.data;
+            return r.data;
+          }
+        } catch (e) {}
         return null;
       }
 
       // ── PIP SCREEN RENDERER ───────────────────────────────
       // Shows rich profile data inside the PIP device screen
       function showScreen(mode, data) {
-        const idle    = document.getElementById("screenContent");
+        const idle = document.getElementById("screenContent");
         const profile = document.getElementById("screenProfile");
 
         if (mode === "idle") {
-          idle.style.display    = "";
+          idle.style.display = "";
           profile.style.display = "none";
-          profile.innerHTML     = "";
+          profile.innerHTML = "";
           hideActionBar();
           return;
         }
@@ -1539,7 +1828,7 @@
           profile.innerHTML = `<div class="screen-profile">
             <div class="sp-header">
               <span>HUNTER REGISTRY</span>
-              <span style="color:rgba(74,255,106,.3)">UID-${data.user_id||"?"}</span>
+              <span style="color:rgba(74,255,106,.3)">UID-${data.user_id || "?"}</span>
             </div>
             <div class="sp-title">PROFILE DATA<span class="sp-cursor"></span></div>
             <div class="sp-row"><span class="sp-lbl">CALLSIGN</span><span class="sp-val green">${ign}</span></div>
@@ -1559,8 +1848,8 @@
             </div>
           </div>`;
           showActionBar("CALLSIGN", [
-            { label:"✎ EDIT CALLSIGN", cls:"primary", fn:"openKbd_ign" },
-            { label:"✕ CANCEL",        cls:"",        fn:"cancelAction" },
+            { label: "✎ EDIT CALLSIGN", cls: "primary", fn: "openKbd_ign" },
+            { label: "✕ CANCEL", cls: "", fn: "cancelAction" },
           ]);
         }
 
@@ -1574,8 +1863,12 @@
             </div>
           </div>`;
           showActionBar("PASSWORD", [
-            { label:"✎ ENTER NEW PASSWORD", cls:"primary amber-chip", fn:"openKbd_pw"  },
-            { label:"✕ CANCEL",             cls:"",                   fn:"cancelAction"},
+            {
+              label: "✎ ENTER NEW PASSWORD",
+              cls: "primary amber-chip",
+              fn: "openKbd_pw",
+            },
+            { label: "✕ CANCEL", cls: "", fn: "cancelAction" },
           ]);
         }
 
@@ -1590,8 +1883,12 @@
             </div>
           </div>`;
           showActionBar("PRONOUNS", [
-            { label:"✎ EDIT PRONOUNS", cls:"primary", fn:"openKbd_pronouns" },
-            { label:"✕ CANCEL",        cls:"",        fn:"cancelAction"     },
+            {
+              label: "✎ EDIT PRONOUNS",
+              cls: "primary",
+              fn: "openKbd_pronouns",
+            },
+            { label: "✕ CANCEL", cls: "", fn: "cancelAction" },
           ]);
         }
 
@@ -1606,21 +1903,24 @@
             </div>
           </div>`;
           showActionBar("DELETE ACCOUNT", [
-            { label:"⚠ CONFIRM DELETE", cls:"danger",  fn:"openKbd_delete" },
-            { label:"✕ ABORT",          cls:"",        fn:"cancelAction"   },
+            { label: "⚠ CONFIRM DELETE", cls: "danger", fn: "openKbd_delete" },
+            { label: "✕ ABORT", cls: "", fn: "cancelAction" },
           ]);
         }
       }
 
       // ── ACTION BAR ────────────────────────────────────────
       function showActionBar(label, chips) {
-        const bar    = document.getElementById("pipActionBar");
-        const lbl    = document.getElementById("pipActionLabel");
-        const chipsEl= document.getElementById("pipActionChips");
+        const bar = document.getElementById("pipActionBar");
+        const lbl = document.getElementById("pipActionLabel");
+        const chipsEl = document.getElementById("pipActionChips");
         lbl.textContent = `// ${label}`;
-        chipsEl.innerHTML = chips.map(c =>
-          `<button class="pip-chip ${c.cls}" onclick="${c.fn}()">${c.label}</button>`
-        ).join('');
+        chipsEl.innerHTML = chips
+          .map(
+            (c) =>
+              `<button class="pip-chip ${c.cls}" onclick="${c.fn}()">${c.label}</button>`,
+          )
+          .join("");
         bar.classList.add("visible");
       }
       function hideActionBar() {
@@ -1629,19 +1929,19 @@
 
       // ── KEYBOARD MODAL ────────────────────────────────────
       const KBD_ROWS = [
-        ['1','2','3','4','5','6','7','8','9','0'],
-        ['Q','W','E','R','T','Y','U','I','O','P'],
-        ['A','S','D','F','G','H','J','K','L'],
-        ['Z','X','C','V','B','N','M'],
+        ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"],
+        ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"],
+        ["A", "S", "D", "F", "G", "H", "J", "K", "L"],
+        ["Z", "X", "C", "V", "B", "N", "M"],
       ];
 
       function buildKeyboard() {
         const container = document.getElementById("kbdKeys");
         container.innerHTML = "";
-        KBD_ROWS.forEach(row => {
+        KBD_ROWS.forEach((row) => {
           const rowEl = document.createElement("div");
           rowEl.className = "kbd-row";
-          row.forEach(k => {
+          row.forEach((k) => {
             const btn = document.createElement("button");
             btn.className = "key";
             btn.textContent = k;
@@ -1659,22 +1959,22 @@
         const bottomRow = document.createElement("div");
         bottomRow.className = "kbd-row";
         [
-          { label:".", cls:"wide" },
-          { label:"-", cls:"wide" },
-          { label:"_", cls:"wide" },
-          { label:"SPACE", cls:"space", val:" " },
-          { label:"⌫ DEL", cls:"backspace-key wide", val:"backspace" },
-          { label:"CLR", cls:"action-key wide", val:"clear" },
-        ].forEach(k => {
+          { label: ".", cls: "wide" },
+          { label: "-", cls: "wide" },
+          { label: "_", cls: "wide" },
+          { label: "SPACE", cls: "space", val: " " },
+          { label: "⌫ DEL", cls: "backspace-key wide", val: "backspace" },
+          { label: "CLR", cls: "action-key wide", val: "clear" },
+        ].forEach((k) => {
           const btn = document.createElement("button");
           btn.className = `key ${k.cls}`;
           btn.textContent = k.label;
           btn.addEventListener("click", () => {
             SFX.keyPress();
             const inp = document.getElementById("kbdInput");
-            if (k.val === "backspace")    inp.value = inp.value.slice(0,-1);
-            else if (k.val === "clear")   inp.value = "";
-            else inp.value += (k.val || k.label);
+            if (k.val === "backspace") inp.value = inp.value.slice(0, -1);
+            else if (k.val === "clear") inp.value = "";
+            else inp.value += k.val || k.label;
             inp.focus();
           });
           bottomRow.appendChild(btn);
@@ -1684,13 +1984,22 @@
 
       let _kbdOnConfirm = null; // callback when confirm pressed
 
-      function openKeyboard({ title, fieldLabel, hint, defaultVal, onConfirm, danger }) {
+      function openKeyboard({
+        title,
+        fieldLabel,
+        hint,
+        defaultVal,
+        onConfirm,
+        danger,
+      }) {
         SFX.modalOpen();
         buildKeyboard();
-        document.getElementById("kbdTitle").textContent      = title;
+        document.getElementById("kbdTitle").textContent = title;
         document.getElementById("kbdFieldLabel").textContent = fieldLabel;
-        document.getElementById("kbdHint").textContent       = hint || "// edit value above · use keyboard below or your physical keyboard";
-        document.getElementById("kbdInput").value            = defaultVal || "";
+        document.getElementById("kbdHint").textContent =
+          hint ||
+          "// edit value above · use keyboard below or your physical keyboard";
+        document.getElementById("kbdInput").value = defaultVal || "";
         // Confirm button style
         const confirmBtn = document.getElementById("kbdConfirm");
         confirmBtn.className = danger ? "kbd-btn danger" : "kbd-btn confirm";
@@ -1706,112 +2015,167 @@
         _kbdOnConfirm = null;
       }
 
-      document.getElementById("kbdClose").addEventListener("click", closeKeyboard);
-      document.getElementById("kbdCancel").addEventListener("click", closeKeyboard);
-      document.getElementById("kbdConfirm").addEventListener("click", async () => {
-        const val = document.getElementById("kbdInput").value.trim();
-        if (_kbdOnConfirm) await _kbdOnConfirm(val);
-      });
+      document
+        .getElementById("kbdClose")
+        .addEventListener("click", closeKeyboard);
+      document
+        .getElementById("kbdCancel")
+        .addEventListener("click", closeKeyboard);
+      document
+        .getElementById("kbdConfirm")
+        .addEventListener("click", async () => {
+          const val = document.getElementById("kbdInput").value.trim();
+          if (_kbdOnConfirm) await _kbdOnConfirm(val);
+        });
       // Allow Enter key to confirm
       document.getElementById("kbdInput").addEventListener("keydown", (e) => {
         if (e.key === "Enter") document.getElementById("kbdConfirm").click();
       });
 
       // ── KEYBOARD OPENERS (called by action bar chips) ─────
-      window.openKbd_ign = function() {
+      window.openKbd_ign = function () {
         openKeyboard({
-          title:      "EDIT CALLSIGN",
+          title: "EDIT CALLSIGN",
           fieldLabel: "NEW CALLSIGN (IGN)",
-          hint:       "// unique hunter designation — backspace to clear, then retype",
+          hint: "// unique hunter designation — backspace to clear, then retype",
           defaultVal: _profileData?.ign || _profileData?.username || "",
-          onConfirm:  async (val) => {
-            if (!val) { log("ERR","err","Callsign cannot be empty"); SFX.modalError(); return; }
-            const check = await fetch(`${API_BASE_URL}/users/check-ign?ign=${encodeURIComponent(val)}`).then(r=>r.json());
-            if (check.taken) { log("ERR","err","Callsign already taken"); SFX.modalError(); return; }
-            const {user_id} = getAuth();
+          onConfirm: async (val) => {
+            if (!val) {
+              log("ERR", "err", "Callsign cannot be empty");
+              SFX.modalError();
+              return;
+            }
+            const check = await fetch(
+              `${API_BASE_URL}/users/check-ign?ign=${encodeURIComponent(val)}`,
+            ).then((r) => r.json());
+            if (check.taken) {
+              log("ERR", "err", "Callsign already taken");
+              SFX.modalError();
+              return;
+            }
+            const { user_id } = getAuth();
             const result = await apiPut(`/users/${user_id}`, { username: val });
             if (result.success) {
               localStorage.setItem("ign", val);
-              if (_profileData) { _profileData.ign = val; _profileData.username = val; }
-              SFX.modalConfirm(); closeKeyboard();
-              log("SYS","sys",`Callsign updated → ${val}`);
+              if (_profileData) {
+                _profileData.ign = val;
+                _profileData.username = val;
+              }
+              SFX.modalConfirm();
+              closeKeyboard();
+              log("SYS", "sys", `Callsign updated → ${val}`);
               showScreen("profile", _profileData);
-            } else { log("ERR","err", result.message||"Update failed"); SFX.modalError(); }
-          }
+            } else {
+              log("ERR", "err", result.message || "Update failed");
+              SFX.modalError();
+            }
+          },
         });
       };
 
-      window.openKbd_pw = function() {
+      window.openKbd_pw = function () {
         openKeyboard({
-          title:      "CHANGE ACCESS CODE",
+          title: "CHANGE ACCESS CODE",
           fieldLabel: "NEW PASSWORD (min 8 chars)",
-          hint:       "// type new password — confirm with Enter or tap Confirm",
+          hint: "// type new password — confirm with Enter or tap Confirm",
           defaultVal: "",
-          onConfirm:  async (val) => {
-            if (val.length < 8) { log("ERR","err","Password must be 8+ characters"); SFX.modalError(); return; }
-            const {user_id} = getAuth();
-            const result = await apiPut(`/users/${user_id}`, { new_password: val });
+          onConfirm: async (val) => {
+            if (val.length < 8) {
+              log("ERR", "err", "Password must be 8+ characters");
+              SFX.modalError();
+              return;
+            }
+            const { user_id } = getAuth();
+            const result = await apiPut(`/users/${user_id}`, {
+              new_password: val,
+            });
             if (result.success) {
-              SFX.modalConfirm(); closeKeyboard();
-              log("SYS","sys","Access code updated successfully");
+              SFX.modalConfirm();
+              closeKeyboard();
+              log("SYS", "sys", "Access code updated successfully");
               showScreen("idle");
-            } else { log("ERR","err", result.message||"Password update failed"); SFX.modalError(); }
-          }
+            } else {
+              log("ERR", "err", result.message || "Password update failed");
+              SFX.modalError();
+            }
+          },
         });
       };
 
-      window.openKbd_pronouns = function() {
+      window.openKbd_pronouns = function () {
         openKeyboard({
-          title:      "EDIT PRONOUNS",
+          title: "EDIT PRONOUNS",
           fieldLabel: "PRONOUNS",
-          hint:       "// e.g. he/him · she/her · they/them · any/all",
+          hint: "// e.g. he/him · she/her · they/them · any/all",
           defaultVal: _profileData?.pronouns || "",
-          onConfirm:  async (val) => {
-            if (!val) { log("ERR","err","Field cannot be empty"); SFX.modalError(); return; }
-            const {user_id} = getAuth();
+          onConfirm: async (val) => {
+            if (!val) {
+              log("ERR", "err", "Field cannot be empty");
+              SFX.modalError();
+              return;
+            }
+            const { user_id } = getAuth();
             const result = await apiPut(`/users/${user_id}`, { pronouns: val });
             if (result.success) {
               if (_profileData) _profileData.pronouns = val;
-              SFX.modalConfirm(); closeKeyboard();
-              log("SYS","sys",`Pronouns updated → ${val}`);
+              SFX.modalConfirm();
+              closeKeyboard();
+              log("SYS", "sys", `Pronouns updated → ${val}`);
               showScreen("profile", _profileData);
-            } else { log("ERR","err", result.message||"Update failed"); SFX.modalError(); }
-          }
+            } else {
+              log("ERR", "err", result.message || "Update failed");
+              SFX.modalError();
+            }
+          },
         });
       };
 
-      window.openKbd_delete = function() {
+      window.openKbd_delete = function () {
         openKeyboard({
-          title:      "DELETE HUNTER ACCOUNT",
+          title: "DELETE HUNTER ACCOUNT",
           fieldLabel: 'TYPE  "DELETE MY ACCOUNT"',
-          hint:       "// this cannot be undone — all fragments and data will be permanently wiped",
+          hint: "// this cannot be undone — all fragments and data will be permanently wiped",
           defaultVal: "",
-          danger:     true,
-          onConfirm:  async (val) => {
+          danger: true,
+          onConfirm: async (val) => {
             if (val !== "DELETE MY ACCOUNT") {
-              log("ERR","err",'Type exactly: DELETE MY ACCOUNT'); SFX.modalError(); return;
+              log("ERR", "err", "Type exactly: DELETE MY ACCOUNT");
+              SFX.modalError();
+              return;
             }
-            const {user_id} = getAuth();
+            const { user_id } = getAuth();
             const result = await apiDelete(`/users/${user_id}`);
             if (result.success) {
-              SFX.modalConfirm(); closeKeyboard();
-              log("SYS","warn","Hunter record wiped. Clearing session...");
-              setTimeout(() => { localStorage.clear(); window.location.href = "../index.html"; }, 1500);
-            } else { log("ERR","err", result.message||"Deletion failed"); SFX.modalError(); }
-          }
+              SFX.modalConfirm();
+              closeKeyboard();
+              log("SYS", "warn", "Hunter record wiped. Clearing session...");
+              setTimeout(() => {
+                localStorage.clear();
+                window.location.href = getPageLink("index.html");
+              }, 1500);
+            } else {
+              log("ERR", "err", result.message || "Deletion failed");
+              SFX.modalError();
+            }
+          },
         });
       };
 
-      window.cancelAction = function() {
+      window.cancelAction = function () {
         SFX.modalClose();
         showScreen("idle");
-        log("SYS","sys","Action cancelled — returning to idle");
+        log("SYS", "sys", "Action cancelled — returning to idle");
       };
 
       // ── BUILD BUTTONS ────────────────────────────────────
       function buildBtn(def) {
         const btn = document.createElement("button");
-        const colorClass = def.color==="amber" ? "amber" : def.color==="red" ? "red-btn" : "";
+        const colorClass =
+          def.color === "amber"
+            ? "amber"
+            : def.color === "red"
+              ? "red-btn"
+              : "";
         btn.className = `pip-btn ${colorClass}`;
         btn.dataset.id = def.id;
         btn.innerHTML = `
@@ -1819,7 +2183,7 @@
             <span class="corner tl"></span><span class="corner tr"></span>
             <span class="corner bl"></span><span class="corner br"></span>
             <div class="btn-id">${def.id}</div>
-            <div class="btn-label">${def.label.replace(/\n/,"<br>")}</div>
+            <div class="btn-label">${def.label.replace(/\n/, "<br>")}</div>
             <div class="btn-sub">${def.sub}</div>
           </div>`;
         btn.addEventListener("mouseenter", () => SFX.hover(def.color));
@@ -1832,21 +2196,29 @@
       }
 
       document.getElementById("leftPanel").append(...leftButtons.map(buildBtn));
-      document.getElementById("rightPanel").append(...rightButtons.map(buildBtn));
+      document
+        .getElementById("rightPanel")
+        .append(...rightButtons.map(buildBtn));
 
       // ── BUTTON HANDLER ────────────────────────────────────
       async function handleBtn(def) {
-        log(def.id,
-          def.color==="red" ? "err" : def.color==="amber" ? "warn" : "sys",
-          `${def.label.replace(/\n/," ")} — ${def.sub}`
+        log(
+          def.id,
+          def.color === "red" ? "err" : def.color === "amber" ? "warn" : "sys",
+          `${def.label.replace(/\n/, " ")} — ${def.sub}`,
         );
 
         // Left panel — profile CRUD → show in PIP screen
         if (def.action === "viewProfile") {
-          screenUpdate("LOADING","PROFILE","FETCHING DATA");
+          screenUpdate("LOADING", "PROFILE", "FETCHING DATA");
           const data = await fetchProfile();
-          if (data) { showScreen("profile", data); log("DAT","info",`Hunter: ${data.ign||data.username}`); }
-          else { log("ERR","err","Failed to fetch profile"); SFX.modalError(); }
+          if (data) {
+            showScreen("profile", data);
+            log("DAT", "info", `Hunter: ${data.ign || data.username}`);
+          } else {
+            log("ERR", "err", "Failed to fetch profile");
+            SFX.modalError();
+          }
           return;
         }
         if (def.action === "editIgn") {
@@ -1869,13 +2241,28 @@
         }
 
         // Right panel — navigation
-        if (def.action === "goMap")       { window.location.href = "map.html";      return; }
-        if (def.action === "goInventory") { window.location.href = "inventory.html"; return; }
-        if (def.action === "goShop")      { window.location.href = "shop.html";      return; }
-        if (def.action === "goCodex")     { window.location.href = "codex.html";     return; }
+        if (def.action === "goMap") {
+          window.location.href = "map.html";
+          return;
+        }
+        if (def.action === "goInventory") {
+          window.location.href = "inventory.html";
+          return;
+        }
+        if (def.action === "goShop") {
+          window.location.href = "shop.html";
+          return;
+        }
+        if (def.action === "goCodex") {
+          window.location.href = "codex.html";
+          return;
+        }
         if (def.action === "signOut") {
-          log("SYS","warn","Signing out — clearing session...");
-          setTimeout(() => { localStorage.clear(); window.location.href = "../index.html"; }, 1000);
+          log("SYS", "warn", "Signing out — clearing session...");
+          setTimeout(() => {
+            localStorage.clear();
+            window.location.href = getPageLink("index.html");
+          }, 1000);
           return;
         }
       }
@@ -1883,37 +2270,62 @@
       // ── CONSOLE LOG ───────────────────────────────────────
       const logLines = [];
       function log(tag, type, msg) {
-        const t = new Date().toTimeString().slice(0,8);
-        logLines.unshift({time:t, tag, type, msg});
+        const t = new Date().toTimeString().slice(0, 8);
+        logLines.unshift({ time: t, tag, type, msg });
         if (logLines.length > 50) logLines.pop();
         renderLog();
       }
       function renderLog() {
-        document.getElementById("consoleLog").innerHTML = logLines.slice(0,6).map(l =>
-          `<div class="log-line">
+        document.getElementById("consoleLog").innerHTML = logLines
+          .slice(0, 6)
+          .map(
+            (l) =>
+              `<div class="log-line">
             <span class="log-time">${l.time}</span>
             <span class="log-tag ${l.type}">[${l.tag.toUpperCase()}]</span>
             <span class="log-msg">${l.msg}</span>
-          </div>`
-        ).join("");
+          </div>`,
+          )
+          .join("");
       }
 
       // Console input
-      document.getElementById("consoleInput").addEventListener("keydown", (e) => {
-        if (e.key !== "Enter") { SFX.consoleKey(); return; }
-        const val = e.target.value.trim().toUpperCase();
-        if (!val) return;
-        SFX.consoleEnter();
-        log("CMD","sys",`> ${val}`);
-        e.target.value = "";
-        setTimeout(() => {
-          if      (val === "HELP")    log("SYS","info","Commands: HELP | STATUS | CLEAR | SCAN");
-          else if (val === "STATUS")  log("SYS","info",`Hunter: ${_profileData?.ign || localStorage.getItem("ign") || "—"} | UID-${localStorage.getItem("user_id")}`);
-          else if (val === "CLEAR")   { logLines.length = 0; renderLog(); }
-          else if (val.startsWith("SCAN")) log("SYS","info","Initiating neural scan... broadcasting on all frequencies.");
-          else { SFX.consoleError(); log("ERR","err","Unknown command. Type HELP for command list."); }
-        }, 200);
-      });
+      document
+        .getElementById("consoleInput")
+        .addEventListener("keydown", (e) => {
+          if (e.key !== "Enter") {
+            SFX.consoleKey();
+            return;
+          }
+          const val = e.target.value.trim().toUpperCase();
+          if (!val) return;
+          SFX.consoleEnter();
+          log("CMD", "sys", `> ${val}`);
+          e.target.value = "";
+          setTimeout(() => {
+            if (val === "HELP")
+              log("SYS", "info", "Commands: HELP | STATUS | CLEAR | SCAN");
+            else if (val === "STATUS")
+              log(
+                "SYS",
+                "info",
+                `Hunter: ${_profileData?.ign || localStorage.getItem("ign") || "—"} | UID-${localStorage.getItem("user_id")}`,
+              );
+            else if (val === "CLEAR") {
+              logLines.length = 0;
+              renderLog();
+            } else if (val.startsWith("SCAN"))
+              log(
+                "SYS",
+                "info",
+                "Initiating neural scan... broadcasting on all frequencies.",
+              );
+            else {
+              SFX.consoleError();
+              log("ERR", "err", "Unknown command. Type HELP for command list.");
+            }
+          }, 200);
+        });
 
       // ── SCREEN UPDATE ─────────────────────────────────────
       function screenUpdate(status, main, sub) {
@@ -1928,30 +2340,41 @@
       // ── CLOCK ─────────────────────────────────────────────
       function tick() {
         const el = document.getElementById("consoleTime");
-        if (el) el.textContent = new Date().toTimeString().slice(0,8);
+        if (el) el.textContent = new Date().toTimeString().slice(0, 8);
       }
-      setInterval(tick, 1000); tick();
+      setInterval(tick, 1000);
+      tick();
 
       // ── BOOT LOG ─────────────────────────────────────────
       const bootLogs = [
-        ["SYS","sys","P.I.P OS v4.1 initialised"],
-        ["SYS","sys","Fragment reader: ONLINE"],
-        ["SYS","sys","Neural substrate: CALIBRATED"],
-        ["SYS","info","Vault scan: 200 records loaded"],
-        ["SYS","warn","Hunter authentication: PENDING"],
+        ["SYS", "sys", "P.I.P OS v4.1 initialised"],
+        ["SYS", "sys", "Fragment reader: ONLINE"],
+        ["SYS", "sys", "Neural substrate: CALIBRATED"],
+        ["SYS", "info", "Vault scan: 200 records loaded"],
+        ["SYS", "warn", "Hunter authentication: PENDING"],
       ];
-      bootLogs.forEach((l,i) => setTimeout(()=>log(l[0],l[1],l[2]), 3600+i*180));
+      bootLogs.forEach((l, i) =>
+        setTimeout(() => log(l[0], l[1], l[2]), 3600 + i * 180),
+      );
 
       // ── AUTO-LOAD PROFILE ON BOOT ─────────────────────────
       setTimeout(async () => {
-        const {user_id} = getAuth();
+        const { user_id } = getAuth();
         if (!user_id) return;
         const data = await fetchProfile();
         if (data) {
           const ign = data.ign || data.username || "UNKNOWN";
-          log("DAT","info",`Hunter: ${ign} | Pronouns: ${data.pronouns||"—"}`);
-          log("DAT","info",`Devices: Mk.I×${data.pokeball??0} Mk.II×${data.greatball??0} Mk.III×${data.ultraball??0} APEX×${data.masterball??0}`);
-          log("DAT","info",`WPC Balance: ${data.user_ingame_wallet??0}`);
+          log(
+            "DAT",
+            "info",
+            `Hunter: ${ign} | Pronouns: ${data.pronouns || "—"}`,
+          );
+          log(
+            "DAT",
+            "info",
+            `Devices: Mk.I×${data.pokeball ?? 0} Mk.II×${data.greatball ?? 0} Mk.III×${data.ultraball ?? 0} APEX×${data.masterball ?? 0}`,
+          );
+          log("DAT", "info", `WPC Balance: ${data.user_ingame_wallet ?? 0}`);
           screenUpdate("ONLINE", ign.toUpperCase(), "HUNTER PROFILE");
         }
       }, 4200);
@@ -1967,7 +2390,7 @@
 
     <!-- CHECK USER POKEMON ON PAGE LOAD -->
     <script type="module">
-      import { API_BASE_URL } from "../api.js";
+      import { API_BASE_URL, getPageLink } from "../api.js";
       // Check if user has Pokémon in user_pokemons table, else redirect to firstpokemon.html
       const user_id = localStorage.getItem("user_id");
       const token = localStorage.getItem("token");
@@ -1994,7 +2417,7 @@
           });
       } else {
         // Not logged in, redirect to login page
-        window.location.href = "../index.html";
+        window.location.href = getPageLink("index.html");
       }
     </script>
 
@@ -2004,9 +2427,12 @@
         .then((res) => res.text())
         .then((data) => {
           document.getElementById("navbar-placeholder").innerHTML = data;
-          if (typeof window.attachLogoutHandler === "function") window.attachLogoutHandler();
-          if (typeof window.loadProfileName    === "function") window.loadProfileName();
-          if (typeof window.updateWPCBalance   === "function") window.updateWPCBalance();
+          if (typeof window.attachLogoutHandler === "function")
+            window.attachLogoutHandler();
+          if (typeof window.loadProfileName === "function")
+            window.loadProfileName();
+          if (typeof window.updateWPCBalance === "function")
+            window.updateWPCBalance();
         });
     </script>
   </body>
