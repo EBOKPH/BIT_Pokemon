@@ -3,7 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- API Configuration from .env CLIENT_URL -->
+    <meta name="api-base-url" content="http://localhost:4000" />
     <title>Purchase WPC</title>
+    <script src="../config.js"></script>
     <style>
       * {
         margin: 0;
@@ -158,13 +161,16 @@
       const yourWallet = "0xA10F750d5A533468e4A825be131f17ff9A692Ba9";
       let wpcContract;
 
+      // Get API URL from api.js
+      const { API_BASE_URL } = await import('../api.js');
+
       // Save wallet to server (manual)
       async function saveManualWalletToServer(wallet) {
         if (!wallet) return false;
         try {
           const token = localStorage.getItem("token");
           if (!token) return false;
-          const response = await fetch("http://localhost:4000/users/wallet", {
+          const response = await fetch(`${API_BASE_URL}/users/wallet`, {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",
@@ -231,7 +237,7 @@
           // Update user_ingame_wallet in backend
           const token = localStorage.getItem("token");
           if (token) {
-            await fetch("http://localhost:4000/users/me", {
+            await fetch(`${API_BASE_URL}/users/me`, {
               method: "PUT",
               headers: {
                 "Content-Type": "application/json",
@@ -267,7 +273,7 @@
         // Get user profile by user_id (ign)
         try {
           const res = await fetch(
-            `http://localhost:4000/users/me?user_id=${user_id}`,
+            `${API_BASE_URL}/users/me?user_id=${user_id}`,
           );
           const data = await res.json();
           if (!data.success || !data.data) {
@@ -296,7 +302,7 @@
         }
       });
         try {
-          const res = await fetch(`http://localhost:4000/users/me-nonjwt?user_id=${user_id}`);
+          const res = await fetch(`${API_BASE_URL}/users/me-nonjwt?user_id=${user_id}`);
           const data = await res.json();
           if (!data.success || !data.data) {
             statusDiv.innerText = "Failed to fetch user profile. Please log in again.";

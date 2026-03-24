@@ -515,7 +515,11 @@ html, body { width:100%; height:100%; background:#000; font-family:'Rajdhani',sa
   </div>
 </div>
 
-<script>
+<script type="module">
+// Import API_BASE_URL from api.js
+import { API_BASE_URL } from '../api.js';
+window.API_BASE_URL = API_BASE_URL;
+
 const ART = id => `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
 
 // ── GROUND TEAMS ──
@@ -681,9 +685,6 @@ const startBtn = document.getElementById('startBtn');
 const loginModal = document.getElementById('loginModal');
 const modalCloseBtn = document.getElementById('modalCloseBtn');
 const loginForm = document.getElementById('loginForm');
-
-// Import API_BASE_URL
-const API_BASE_URL = window.API_BASE_URL || 'http://localhost:4000';
 
 // Open modal on START button click
 startBtn.addEventListener('click', () => {

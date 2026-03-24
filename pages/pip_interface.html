@@ -1374,9 +1374,10 @@
       </div>
     </div>
 
-    <script>
-      // ── API_BASE_URL ─────────────────────────────────────
-      const API_BASE_URL = window.API_BASE_URL || "http://localhost:4000";
+    <script type="module">
+      // Import API_BASE_URL from api.js
+      import { API_BASE_URL } from '../api.js';
+      window.API_BASE_URL = API_BASE_URL;
 
       // ── LEFT BUTTONS: Profile CRUD ────────────────────────
       const leftButtons = [

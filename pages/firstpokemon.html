@@ -3,7 +3,10 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <!-- API Configuration from .env CLIENT_URL -->
+  <meta name="api-base-url" content="http://localhost:4000" />
   <title>BIT-POKEMON — First Fragment</title>
+  <script src="../config.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Bebas+Neue&family=Special+Elite&display=swap" rel="stylesheet"/>
   <style>
     :root {
@@ -465,12 +468,8 @@
 </div>
 
 <script type="module">
-// Try to import API_BASE_URL from api.js, fall back to localhost
-let API_BASE_URL = 'http://localhost:4000';
-try {
-  const mod = await import('../api.js');
-  if (mod.API_BASE_URL) API_BASE_URL = mod.API_BASE_URL;
-} catch(e) {}
+// Import API_BASE_URL from api.js (uses window.API_BASE_URL or defaults to localhost)
+import { API_BASE_URL } from '../api.js';
 
 const user_id = localStorage.getItem('user_id');
 const token   = localStorage.getItem('token');

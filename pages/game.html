@@ -1819,8 +1819,9 @@
         const user_id = localStorage.getItem("user_id");
         if (!user_id) return;
         try {
+          const { API_BASE_URL } = await import('../api.js');
           const res = await fetch(
-            `http://localhost:4000/items/inventory/${user_id}`,
+            `${API_BASE_URL}/items/inventory/${user_id}`,
           );
           const result = await res.json();
           if (result.success && result.data) {

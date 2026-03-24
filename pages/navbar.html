@@ -495,7 +495,9 @@
     if (!ign) {
       const user_id = localStorage.getItem("user_id");
       if (!user_id) return;
-      fetch("http://localhost:4000/users/me-nonjwt?user_id=" + user_id)
+      (async () => {
+        const { API_BASE_URL } = await import('../api.js');
+        fetch(`${API_BASE_URL}/users/me-nonjwt?user_id=` + user_id)
         .then(r => r.json())
         .then(data => {
           if (data.success && data.data) {
@@ -506,14 +508,16 @@
           }
         })
         .catch(() => {});
+      })();
     }
   }
   async function updateWPCBalance() {
     const user_id = localStorage.getItem("user_id");
     if (!user_id) return;
     try {
+      const { API_BASE_URL } = await import('../api.js');
       const res = await fetch(
-        "http://localhost:4000/users/me-nonjwt?user_id=" + user_id,
+        `${API_BASE_URL}/users/me-nonjwt?user_id=` + user_id,
       );
       const data = await res.json();
       if (data.success && data.data) {
