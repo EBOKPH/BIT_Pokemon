@@ -483,6 +483,31 @@
       });
     }
   }
+  function loadProfileName() {
+    // First try localStorage (set on login)
+    const ign = localStorage.getItem("ign") || localStorage.getItem("username");
+    const nameEl = document.getElementById("profileName");
+    const initEl = document.getElementById("avatarInitial");
+    if (nameEl && ign) nameEl.textContent = ign;
+    if (initEl && ign) initEl.textContent = ign.charAt(0).toUpperCase();
+
+    // If not in localStorage, fetch from API
+    if (!ign) {
+      const user_id = localStorage.getItem("user_id");
+      if (!user_id) return;
+      fetch("http://localhost:4000/users/me-nonjwt?user_id=" + user_id)
+        .then(r => r.json())
+        .then(data => {
+          if (data.success && data.data) {
+            const name = data.data.username || data.data.ign || "Hunter";
+            localStorage.setItem("ign", name);
+            if (nameEl) nameEl.textContent = name;
+            if (initEl) initEl.textContent = name.charAt(0).toUpperCase();
+          }
+        })
+        .catch(() => {});
+    }
+  }
   async function updateWPCBalance() {
     const user_id = localStorage.getItem("user_id");
     if (!user_id) return;
@@ -491,22 +516,13 @@
         "http://localhost:4000/users/me-nonjwt?user_id=" + user_id,
       );
       const data = await res.json();
-      if (
-        data.success &&
-        data.data &&
-        typeof data.data.user_ingame_wallet !== "undefined"
-      ) {
+      if (data.success && data.data) {
         const el = document.getElementById("coin-amount");
-        if (el) el.textContent = data.data.user_ingame_wallet + " FRG";
+        // pokecoins is the FRG wallet column in your DB
+        const balance = data.data.pokecoins ?? data.data.user_ingame_wallet ?? 0;
+        if (el) el.textContent = balance + " FRG";
       }
     } catch {}
-  }
-  function loadProfileName() {
-    const ign = localStorage.getItem("ign");
-    const nameEl = document.getElementById("profileName");
-    const initEl = document.getElementById("avatarInitial");
-    if (nameEl && ign) nameEl.textContent = ign;
-    if (initEl && ign) initEl.textContent = ign.charAt(0).toUpperCase();
   }
   document.addEventListener("DOMContentLoaded", function () {
     applyNavbarTheme();
@@ -514,6 +530,11 @@
     updateWPCBalance();
     loadProfileName();
   });
+
+  // Also run immediately in case DOMContentLoaded already fired
+  applyNavbarTheme();
+  loadProfileName();
+  updateWPCBalance();
   window.toggleProfileMenu = toggleProfileMenu;
   window.attachLogoutHandler = attachLogoutHandler;
 </script>

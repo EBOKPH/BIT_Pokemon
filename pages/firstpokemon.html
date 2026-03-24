@@ -1,331 +1,707 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Choose Your Starter Pokémon</title>
-    <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        font-family: Arial, Helvetica, sans-serif;
-      }
-      body {
-        background: #0b0e14;
-        color: #fff;
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-      }
-      main {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding: 40px 10px;
-      }
-      .starter-title {
-        font-size: 32px;
-        color: #4caf50;
-        font-weight: bold;
-        margin-bottom: 10px;
-        text-align: center;
-      }
-      .starter-desc {
-        font-size: 18px;
-        color: #aaa;
-        margin-bottom: 30px;
-        text-align: center;
-      }
-      .starters-grid {
-        display: flex;
-        gap: 32px;
-        justify-content: center;
-        flex-wrap: wrap;
-        margin-bottom: 40px;
-      }
-      .starter-card {
-        background: #1a1f2e;
-        border-radius: 12px;
-        padding: 24px 18px 18px 18px;
-        text-align: center;
-        box-shadow: 0 4px 16px #0008;
-        cursor: pointer;
-        transition:
-          transform 0.2s,
-          box-shadow 0.2s;
-        min-width: 180px;
-        position: relative;
-      }
-      .starter-card.selected {
-        border: 2px solid #ffcc00;
-        box-shadow: 0 8px 32px #ffcc0033;
-        transform: scale(1.05);
-      }
-      .starter-card img {
-        width: 120px;
-        height: 120px;
-        margin-bottom: 10px;
-      }
-      .starter-card .name {
-        font-size: 20px;
-        color: #ffd700;
-        font-weight: bold;
-        margin-bottom: 6px;
-      }
-      .starter-card .type {
-        font-size: 14px;
-        color: #4caf50;
-        margin-bottom: 4px;
-      }
-      .choose-btn {
-        margin-top: 12px;
-        padding: 10px 20px;
-        background: #4caf50;
-        color: #000;
-        border: none;
-        border-radius: 8px;
-        font-weight: bold;
-        cursor: pointer;
-        font-size: 16px;
-        transition: background 0.2s;
-      }
-      .choose-btn:hover {
-        background: #388e3c;
-      }
-      /* Modal */
-      .modal-bg {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: #000a;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 1000;
-      }
-      .modal {
-        background: #1a1f2e;
-        border-radius: 16px;
-        padding: 32px 24px;
-        text-align: center;
-        color: #fff;
-        min-width: 320px;
-        box-shadow: 0 8px 32px #000a;
-      }
-      .modal .modal-title {
-        font-size: 22px;
-        color: #ffd700;
-        margin-bottom: 18px;
-      }
-      .modal .modal-btns {
-        margin-top: 18px;
-        display: flex;
-        gap: 16px;
-        justify-content: center;
-      }
-      .modal .modal-btns button {
-        padding: 8px 18px;
-        border-radius: 8px;
-        border: none;
-        font-size: 16px;
-        font-weight: bold;
-        cursor: pointer;
-      }
-      .modal .confirm {
-        background: #4caf50;
-        color: #000;
-      }
-      .modal .cancel {
-        background: #e53935;
-        color: #fff;
-      }
-      /* Footer */
-      footer {
-        background: #11151f;
-        padding: 20px 24px;
-        text-align: center;
-        color: #aaa;
-        margin-top: auto;
-      }
-      footer a {
-        color: #4caf50;
-        margin: 0 10px;
-        text-decoration: none;
-        transition: color 0.2s;
-      }
-      footer a:hover {
-        color: #fff;
-      }
-    </style>
-  </head>
-  <body>
-    <div id="navbar-placeholder"></div>
-    <main>
-      <div class="starter-title">Choose Your Starter Pokémon</div>
-      <div class="starter-desc">
-        Select your first Pokémon to begin your journey!
-      </div>
-      <div class="starters-grid" id="starters-grid">
-        <!-- Starter cards will be injected here -->
-      </div>
-    </main>
-    <footer>
-      <a href="dashboard.html">Dashboard</a> |
-      <a href="profile.html">Profile</a> |
-      <a href="game.html">Game</a>
-      <p>&copy; 2026 Bit-Pokemon by Kobe D. Estabalaya</p>
-    </footer>
-    <!-- Modal -->
-    <div id="modal-bg" class="modal-bg" style="display: none">
-      <div class="modal">
-        <div class="modal-title" id="modal-title"></div>
-        <div class="modal-btns">
-          <button class="confirm" id="modal-confirm">Yes</button>
-          <button class="cancel" id="modal-cancel">No</button>
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BIT-POKEMON — First Fragment</title>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Bebas+Neue&family=Special+Elite&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --green:      #4aff6a;
+      --green-dim:  rgba(74,255,106,.15);
+      --amber:      #ffb830;
+      --red:        #ff4444;
+      --bg:         #060908;
+      --border:     rgba(74,255,106,.18);
+      --border-dim: rgba(74,255,106,.08);
+      --text:       #c8e8a0;
+      --text-dim:   #4a6a38;
+      --mono:       "Share Tech Mono", monospace;
+      --ui:         "Rajdhani", sans-serif;
+      --display:    "Bebas Neue", sans-serif;
+      --lore:       "Special Elite", cursive;
+    }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html, body {
+      width:100%; min-height:100%;
+      background:var(--bg); color:var(--text);
+      font-family:var(--ui); overflow-x:hidden;
+    }
+
+    /* Scanlines */
+    body::before {
+      content:""; position:fixed; inset:0; z-index:1000; pointer-events:none;
+      background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.07) 2px,rgba(0,0,0,.07) 4px);
+    }
+    /* Vignette */
+    body::after {
+      content:""; position:fixed; inset:0; z-index:999; pointer-events:none;
+      background:radial-gradient(ellipse 85% 85% at 50% 50%,transparent 45%,rgba(0,0,0,.65) 100%);
+    }
+
+    #navbar-placeholder { position:relative; z-index:100; }
+
+    /* ── BG AMBIENCE ── */
+    .bg-layer {
+      position:fixed; inset:0; z-index:0; pointer-events:none;
+      background:
+        radial-gradient(ellipse 70% 50% at 50% 20%, rgba(20,40,10,.4) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 30% at 15% 60%, rgba(180,70,0,.06) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 30% at 85% 60%, rgba(20,80,180,.05) 0%, transparent 60%),
+        linear-gradient(180deg, #060908 0%, #080c06 50%, #060908 100%);
+    }
+
+    /* ── PAGE LAYOUT ── */
+    .page {
+      position:relative; z-index:1;
+      min-height:calc(100vh - 58px);
+      display:flex; flex-direction:column;
+      align-items:center;
+      padding:40px 20px 80px;
+      gap:0;
+    }
+
+    /* ── LORE INTRO SECTION ── */
+    .lore-section {
+      width:100%; max-width:720px;
+      display:flex; flex-direction:column; align-items:center;
+      gap:0; margin-bottom:36px;
+      animation:fadeUp .8s ease both;
+    }
+    @keyframes fadeUp {
+      from { opacity:0; transform:translateY(16px); }
+      to   { opacity:1; transform:none; }
+    }
+
+    .lore-tag {
+      font-family:var(--mono); font-size:9px; letter-spacing:5px;
+      color:rgba(74,255,106,.35); text-transform:uppercase;
+      margin-bottom:14px;
+    }
+
+    .lore-title {
+      font-family:var(--display); font-size:clamp(32px,5vw,52px);
+      letter-spacing:6px; color:var(--green); line-height:1;
+      text-shadow:0 0 40px rgba(74,255,106,.3);
+      text-align:center; margin-bottom:6px;
+    }
+    .lore-sub {
+      font-family:var(--mono); font-size:10px; letter-spacing:4px;
+      color:var(--text-dim); text-align:center; margin-bottom:28px;
+    }
+
+    /* Story typewriter block */
+    .story-box {
+      width:100%;
+      background:linear-gradient(160deg,rgba(10,16,8,.9) 0%,rgba(6,10,4,.95) 100%);
+      border:1px solid var(--border-dim);
+      border-left:2px solid rgba(74,255,106,.25);
+      padding:20px 24px;
+      position:relative;
+    }
+    .story-box::before {
+      content:''; position:absolute; inset:0;
+      background:linear-gradient(180deg,rgba(74,255,106,.02) 0%,transparent 50%);
+      pointer-events:none;
+    }
+    .story-line {
+      font-family:var(--lore); font-size:13px; line-height:1.9;
+      color:rgba(200,232,160,.7); margin-bottom:10px;
+    }
+    .story-line:last-child { margin-bottom:0; }
+    .story-line.em { color:rgba(74,255,106,.8); font-style:normal; }
+    .story-line.quote {
+      border-left:2px solid rgba(74,255,106,.2);
+      padding-left:14px; margin:14px 0;
+      color:rgba(180,220,140,.5); font-size:12px;
+    }
+
+    /* ── DIVIDER ── */
+    .section-divider {
+      width:100%; max-width:720px;
+      display:flex; align-items:center; gap:14px;
+      margin:28px 0 24px;
+      animation:fadeUp .8s .2s ease both;
+    }
+    .div-line { flex:1; height:1px; background:linear-gradient(90deg,transparent,rgba(74,255,106,.15),transparent); }
+    .div-label {
+      font-family:var(--mono); font-size:9px; letter-spacing:4px;
+      color:rgba(74,255,106,.35); white-space:nowrap;
+    }
+
+    /* ── GRID + PIP LAYOUT ── */
+    .main-layout {
+      width:100%; max-width:1100px;
+      display:grid;
+      grid-template-columns:1fr auto 1fr;
+      gap:24px;
+      align-items:start;
+      animation:fadeUp .8s .35s ease both;
+    }
+
+    /* Fragment grid */
+    .fragments-col {
+      display:flex; flex-direction:column; gap:10px;
+    }
+    .col-label {
+      font-family:var(--mono); font-size:9px; letter-spacing:4px;
+      color:rgba(74,255,106,.3); text-transform:uppercase;
+      margin-bottom:4px;
+    }
+
+    .fragment-card {
+      background:linear-gradient(160deg,rgba(16,22,10,.95) 0%,rgba(8,12,4,.98) 100%);
+      border:1px solid var(--border-dim);
+      padding:12px 14px;
+      cursor:pointer; position:relative; overflow:hidden;
+      transition:all .2s;
+      display:flex; align-items:center; gap:12px;
+    }
+    .fragment-card::before {
+      content:''; position:absolute; left:0; top:0; bottom:0; width:2px;
+      background:var(--border-dim); transition:background .2s;
+    }
+    .fragment-card:hover { border-color:rgba(74,255,106,.3); transform:translateX(3px); }
+    .fragment-card:hover::before { background:var(--green); box-shadow:0 0 8px var(--green); }
+    .fragment-card.selected {
+      border-color:rgba(74,255,106,.5);
+      background:linear-gradient(160deg,rgba(20,32,14,.98) 0%,rgba(12,18,8,.99) 100%);
+      box-shadow:0 0 20px rgba(74,255,106,.08);
+    }
+    .fragment-card.selected::before { background:var(--green); box-shadow:0 0 10px var(--green); }
+
+    /* Corner marks */
+    .fc { position:absolute; width:6px; height:6px; }
+    .fc.tl { top:3px; left:3px; border-top:1px solid rgba(74,255,106,.2); border-left:1px solid rgba(74,255,106,.2); }
+    .fc.br { bottom:3px; right:3px; border-bottom:1px solid rgba(74,255,106,.2); border-right:1px solid rgba(74,255,106,.2); }
+    .fragment-card.selected .fc { border-color:rgba(74,255,106,.5); }
+
+    .card-sprite {
+      width:52px; height:52px; object-fit:contain; flex-shrink:0;
+      image-rendering:auto;
+      filter:sepia(.2) brightness(.9) drop-shadow(0 0 6px rgba(74,255,106,.15));
+      transition:filter .2s, transform .2s;
+    }
+    .fragment-card:hover .card-sprite,
+    .fragment-card.selected .card-sprite {
+      filter:brightness(1.05) drop-shadow(0 0 10px rgba(74,255,106,.3));
+      transform:scale(1.06);
+    }
+
+    .card-info { flex:1; min-width:0; }
+    .card-name {
+      font-family:var(--display); font-size:16px; letter-spacing:2px;
+      color:var(--text); line-height:1; margin-bottom:3px;
+    }
+    .card-dex {
+      font-family:var(--mono); font-size:8px; letter-spacing:2px;
+      color:var(--text-dim); margin-bottom:4px;
+    }
+    .card-types { display:flex; gap:4px; flex-wrap:wrap; }
+    .type-tag {
+      font-family:var(--mono); font-size:7px; letter-spacing:1px;
+      padding:1px 5px; border:1px solid;
+      text-transform:uppercase;
+    }
+
+    .card-signal {
+      font-family:var(--mono); font-size:7px; letter-spacing:1px;
+      color:rgba(74,255,106,.25); text-align:right; flex-shrink:0;
+    }
+
+    /* Loading skeleton */
+    .card-skeleton {
+      background:rgba(74,255,106,.03);
+      border:1px solid rgba(74,255,106,.06);
+      padding:12px 14px; height:76px;
+      animation:skelPulse 1.4s ease-in-out infinite;
+    }
+    @keyframes skelPulse { 0%,100%{opacity:.4;} 50%{opacity:.8;} }
+
+    /* ── PIP DEVICE CENTER ── */
+    .pip-col {
+      display:flex; flex-direction:column;
+      align-items:center; gap:12px;
+      position:sticky; top:20px;
+    }
+    .pip-img-wrap {
+      position:relative; width:min(300px,32vw);
+    }
+    .pip-img-wrap img {
+      width:100%; display:block;
+      filter:drop-shadow(0 0 24px rgba(74,255,106,.1)) drop-shadow(0 0 60px rgba(74,255,106,.05)) brightness(1.05) contrast(1.08);
+      mix-blend-mode:screen;
+    }
+    /* Screen on the PIP */
+    .pip-screen {
+      position:absolute;
+      top:17%; left:17%; width:52%; height:52%;
+      overflow:hidden; border-radius:2px;
+      display:flex; flex-direction:column;
+      align-items:center; justify-content:center;
+      padding:8%;
+      background:rgba(0,0,0,.2);
+    }
+    .pip-screen-idle {
+      display:flex; flex-direction:column; align-items:center; gap:6px;
+    }
+    .pip-screen-line {
+      font-family:var(--mono); font-size:clamp(5px,.9vw,9px);
+      letter-spacing:2px; color:var(--green);
+      text-shadow:0 0 8px var(--green); opacity:.7;
+      animation:screenFlicker 5s ease-in-out infinite;
+      text-align:center;
+    }
+    .pip-screen-line.dim { color:var(--text-dim); opacity:.5; font-size:clamp(4px,.75vw,8px); }
+    @keyframes screenFlicker { 0%,94%,100%{opacity:.7;} 95%,97%{opacity:.15;} }
+
+    /* Selected fragment on screen */
+    .pip-screen-selected {
+      display:none; flex-direction:column; align-items:center; gap:4px;
+      animation:screenIn .3s ease;
+    }
+    @keyframes screenIn { from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;} }
+    .pip-screen-selected img {
+      width:clamp(28px,5vw,52px); height:clamp(28px,5vw,52px);
+      object-fit:contain; image-rendering:auto;
+      filter:drop-shadow(0 0 6px var(--green));
+      animation:pokeFloat 3s ease-in-out infinite;
+    }
+    @keyframes pokeFloat { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-4px);} }
+    .pip-selected-name {
+      font-family:var(--mono); font-size:clamp(5px,.85vw,8px);
+      letter-spacing:2px; color:var(--green);
+      text-shadow:0 0 8px var(--green); text-align:center;
+    }
+    .pip-selected-sig {
+      font-family:var(--mono); font-size:clamp(4px,.7vw,7px);
+      letter-spacing:1px; color:rgba(74,255,106,.4); text-align:center;
+    }
+
+    /* Pip status below device */
+    .pip-status {
+      font-family:var(--mono); font-size:9px; letter-spacing:3px;
+      color:rgba(74,255,106,.35); text-align:center;
+      text-transform:uppercase;
+    }
+    .pip-status .blink {
+      display:inline-block; width:5px; height:5px; border-radius:50%;
+      background:var(--green); margin-right:5px; vertical-align:middle;
+      animation:ledBlink 1.2s ease-in-out infinite;
+    }
+    @keyframes ledBlink { 0%,100%{opacity:1;} 50%{opacity:.2;} }
+
+    /* ── CONFIRM SECTION ── */
+    .confirm-section {
+      width:100%; max-width:1100px;
+      display:flex; flex-direction:column; align-items:center; gap:14px;
+      margin-top:28px;
+      animation:fadeUp .8s .5s ease both;
+    }
+    .selected-preview {
+      display:none; flex-direction:column; align-items:center; gap:6px;
+    }
+    .selected-preview.visible { display:flex; }
+    .selected-name-display {
+      font-family:var(--display); font-size:28px; letter-spacing:5px;
+      color:var(--green); text-shadow:0 0 24px rgba(74,255,106,.35);
+    }
+    .selected-lore {
+      font-family:var(--lore); font-size:11px; letter-spacing:1px;
+      color:rgba(200,232,160,.45); text-align:center; max-width:400px;
+      line-height:1.7;
+    }
+
+    .confirm-btn {
+      font-family:var(--display); font-size:22px; letter-spacing:8px;
+      color:#000; padding:14px 52px;
+      background:linear-gradient(160deg,#2aff5a,#4aff6a,#3aee58);
+      border:none; cursor:pointer;
+      clip-path:polygon(6px 0%,100% 0%,calc(100% - 6px) 100%,0% 100%);
+      box-shadow:0 4px 28px rgba(74,255,106,.35);
+      transition:all .2s; position:relative; overflow:hidden;
+      display:none;
+    }
+    .confirm-btn.visible { display:block; }
+    .confirm-btn::after {
+      content:''; position:absolute; top:-50%; left:-60%; width:30%; height:200%;
+      background:rgba(255,255,255,.15); transform:skewX(-20deg);
+      animation:btnShine 3s ease-in-out infinite;
+    }
+    @keyframes btnShine { 0%,70%,100%{left:-60%;opacity:0;} 40%{left:130%;opacity:1;} }
+    .confirm-btn:hover { transform:translateY(-2px); box-shadow:0 8px 40px rgba(74,255,106,.5); }
+    .confirm-btn:active { transform:translateY(1px); }
+    .confirm-btn:disabled { opacity:.4; cursor:not-allowed; pointer-events:none; animation:authPulse .7s ease-in-out infinite; }
+    @keyframes authPulse { 0%,100%{opacity:.3;} 50%{opacity:.8;} }
+
+    /* ── LOADING OVERLAY ── */
+    .load-overlay {
+      display:none; position:fixed; inset:0; z-index:500;
+      background:rgba(6,9,8,.92); backdrop-filter:blur(4px);
+      flex-direction:column; align-items:center; justify-content:center; gap:16px;
+    }
+    .load-overlay.show { display:flex; }
+    .load-title {
+      font-family:var(--display); font-size:28px; letter-spacing:6px;
+      color:var(--green); text-shadow:0 0 30px rgba(74,255,106,.5);
+    }
+    .load-sub {
+      font-family:var(--mono); font-size:10px; letter-spacing:3px;
+      color:var(--text-dim);
+    }
+    .load-bar-wrap { width:240px; }
+    .load-bar {
+      height:2px; background:rgba(74,255,106,.1); overflow:hidden;
+    }
+    .load-bar-fill {
+      height:100%; background:var(--green);
+      box-shadow:0 0 8px var(--green);
+      animation:loadFill 2s ease forwards;
+      width:0;
+    }
+    @keyframes loadFill { to { width:100%; } }
+
+    /* Type colors */
+    .t-fire     { color:#ff6030; border-color:rgba(255,96,48,.3); }
+    .t-water    { color:#4ab8ff; border-color:rgba(74,184,255,.3); }
+    .t-grass    { color:#4aff6a; border-color:rgba(74,255,106,.3); }
+    .t-electric { color:#ffe040; border-color:rgba(255,224,64,.3); }
+    .t-psychic  { color:#ff80c0; border-color:rgba(255,128,192,.3); }
+    .t-normal   { color:#d0d0d0; border-color:rgba(208,208,208,.25); }
+    .t-poison   { color:#a040c0; border-color:rgba(160,64,192,.3); }
+    .t-flying   { color:#88aaff; border-color:rgba(136,170,255,.3); }
+    .t-default  { color:var(--text-dim); border-color:var(--border-dim); }
+  </style>
+</head>
+<body>
+<div class="bg-layer"></div>
+<div id="navbar-placeholder"></div>
+
+<div class="page">
+
+  <!-- LORE INTRO -->
+  <div class="lore-section">
+    <div class="lore-tag">// year 500 — post warden's curse · ravine, outskirts sector 7</div>
+    <div class="lore-title">First Fragment</div>
+    <div class="lore-sub">// pip mk.i — slot reader active — awaiting chip lock</div>
+
+    <div class="story-box">
+      <p class="story-line">The noise has stopped. The dust is still settling. You count eleven people who are not moving and you understand, with a clarity that only comes after something like this, that they are not going to start.</p>
+      <p class="story-line">You were a village guard. Boundary post. Two shifts. Nothing ever happened. And then a Legendary Pok&eacute;mon came through your village the way a storm comes through a forest — not angry, not targeting you specifically — and eleven people decided to follow it into a ravine because a Legendary-class Fragment would buy three generations of protection.</p>
+      <p class="story-line em">Twelve went in. You are the one who came back out.</p>
+      <p class="story-line">In the rubble, half-buried under a section of collapsed rock, is the chest. Someone dragged it in as an afterthought — just in case, they said. Inside it, where it has always been, is the old PIP device. Salvaged First Order tech, passed down through enough hands that no one alive knows where it originally came from.</p>
+      <p class="story-line quote">"A fragment chip that has never been activated remains in stasis indefinitely. The signal does not degrade. The Pokémon does not age. It simply waits." — First Order Field Manual, recovered fragment, Year 12</p>
+      <p class="story-line">The reader slot already has a chip in it. You did not put it there. You do not know who did. It is warm to the touch in a way that no crystal should be warm.</p>
+      <p class="story-line">The factions will have picked up the seismic signature. You have six hours before the first scouts arrive. You are injured and alone and the Legendary is somewhere in the rubble behind you.</p>
+      <p class="story-line em">You strap the PIP to your wrist. The beam fires. The Pok&eacute;mon forms — real mass, real power — and it opens its eyes and looks at you with that specific and terrifying question.</p>
+      <p class="story-line">Are you worth it?</p>
+    </div>
+  </div>
+
+  <!-- DIVIDER -->
+  <div class="section-divider">
+    <div class="div-line"></div>
+    <div class="div-label">// chip already slotted — identify the signal</div>
+    <div class="div-line"></div>
+  </div>
+
+  <!-- MAIN LAYOUT: cards + PIP + cards -->
+  <div class="main-layout">
+
+    <!-- LEFT COLUMN -->
+    <div class="fragments-col" id="leftCol">
+      <div class="col-label">// fragment signals detected in chip</div>
+    </div>
+
+    <!-- PIP DEVICE CENTER -->
+    <div class="pip-col">
+      <div class="pip-img-wrap">
+        <img src="../assets/img/BITPIP.png" alt="PIP Device"/>
+        <div class="pip-screen">
+          <!-- Idle state -->
+          <div class="pip-screen-idle" id="pipIdle">
+            <div class="pip-screen-line dim">CHIP LOADED</div>
+            <div class="pip-screen-line">READING</div>
+            <div class="pip-screen-line dim">SIGNAL UNKNOWN</div>
+          </div>
+          <!-- Selected state -->
+          <div class="pip-screen-selected" id="pipSelected">
+            <img id="pipSprite" src="" alt=""/>
+            <div class="pip-selected-name" id="pipName">—</div>
+            <div class="pip-selected-sig" id="pipSig">—</div>
+          </div>
         </div>
       </div>
+      <div class="pip-status">
+        <span class="blink"></span>CHIP LOCK — CONFIRM TO BIND
+      </div>
     </div>
-    <script>
-      // Load navbar
-      fetch("navbar.html")
-        .then((res) => res.text())
-        .then((data) => {
-          document.getElementById("navbar-placeholder").innerHTML = data;
+
+    <!-- RIGHT COLUMN -->
+    <div class="fragments-col" id="rightCol">
+      <div class="col-label">// possible signal matches</div>
+    </div>
+
+  </div>
+
+  <!-- CONFIRM SECTION -->
+  <div class="confirm-section">
+    <div class="selected-preview" id="selectedPreview">
+      <div class="selected-name-display" id="selectedNameDisplay">—</div>
+      <div class="selected-lore" id="selectedLoreText">—</div>
+    </div>
+    <button class="confirm-btn" id="confirmBtn">▶ &nbsp;ACTIVATE BEAM — BIND FRAGMENT</button>
+  </div>
+
+</div>
+
+<!-- Loading overlay -->
+<div class="load-overlay" id="loadOverlay">
+  <div class="load-title" id="loadTitle">BEAM ACTIVE</div>
+  <div class="load-sub" id="loadSub">// acquiring fragment signal...</div>
+  <div class="load-bar-wrap">
+    <div class="load-bar"><div class="load-bar-fill" id="loadBarFill"></div></div>
+  </div>
+</div>
+
+<script type="module">
+// Try to import API_BASE_URL from api.js, fall back to localhost
+let API_BASE_URL = 'http://localhost:4000';
+try {
+  const mod = await import('../api.js');
+  if (mod.API_BASE_URL) API_BASE_URL = mod.API_BASE_URL;
+} catch(e) {}
+
+const user_id = localStorage.getItem('user_id');
+const token   = localStorage.getItem('token');
+if (!user_id || !token) { window.location.href = '../index.html'; }
+
+// ── State ──────────────────────────────────────────────
+let selectedStarter  = null;
+let starterData      = {};
+let allStarters      = [];
+
+// ── Lore blurbs — written from the perspective of a village guard
+// who has never held a Fragment chip before, reading the signal for
+// the first time in a ravine with eleven dead companions behind them
+const LORE_BLURBS = {
+  fire:     'The chip has been burning for years. Not metaphorically. The casing is heat-scarred, the crystal underneath still intact, still radiating something that has no business radiating after five hundred years in storage. Whatever chose to wait inside it chose patience over comfort.',
+  water:    'Under the dim light of the ravine you can see movement inside the crystal. Not reflection. Movement. Something in there has been alive this whole time, circling in the dark, waiting for the beam to let it out.',
+  grass:    'The chip is cracked. Hairline fractures run the entire length. By every First Order standard you half-remember from guard training it should be unreadable. The signal is the strongest you have ever encountered. Whatever is inside has been growing in the dark for a very long time.',
+  electric: 'You pick it up and static discharge runs up your arm to your shoulder. Faint. The signal disruptor you are still carrying gives a single alarmed beep and goes quiet. Something in the chip read the device and decided to neutralise it. Something in there is awake and paying attention.',
+  psychic:  'You pick it up and immediately feel watched. Not from the shadows behind you, not from wherever the Legendary has gone. From inside the chip itself. Something has been reading the room for five hundred years. It has had a long time to form an opinion of the person who finally picks it up.',
+  normal:   'The chip is unremarkable. No heat, no static, no visible signal. The PIP reader pings once and goes silent. You would think it was blank if not for the weight — it is heavier than it should be, denser, like it is holding something very tightly.',
+  default:  'You do not know what type the signal is. The reader cannot fully parse it. What you know is that the chip has been in this PIP for longer than anyone alive can account for, and that it is warm to the touch in a way that no crystal should be warm, and that it has been waiting for exactly this moment.',
+};
+
+function getLore(types) {
+  for (const t of (types||[])) {
+    if (LORE_BLURBS[t]) return LORE_BLURBS[t];
+  }
+  return LORE_BLURBS.default;
+}
+
+// ── Type color helper ──────────────────────────────────
+function typeClass(t) {
+  return ['fire','water','grass','electric','psychic','normal','poison','flying'].includes(t)
+    ? `t-${t}` : 't-default';
+}
+
+// ── Build a single fragment card ──────────────────────
+function buildCard(starter, pokeData) {
+  const name  = starter.name.charAt(0).toUpperCase() + starter.name.slice(1);
+  const types = pokeData.types.map(t => t.type.name);
+  const dex   = `NO.${String(starter.pokedex_no).padStart(3,'0')}`;
+  const sig   = `${types[0].toUpperCase().slice(0,3)}-RARE-${String(starter.pokedex_no).padStart(3,'0')}`;
+  const sprite= pokeData.sprites.other?.['official-artwork']?.front_default || pokeData.sprites.front_default;
+
+  const card = document.createElement('div');
+  card.className = 'fragment-card';
+  card.dataset.id = starter.pokedex_no;
+  card.innerHTML = `
+    <span class="fc tl"></span><span class="fc br"></span>
+    <img class="card-sprite" src="${sprite}" alt="${name}"/>
+    <div class="card-info">
+      <div class="card-name">${name}</div>
+      <div class="card-dex">${dex}</div>
+      <div class="card-types">
+        ${types.map(t=>`<span class="type-tag ${typeClass(t)}">${t}</span>`).join('')}
+      </div>
+    </div>
+    <div class="card-signal">${sig}</div>
+  `;
+
+  card.addEventListener('click', () => selectStarter(starter, pokeData, card, name, types, sprite, sig));
+  return card;
+}
+
+// ── Select a starter ──────────────────────────────────
+function selectStarter(starter, pokeData, card, name, types, sprite, sig) {
+  // Deselect all
+  document.querySelectorAll('.fragment-card').forEach(c => c.classList.remove('selected'));
+  card.classList.add('selected');
+
+  selectedStarter = { ...starter, name, pokeData };
+
+  // Update PIP screen
+  document.getElementById('pipIdle').style.display    = 'none';
+  document.getElementById('pipSelected').style.display= 'flex';
+  document.getElementById('pipSprite').src             = sprite;
+  document.getElementById('pipName').textContent       = name.toUpperCase();
+  document.getElementById('pipSig').textContent        = sig;
+
+  // Update confirm section
+  document.getElementById('selectedNameDisplay').textContent = name;
+  document.getElementById('selectedLoreText').textContent    = getLore(types);
+  document.getElementById('selectedPreview').classList.add('visible');
+  document.getElementById('confirmBtn').classList.add('visible');
+}
+
+// ── Load starters from backend ─────────────────────────
+async function loadStarters() {
+  const leftCol  = document.getElementById('leftCol');
+  const rightCol = document.getElementById('rightCol');
+
+  // Show skeletons
+  for (let i = 0; i < 5; i++) {
+    const sk = document.createElement('div'); sk.className = 'card-skeleton';
+    leftCol.appendChild(sk);
+  }
+  for (let i = 0; i < 5; i++) {
+    const sk = document.createElement('div'); sk.className = 'card-skeleton';
+    rightCol.appendChild(sk);
+  }
+
+  try {
+    const res      = await fetch(`${API_BASE_URL}/pokemons/starters`);
+    const starters = await res.json();
+    if (!Array.isArray(starters) || !starters.length) throw new Error('No starters');
+
+    allStarters = starters;
+
+    // Fetch PokeAPI data for each
+    const pokePromises = starters.map(s =>
+      fetch(`https://pokeapi.co/api/v2/pokemon/${s.pokedex_no}`).then(r => r.json())
+    );
+    const pokeDatas = await Promise.all(pokePromises);
+    pokeDatas.forEach((pd, i) => { starterData[starters[i].pokedex_no] = pd; });
+
+    // Clear skeletons
+    leftCol.querySelectorAll('.card-skeleton').forEach(s => s.remove());
+    rightCol.querySelectorAll('.card-skeleton').forEach(s => s.remove());
+
+    // Split left / right
+    const half = Math.ceil(starters.length / 2);
+    starters.forEach((starter, i) => {
+      const card = buildCard(starter, pokeDatas[i]);
+      if (i < half) leftCol.appendChild(card);
+      else          rightCol.appendChild(card);
+    });
+
+  } catch (e) {
+    leftCol.querySelectorAll('.card-skeleton').forEach(s => s.remove());
+    rightCol.querySelectorAll('.card-skeleton').forEach(s => s.remove());
+    leftCol.innerHTML += `<div style="font-family:var(--mono);font-size:10px;color:var(--red);padding:12px;">// error: ${e.message}</div>`;
+  }
+}
+
+// ── Confirm — slot in the fragment ─────────────────────
+document.getElementById('confirmBtn').addEventListener('click', async () => {
+  if (!selectedStarter) return;
+
+  const btn = document.getElementById('confirmBtn');
+  btn.disabled = true;
+  btn.textContent = 'ENCODING...';
+
+  const overlay  = document.getElementById('loadOverlay');
+  const loadSub  = document.getElementById('loadSub');
+  const loadFill = document.getElementById('loadBarFill');
+
+  overlay.classList.add('show');
+
+  // Animated loading messages — written from the moment you fire the beam
+  const msgs = [
+    '// reading chip signature — signal acquired...',
+    '// cross-referencing First Order fragment archive...',
+    '// loyalty architecture — binding to bearer...',
+    '// neural essence stabilising — mass coalescing...',
+    `// ${selectedStarter.name} — fragment locked. signal stable. binding complete.`,
+  ];
+  let mi = 0;
+  const msgInt = setInterval(() => {
+    if (mi < msgs.length) loadSub.textContent = msgs[mi++];
+  }, 380);
+
+  try {
+    const pd  = selectedStarter.pokeData;
+    const now = new Date().toISOString();
+    const pokemon = {
+      user_id:    Number(user_id),
+      pokemon_id: selectedStarter.pokedex_no,
+      nickname:   selectedStarter.name,
+      level:      1,
+      experience: 0,
+      current_hp: pd.stats?.[0]?.base_stat ?? 20,
+      nature:     null,
+      is_shiny:   false,
+      caught_at:  now,
+      status:     'active',
+      name:       selectedStarter.name,
+      pokedex_no: selectedStarter.pokedex_no,
+      sprite:     pd.sprites?.other?.['official-artwork']?.front_default || pd.sprites?.front_default,
+      types:      pd.types.map(t => t.type.name),
+    };
+
+    const resp = await fetch(`${API_BASE_URL}/users/${user_id}/pokemon`, {
+      method:  'POST',
+      headers: { 'Content-Type':'application/json', Authorization:`Bearer ${token}` },
+      body:    JSON.stringify(pokemon),
+    });
+    const result = await resp.json();
+
+    clearInterval(msgInt);
+
+    if (result.success) {
+      loadSub.textContent = `// ${selectedStarter.name} bound. beam closed. you have a partner.`;
+      document.getElementById('loadTitle').textContent = 'FRAGMENT BOUND';
+
+      // Give starter capture devices via inventory
+      try {
+        await fetch(`${API_BASE_URL}/items/add-to-inventory`, {
+          method: 'POST',
+          headers: { 'Content-Type':'application/json', Authorization:`Bearer ${token}` },
+          body: JSON.stringify({ user_id: Number(user_id) }),
         });
+      } catch(e) {}
 
-      // --- DYNAMIC STARTER FETCH FROM BACKEND ---
-      const API_BASE_URL = window.API_BASE_URL || "http://localhost:4000";
-      const startersGrid = document.getElementById("starters-grid");
-      let selectedStarter = null;
-      let starterData = {};
+      setTimeout(() => { window.location.href = 'pip_interface.html'; }, 2000);
+    } else {
+      clearInterval(msgInt);
+      overlay.classList.remove('show');
+      btn.disabled = false;
+      btn.textContent = '▶  ACTIVATE BEAM — BIND FRAGMENT';
+      alert(result.message || 'Failed to encode fragment.');
+    }
+  } catch(e) {
+    clearInterval(msgInt);
+    overlay.classList.remove('show');
+    btn.disabled = false;
+    btn.textContent = '▶  ACTIVATE BEAM — BIND FRAGMENT';
+    alert('Network error. Check your connection.');
+  }
+});
 
-      async function loadStarters() {
-        // Fetch starter list from backend (e.g. /starters or /pokemons?starter=true)
-        // For this example, we'll use the first 9 pokedex_no as starters
-        const res = await fetch(`${API_BASE_URL}/pokemons/starters`);
-        const starters = await res.json();
-        if (!Array.isArray(starters) || starters.length === 0) {
-          startersGrid.innerHTML =
-            '<div style="color:#e53935">No starters found in DB.</div>';
-          return;
-        }
-        for (const starter of starters) {
-          // starter: { pokedex_no, name }
-          const pokeRes = await fetch(
-            `https://pokeapi.co/api/v2/pokemon/${starter.pokedex_no}`,
-          );
-          const data = await pokeRes.json();
-          starterData[starter.pokedex_no] = data;
-          const card = document.createElement("div");
-          card.className = "starter-card";
-          card.innerHTML = `
-            <img src="${data.sprites.front_default}" alt="${starter.name}" />
-            <div class="name">${starter.name.charAt(0).toUpperCase() + starter.name.slice(1)}</div>
-            <div class="type">Type: ${data.types.map((t) => t.type.name).join(", ")}</div>
-            <button class="choose-btn">Choose</button>
-          `;
-          card.querySelector(".choose-btn").onclick = () =>
-            showModal({
-              ...starter,
-              id: starter.pokedex_no,
-              name:
-                starter.name.charAt(0).toUpperCase() + starter.name.slice(1),
-            });
-          startersGrid.appendChild(card);
-        }
-      }
+loadStarters();
+</script>
 
-      loadStarters();
-
-      // Modal logic
-      const modalBg = document.getElementById("modal-bg");
-      const modalTitle = document.getElementById("modal-title");
-      const modalConfirm = document.getElementById("modal-confirm");
-      const modalCancel = document.getElementById("modal-cancel");
-      function showModal(starter) {
-        selectedStarter = starter;
-        modalTitle.textContent = `Are you sure you want ${starter.name} as your first Pokémon?`;
-        modalBg.style.display = "flex";
-      }
-      modalCancel.onclick = () => {
-        modalBg.style.display = "none";
-        selectedStarter = null;
-      };
-      modalConfirm.onclick = async () => {
-        if (!selectedStarter) return;
-
-        const user_id = localStorage.getItem("user_id");
-        const token = localStorage.getItem("token");
-
-        if (!user_id || !token) {
-          alert("Not logged in!");
-          return;
-        }
-
-        // Compose full Pokémon object for backend
-        const pokeData = starterData[selectedStarter.id];
-        const now = new Date().toISOString();
-        const pokemon = {
-          user_id: Number(user_id),
-          pokemon_id: selectedStarter.id, // For starters, use pokedex_no as pokemon_id
-          nickname: selectedStarter.name, // Default nickname to name
-          level: 1,
-          experience: 0,
-          current_hp:
-            pokeData.stats && pokeData.stats[0]
-              ? pokeData.stats[0].base_stat
-              : 20,
-          nature: null, // Or randomize if you want
-          is_shiny: false,
-          caught_at: now,
-          status: "active",
-          name: selectedStarter.name,
-          pokedex_no: selectedStarter.id,
-          sprite: pokeData.sprites.front_default,
-          types: pokeData.types.map((t) => t.type.name),
-        };
-
-        const resp = await fetch(`${API_BASE_URL}/users/${user_id}/pokemon`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(pokemon),
-        });
-
-        const result = await resp.json();
-
-        if (result.success) {
-          // Add starter balls to user inventory
-          const invResp = await fetch(
-            `${API_BASE_URL}/items/add-to-inventory`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-              },
-              body: JSON.stringify({ user_id: Number(user_id) }),
-            },
-          );
-          const invResult = await invResp.json();
-          if (!invResult.success) {
-            alert(
-              "Pokémon saved, but failed to add starter balls: " +
-                (invResult.message || "Unknown error"),
-            );
-          }
-          window.location.href = "pip_interface.html";
-        } else {
-          alert(result.message || "Failed to save your Pokémon.");
-        }
-      };
-    </script>
-  </body>
+<!-- Navbar -->
+<script>
+  fetch("navbar.html")
+    .then(r => r.text())
+    .then(html => {
+      document.getElementById("navbar-placeholder").innerHTML = html;
+      if (typeof window.attachLogoutHandler === "function") window.attachLogoutHandler();
+    });
+</script>
+</body>
 </html>

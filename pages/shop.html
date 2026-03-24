@@ -3,702 +3,1553 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Pokémon Shop</title>
-    <link rel="stylesheet" href="../assets/css/soft-ui-dashboard.css?v=1.1.0" />
-    <link rel="stylesheet" href="../assets/css/navbar.css" />
-    <link rel="stylesheet" href="../assets/css/style.css" />
+    <title>BIT-POKEMON — Fragment Shop</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
     <style>
-      * {
+      :root {
+        --green: #4aff6a;
+        --green-dim: rgba(74, 255, 106, 0.12);
+        --amber: #ffb830;
+        --red: #ff4444;
+        --blue: #4ab8ff;
+        --purple: #b86aff;
+        --pink: #ff80c0;
+        --bg: #060908;
+        --bg2: #0c140e;
+        --bg3: #111a12;
+        --border: rgba(74, 255, 106, 0.18);
+        --border-dim: rgba(74, 255, 106, 0.08);
+        --text: #c8e8a0;
+        --text-dim: #4a6a38;
+        --mono: "Share Tech Mono", monospace;
+        --ui: "Rajdhani", sans-serif;
+        --display: "Bebas Neue", sans-serif;
+      }
+      *,
+      *::before,
+      *::after {
         margin: 0;
         padding: 0;
         box-sizing: border-box;
-        font-family: Arial, Helvetica, sans-serif;
       }
-      body,
-      .navbar,
-      .nav-link,
-      .dropdown a,
-      .logo {
-        font-family: Arial, Helvetica, sans-serif !important;
-        color: #fff;
-      }
+      html,
       body {
-        background: #0b0e14;
-        color: #fff;
         min-height: 100vh;
-        display: flex;
-        flex-direction: column;
+        background: var(--bg);
+        font-family: var(--ui);
+        color: var(--text);
       }
-      main {
-        flex: 1;
-        display: flex;
-        flex-direction: row;
-        justify-content: center;
-        padding: 40px 10px;
-        gap: 10px;
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        background:
+          radial-gradient(
+            ellipse 60% 40% at 50% 0%,
+            rgba(74, 255, 106, 0.04) 0%,
+            transparent 60%
+          ),
+          repeating-linear-gradient(
+            0deg,
+            transparent,
+            transparent 60px,
+            rgba(74, 255, 106, 0.018) 60px,
+            rgba(74, 255, 106, 0.018) 61px
+          ),
+          repeating-linear-gradient(
+            90deg,
+            transparent,
+            transparent 60px,
+            rgba(74, 255, 106, 0.012) 60px,
+            rgba(74, 255, 106, 0.012) 61px
+          );
       }
-      .ad-placeholder {
-        background: #181c24;
-        width: 110px;
-        min-width: 80px;
-        height: 600px;
-        border-radius: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #888;
-        font-size: 13px;
-        flex-shrink: 0;
-        opacity: 0.7;
-        box-shadow: 0 2px 8px #0004;
+      body::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        background: repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 2px,
+          rgba(0, 0, 0, 0.05) 2px,
+          rgba(0, 0, 0, 0.05) 4px
+        );
       }
-      .content-wrapper {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
+      #navbar-placeholder {
+        position: relative;
+        z-index: 100;
+      }
+
+      /* ── PAGE LAYOUT ── */
+      .shop-page {
+        position: relative;
+        z-index: 1;
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 28px 20px 80px;
+      }
+
+      /* ── HEADER ── */
+      .shop-header {
+        text-align: center;
+        margin-bottom: 32px;
+        position: relative;
+      }
+      .shop-header::before,
+      .shop-header::after {
+        content: "";
+        display: block;
+        height: 1px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(74, 255, 106, 0.3),
+          transparent
+        );
+        margin: 10px 0;
       }
       .shop-title {
-        text-align: center;
-        font-size: 32px;
-        color: #4caf50;
-        font-weight: bold;
-        margin-bottom: 10px;
-        margin-top: 10px;
-        letter-spacing: 1px;
+        font-family: var(--display);
+        font-size: clamp(28px, 5vw, 52px);
+        letter-spacing: 10px;
+        color: var(--green);
+        text-shadow: 0 0 30px rgba(74, 255, 106, 0.4);
       }
-      .wallet-balance {
-        text-align: center;
-        font-size: 17px;
-        color: #ffd700;
-        margin-bottom: 18px;
-        font-weight: bold;
-        letter-spacing: 0.5px;
+      .shop-sub {
+        font-family: var(--mono);
+        font-size: 10px;
+        letter-spacing: 5px;
+        color: rgba(74, 255, 106, 0.4);
+        margin-top: 4px;
       }
-      .timer-container {
-        text-align: center;
-        margin-bottom: 18px;
-        font-size: 15px;
-        color: #aaa;
-      }
-      .shop-section {
-        width: 100%;
-        max-width: 800px;
-        background: #1a1f2e;
-        border-radius: 16px;
-        margin-bottom: 32px;
-        padding: 32px 32px 24px 32px;
-        box-shadow: 0 4px 24px #000a;
-      }
-      .shop-section h2 {
-        color: #4caf50;
-        font-size: 22px;
-        font-weight: bold;
-        margin-bottom: 16px;
-        text-align: center;
-        letter-spacing: 0.5px;
-      }
-      .shop-items {
+
+      /* ── BALANCE BAR ── */
+      .balance-bar {
         display: flex;
-        flex-wrap: wrap;
-        gap: 32px;
-        justify-content: center;
-        margin-bottom: 10px;
-        width: 100%;
-      }
-      .shop-item {
-        background: #23273a;
-        border-radius: 16px;
-        padding: 20px 16px 16px 16px;
-        width: 200px;
-        min-width: 200px;
-        max-width: 200px;
-        min-height: 340px;
-        max-height: 420px;
-        display: flex;
-        flex-direction: column;
         align-items: center;
-        box-shadow: 0 2px 12px #0008;
+        justify-content: center;
+        gap: 24px;
+        padding: 12px 24px;
+        margin-bottom: 28px;
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        flex-wrap: wrap;
       }
-      .shop-item.pokemon {
-        width: 260px;
-        min-width: 260px;
-        max-width: 260px;
-        min-height: 480px;
-        max-height: 520px;
+      .balance-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
       }
-      .shop-item img {
-        margin-bottom: 8px;
-        /* background: #fff; */
-        border-radius: 12px;
-        max-width: 128px;
-        max-height: 128px;
-        min-width: 96px;
-        min-height: 96px;
-        box-shadow: 0 2px 8px #0002;
-        object-fit: contain;
-        image-rendering: auto;
-        background: transparent !important;
+      .balance-icon {
+        font-size: 13px;
+        color: var(--amber);
       }
-      .shop-item input[type="checkbox"] {
-        margin-bottom: 8px;
-        transform: scale(1.2);
+      .balance-val {
+        font-family: var(--display);
+        font-size: 20px;
+        letter-spacing: 3px;
+        color: var(--amber);
+      }
+      .balance-label {
+        font-family: var(--mono);
+        font-size: 8px;
+        letter-spacing: 3px;
+        color: var(--text-dim);
+      }
+      .refresh-timer {
+        font-family: var(--mono);
+        font-size: 9px;
+        letter-spacing: 2px;
+        color: var(--text-dim);
+        text-align: center;
+      }
+      .timer-val {
+        color: rgba(74, 255, 106, 0.6);
+      }
+
+      /* ── SECTION ── */
+      .shop-section {
+        margin-bottom: 40px;
+      }
+      .section-header {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid var(--border-dim);
+      }
+      .section-title {
+        font-family: var(--display);
+        font-size: 22px;
+        letter-spacing: 6px;
+        color: var(--green);
+      }
+      .section-badge {
+        font-family: var(--mono);
+        font-size: 8px;
+        letter-spacing: 3px;
+        padding: 3px 10px;
+        border: 1px solid var(--border);
+        border-radius: 2px;
+        color: var(--text-dim);
+      }
+
+      /* ── TABS ── */
+      .tabs {
+        display: flex;
+        gap: 4px;
+        margin-bottom: 28px;
+      }
+      .tab {
+        font-family: var(--display);
+        font-size: 13px;
+        letter-spacing: 4px;
+        padding: 8px 20px;
+        border: 1px solid var(--border-dim);
+        border-radius: 2px;
+        background: var(--bg2);
+        color: var(--text-dim);
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .tab.active,
+      .tab:hover {
+        border-color: var(--green);
+        color: var(--green);
+        background: var(--green-dim);
+      }
+      .tab-content {
+        display: none;
+      }
+      .tab-content.active {
         display: block;
       }
-      .poke-details {
-        font-size: 16px;
-        color: #aaa;
-        margin-bottom: 12px;
-        min-height: 60px;
-        text-align: center;
-        word-break: break-word;
-        line-height: 1.4;
+
+      /* ── GACHA BANNERS ── */
+      .banners-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
       }
-      .shop-item input[type="number"] {
-        width: 60px;
-        margin-bottom: 8px;
-        border-radius: 6px;
-        border: 1px solid #444;
-        padding: 4px 6px;
-        background: #181c24;
-        color: #fff;
-        font-size: 15px;
-        text-align: center;
+      @media (max-width: 700px) {
+        .banners-grid {
+          grid-template-columns: 1fr;
+        }
       }
-      .modal {
-        display: none;
+
+      .banner-card {
+        background: linear-gradient(160deg, var(--bg2), var(--bg));
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        padding: 22px;
+        position: relative;
+        overflow: auto;
+      }
+      .banner-card::before {
+        content: "";
+        position: absolute;
+        top: -40px;
+        right: -40px;
+        width: 180px;
+        height: 180px;
+        border-radius: 50%;
+        background: radial-gradient(
+          circle,
+          var(--banner-glow, rgba(74, 255, 106, 0.06)) 0%,
+          transparent 70%
+        );
+        pointer-events: none;
+      }
+      .banner-card.premium {
+        --banner-glow: rgba(255, 184, 48, 0.08);
+        border-color: rgba(255, 184, 48, 0.3);
+      }
+      .banner-card.premium .banner-name {
+        color: var(--amber);
+      }
+      .banner-card.premium .pull-btn {
+        border-color: rgba(255, 184, 48, 0.4);
+        color: var(--amber);
+      }
+      .banner-card.premium .pull-btn:hover {
+        background: rgba(255, 184, 48, 0.1);
+        border-color: var(--amber);
+        box-shadow: 0 0 16px rgba(255, 184, 48, 0.2);
+      }
+
+      .banner-tag {
+        font-family: var(--mono);
+        font-size: 7px;
+        letter-spacing: 3px;
+        color: var(--text-dim);
+        margin-bottom: 6px;
+      }
+      .banner-name {
+        font-family: var(--display);
+        font-size: 20px;
+        letter-spacing: 5px;
+        color: var(--green);
+        margin-bottom: 4px;
+      }
+      .banner-desc {
+        font-family: var(--mono);
+        font-size: 9px;
+        letter-spacing: 0.5px;
+        color: rgba(200, 230, 200, 0.5);
+        line-height: 1.6;
+        margin-bottom: 16px;
+      }
+
+      /* Featured pokemon preview */
+      .banner-featured {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 16px;
+        flex-wrap: wrap;
+      }
+      .featured-chip {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 10px;
+        border-radius: 2px;
+        border: 1px solid var(--chip-color, var(--green));
+        background: rgba(0, 0, 0, 0.3);
+        font-family: var(--mono);
+        font-size: 8px;
+        letter-spacing: 2px;
+        color: var(--chip-color, var(--green));
+      }
+      .featured-chip img {
+        width: 24px;
+        height: 24px;
+        image-rendering: pixelated;
+      }
+
+      /* Pity counter */
+      .pity-bar {
+        margin-bottom: 14px;
+      }
+      .pity-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 6px;
+      }
+      .pity-label {
+        font-family: var(--mono);
+        font-size: 8px;
+        letter-spacing: 2px;
+        color: var(--text-dim);
+        white-space: nowrap;
+        width: 80px;
+      }
+      .pity-track {
+        flex: 1;
+        height: 4px;
+        background: rgba(74, 255, 106, 0.08);
+        border-radius: 2px;
+        overflow: hidden;
+        position: relative;
+      }
+      .pity-fill {
+        height: 100%;
+        border-radius: 2px;
+        transition: width 0.5s ease;
+        background: var(--pity-color, var(--green));
+        box-shadow: 0 0 6px var(--pity-color, var(--green));
+      }
+      .pity-num {
+        font-family: var(--mono);
+        font-size: 8px;
+        letter-spacing: 1px;
+        color: var(--text-dim);
+        width: 36px;
+        text-align: right;
+      }
+
+      /* Pull buttons */
+      .pull-btns {
+        display: flex;
+        gap: 8px;
+      }
+      .pull-btn {
+        flex: 1;
+        padding: 10px;
+        border-radius: 2px;
+        font-family: var(--display);
+        font-size: 14px;
+        letter-spacing: 4px;
+        border: 1px solid var(--border);
+        color: var(--green);
+        background: var(--green-dim);
+        cursor: pointer;
+        transition: all 0.2s;
+        position: relative;
+        overflow: hidden;
+      }
+      .pull-btn::after {
+        content: "";
+        position: absolute;
+        top: -50%;
+        left: -60%;
+        width: 25%;
+        height: 200%;
+        background: rgba(255, 255, 255, 0.04);
+        transform: skewX(-18deg);
+        animation: btnShine 4s ease-in-out infinite;
+      }
+      @keyframes btnShine {
+        0%,
+        70%,
+        100% {
+          left: -60%;
+        }
+        40% {
+          left: 130%;
+        }
+      }
+      .pull-btn:hover {
+        background: rgba(74, 255, 106, 0.16);
+        border-color: var(--green);
+        box-shadow: 0 0 16px rgba(74, 255, 106, 0.2);
+      }
+      .pull-btn .cost {
+        display: block;
+        font-family: var(--mono);
+        font-size: 7px;
+        letter-spacing: 2px;
+        color: var(--text-dim);
+        margin-top: 2px;
+      }
+
+      /* ── PULL RESULT MODAL ── */
+      .result-overlay {
         position: fixed;
-        z-index: 9999;
-        left: 0;
-        top: 0;
-        width: 100vw;
-        height: 100vh;
-        background: rgba(0, 0, 0, 0.7);
+        inset: 0;
+        z-index: 500;
+        background: rgba(0, 0, 0, 0.88);
+        backdrop-filter: blur(8px);
+        display: none;
         align-items: center;
         justify-content: center;
       }
-      .modal-content {
-        background: #23273a;
-        color: #fff;
-        border-radius: 16px;
-        padding: 32px 24px 24px 24px;
-        min-width: 320px;
-        max-width: 90vw;
-        box-shadow: 0 4px 32px #000a;
+      .result-overlay.open {
+        display: flex;
+      }
+      .result-box {
+        background: linear-gradient(160deg, #0c140e, #080d09);
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        padding: 28px;
+        width: min(680px, 96vw);
+        box-shadow: 0 0 60px rgba(74, 255, 106, 0.08);
+      }
+      .result-title {
+        font-family: var(--display);
+        font-size: 22px;
+        letter-spacing: 8px;
+        color: var(--green);
         text-align: center;
+        margin-bottom: 20px;
       }
-      .modal-content h3 {
-        margin-bottom: 18px;
-        color: #4caf50;
-      }
-      .modal-content ul {
-        list-style: none;
-        padding: 0;
-        margin: 0 0 18px 0;
-      }
-      .modal-content li {
+      .result-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 8px;
         margin-bottom: 8px;
-        font-size: 16px;
       }
-      .modal-content button {
-        margin: 0 10px;
-        padding: 8px 24px;
-        border-radius: 8px;
-        border: none;
-        font-size: 16px;
-        font-weight: bold;
-        background: #4caf50;
-        color: #fff;
-        cursor: pointer;
-        transition: background 0.2s;
+      @media (max-width: 500px) {
+        .result-grid {
+          grid-template-columns: repeat(3, 1fr);
+        }
       }
-      .modal-content button:hover {
-        background: #388e3c;
+      .result-item {
+        background: rgba(0, 0, 0, 0.4);
+        border-radius: 3px;
+        padding: 10px 6px;
+        text-align: center;
+        border: 1px solid;
+        animation: resultPop 0.4s ease backwards;
+        position: relative;
+        overflow: hidden;
       }
-      .poke-rarity {
-        font-weight: bold;
+      .result-item::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(
+          ellipse at 50% 0%,
+          var(--item-glow, rgba(74, 255, 106, 0.08)) 0%,
+          transparent 70%
+        );
+        pointer-events: none;
+      }
+      @keyframes resultPop {
+        from {
+          transform: scale(0.7);
+          opacity: 0;
+        }
+        to {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+      .result-item.r5 {
+        border-color: rgba(255, 184, 48, 0.5);
+        --item-glow: rgba(255, 184, 48, 0.12);
+      }
+      .result-item.r4 {
+        border-color: rgba(74, 184, 255, 0.4);
+        --item-glow: rgba(74, 184, 255, 0.1);
+      }
+      .result-item.r3 {
+        border-color: rgba(74, 255, 106, 0.2);
+      }
+      .result-img {
+        width: 52px;
+        height: 52px;
+        image-rendering: pixelated;
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
+      }
+      .result-name {
+        font-family: var(--mono);
+        font-size: 7px;
+        letter-spacing: 1px;
+        margin-top: 4px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .result-star {
+        font-size: 9px;
+        margin-top: 2px;
+      }
+      .result-rarity-badge {
+        font-family: var(--mono);
+        font-size: 6px;
+        letter-spacing: 2px;
+        padding: 2px 4px;
+        border-radius: 1px;
+        margin-top: 3px;
+        display: inline-block;
+      }
+      .featured-tag {
+        font-family: var(--mono);
+        font-size: 6px;
+        letter-spacing: 1px;
+        color: var(--amber);
+        margin-top: 2px;
+      }
+      .result-close {
+        display: block;
+        width: 100%;
+        margin-top: 16px;
+        padding: 10px;
+        font-family: var(--display);
         font-size: 14px;
-        margin-bottom: 4px;
-        letter-spacing: 0.5px;
+        letter-spacing: 5px;
+        border: 1px solid var(--border);
+        background: var(--green-dim);
+        color: var(--green);
+        border-radius: 2px;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .result-close:hover {
+        background: rgba(74, 255, 106, 0.16);
+        border-color: var(--green);
+      }
+
+      /* ── ITEMS GRID ── */
+      .items-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 14px;
+      }
+      .item-card {
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: 3px;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        transition: border-color 0.2s;
+        position: relative;
+        overflow: hidden;
+      }
+      .item-card::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          var(--card-accent, var(--green)),
+          transparent
+        );
+        opacity: 0.4;
+      }
+      .item-card:hover {
+        border-color: rgba(74, 255, 106, 0.4);
+      }
+      .item-card.booster {
+        --card-accent: var(--amber);
+      }
+      .item-icon-wrap {
+        width: 56px;
+        height: 56px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .item-icon-wrap img {
+        width: 48px;
+        height: 48px;
+        image-rendering: pixelated;
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+      }
+      .item-icon-emoji {
+        font-size: 28px;
+        line-height: 1;
       }
       .item-name {
-        font-size: 15px;
-        font-weight: bold;
-        margin-bottom: 2px;
-        color: #fff;
-        text-align: center;
-        letter-spacing: 0.2px;
-      }
-      .item-price {
+        font-family: var(--display);
         font-size: 14px;
-        color: #4caf50;
-        margin-bottom: 8px;
-        text-align: center;
-        font-weight: bold;
+        letter-spacing: 3px;
+        color: var(--text);
       }
-      .btn.btn-encounter {
-        background: linear-gradient(90deg, #4caf50 60%, #388e3c 100%);
-        color: #fff;
-        border: none;
-        border-radius: 8px;
-        padding: 10px 32px;
-        font-size: 17px;
-        cursor: pointer;
-        margin-top: 10px;
-        font-weight: bold;
+      .item-desc {
+        font-family: var(--mono);
+        font-size: 8px;
         letter-spacing: 0.5px;
-        box-shadow: 0 2px 8px #0003;
-        transition:
-          background 0.2s,
-          box-shadow 0.2s;
+        color: rgba(200, 230, 200, 0.5);
+        line-height: 1.6;
+        flex: 1;
       }
-      .btn.btn-encounter:hover {
-        background: linear-gradient(90deg, #388e3c 60%, #4caf50 100%);
-        box-shadow: 0 4px 16px #0005;
+      .item-cost {
+        font-family: var(--display);
+        font-size: 16px;
+        letter-spacing: 2px;
+        color: var(--amber);
       }
-      /* Responsive */
-      @media (max-width: 1024px) {
-        main {
-          flex-direction: column;
-          padding: 20px 10px;
-        }
-        .ad-placeholder {
-          width: 100%;
-          height: 100px;
-          margin-bottom: 10px;
-        }
-        .shop-section {
-          max-width: 100%;
-        }
-        .shop-item {
-          min-width: 140px;
-          max-width: 160px;
-        }
+      .item-cost span {
+        font-family: var(--mono);
+        font-size: 8px;
+        color: var(--text-dim);
+        letter-spacing: 2px;
+        margin-left: 4px;
       }
-      @media (max-width: 600px) {
-        .shop-items {
-          flex-direction: column;
-          gap: 12px;
-        }
-        .shop-section {
-          padding: 12px 4px;
-        }
+      .buy-btn {
+        padding: 8px;
+        font-family: var(--display);
+        font-size: 12px;
+        letter-spacing: 3px;
+        border: 1px solid var(--border);
+        background: var(--green-dim);
+        color: var(--green);
+        border-radius: 2px;
+        cursor: pointer;
+        transition: all 0.2s;
       }
-      footer {
-        background: #11151f;
-        padding: 20px 24px;
+      .buy-btn:hover {
+        background: rgba(74, 255, 106, 0.16);
+        border-color: var(--green);
+        box-shadow: 0 0 10px rgba(74, 255, 106, 0.15);
+      }
+      .buy-btn.amber-btn {
+        background: rgba(255, 184, 48, 0.08);
+        border-color: rgba(255, 184, 48, 0.3);
+        color: var(--amber);
+      }
+      .buy-btn.amber-btn:hover {
+        background: rgba(255, 184, 48, 0.16);
+        border-color: var(--amber);
+      }
+      .qty-row {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .qty-btn {
+        width: 24px;
+        height: 24px;
+        border: 1px solid var(--border);
+        background: var(--bg);
+        color: var(--text);
+        font-size: 14px;
+        cursor: pointer;
+        border-radius: 2px;
+        transition: all 0.2s;
+      }
+      .qty-btn:hover {
+        border-color: var(--green);
+        color: var(--green);
+      }
+      .qty-val {
+        font-family: var(--mono);
+        font-size: 11px;
+        letter-spacing: 1px;
+        color: var(--text);
+        width: 28px;
         text-align: center;
-        color: #aaa;
-        margin-top: auto;
-        font-family: Arial, Helvetica, sans-serif;
-        font-size: 15px;
       }
-      footer a {
-        color: #4caf50;
-        margin: 0 10px;
-        text-decoration: none;
-        transition: color 0.2s;
+
+      /* ── HISTORY ── */
+      .history-wrap {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 8px;
       }
-      footer a:hover {
-        color: #fff;
+      .history-chip {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        padding: 3px 8px;
+        border-radius: 2px;
+        border: 1px solid;
+        font-family: var(--mono);
+        font-size: 7px;
+        letter-spacing: 1px;
+      }
+      .history-chip.r5 {
+        border-color: rgba(255, 184, 48, 0.5);
+        color: var(--amber);
+      }
+      .history-chip.r4 {
+        border-color: rgba(74, 184, 255, 0.4);
+        color: var(--blue);
+      }
+      .history-chip.r3 {
+        border-color: rgba(74, 255, 106, 0.2);
+        color: rgba(74, 255, 106, 0.5);
+      }
+      .history-chip img {
+        width: 16px;
+        height: 16px;
+        image-rendering: pixelated;
+      }
+
+      /* ── CONFIRM MODAL ── */
+      .confirm-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 400;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(4px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+      }
+      .confirm-overlay.open {
+        display: flex;
+      }
+      .confirm-box {
+        background: linear-gradient(160deg, #0c140e, #080d09);
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        padding: 28px;
+        width: min(360px, 94vw);
+        text-align: center;
+      }
+      .confirm-title {
+        font-family: var(--display);
+        font-size: 18px;
+        letter-spacing: 5px;
+        color: var(--green);
+        margin-bottom: 12px;
+      }
+      .confirm-desc {
+        font-family: var(--mono);
+        font-size: 10px;
+        letter-spacing: 0.5px;
+        color: rgba(200, 230, 200, 0.6);
+        line-height: 1.7;
+        margin-bottom: 8px;
+      }
+      .confirm-cost {
+        font-family: var(--display);
+        font-size: 22px;
+        letter-spacing: 3px;
+        color: var(--amber);
+        margin-bottom: 18px;
+      }
+      .confirm-btns {
+        display: flex;
+        gap: 10px;
+      }
+      .confirm-btn {
+        flex: 1;
+        padding: 10px;
+        font-family: var(--display);
+        font-size: 13px;
+        letter-spacing: 4px;
+        border-radius: 2px;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: 1px solid;
+      }
+      .confirm-btn.ok {
+        background: var(--green-dim);
+        border-color: rgba(74, 255, 106, 0.4);
+        color: var(--green);
+      }
+      .confirm-btn.ok:hover {
+        background: rgba(74, 255, 106, 0.16);
+        border-color: var(--green);
+      }
+      .confirm-btn.cancel {
+        background: rgba(255, 68, 68, 0.06);
+        border-color: rgba(255, 68, 68, 0.25);
+        color: var(--red);
+      }
+      .confirm-btn.cancel:hover {
+        background: rgba(255, 68, 68, 0.14);
+      }
+
+      /* ── TOAST ── */
+      .toast {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        z-index: 600;
+        font-family: var(--mono);
+        font-size: 10px;
+        letter-spacing: 2px;
+        padding: 10px 18px;
+        border-radius: 3px;
+        border: 1px solid;
+        background: var(--bg2);
+        transform: translateY(40px);
+        opacity: 0;
+        transition: all 0.3s ease;
+        pointer-events: none;
+      }
+      .toast.show {
+        transform: translateY(0);
+        opacity: 1;
+      }
+      .toast.ok {
+        border-color: rgba(74, 255, 106, 0.4);
+        color: var(--green);
+      }
+      .toast.err {
+        border-color: rgba(255, 68, 68, 0.4);
+        color: var(--red);
+      }
+      .toast.warn {
+        border-color: rgba(255, 184, 48, 0.4);
+        color: var(--amber);
+      }
+
+      /* ── INSUFFICIENT FUNDS warning ── */
+      .insuf-note {
+        font-family: var(--mono);
+        font-size: 8px;
+        letter-spacing: 2px;
+        color: rgba(255, 68, 68, 0.6);
+        text-align: center;
+        margin-top: 8px;
+        display: none;
       }
     </style>
   </head>
   <body>
     <div id="navbar-placeholder"></div>
-    <main>
-      <div class="ad-placeholder">AD LEFT</div>
-      <div class="content-wrapper">
-        <div class="shop-title">Pokémon Shop</div>
-        <div class="wallet-balance">
-          Your Balance: <span id="wallet-balance">0</span> WPC
+
+    <div class="shop-page">
+      <!-- HEADER -->
+      <div class="shop-header">
+        <div class="shop-title">FRAGMENT SHOP</div>
+        <div class="shop-sub">
+          // Acquire Neural Chips — Expand Your Arsenal
         </div>
-        <div class="timer-container">
-          <span>Next refresh in: <span id="refresh-timer">--:--:--</span></span>
-          <span style="font-size: 12px; color: #aaa"
-            >(Refreshes daily at 8:00 AM PH Time)</span
-          >
+      </div>
+
+      <!-- BALANCE BAR -->
+      <div class="balance-bar">
+        <div class="balance-item">
+          <span class="balance-icon">◆</span>
+          <div>
+            <div class="balance-val" id="frgBalance">0</div>
+            <div class="balance-label">FRG BALANCE</div>
+          </div>
         </div>
-        <div class="shop-section">
-          <h2>Pokéballs</h2>
-          <form id="pokeball-shop-form">
-            <div class="shop-items" id="pokeball-shop-list">
-              <!-- Pokéballs for sale will be rendered here -->
+        <div
+          style="width: 1px; height: 32px; background: var(--border-dim)"
+        ></div>
+        <div>
+          <div class="refresh-timer">
+            DAILY RESET IN
+            <span class="timer-val" id="refreshTimer">--:--:--</span>
+          </div>
+          <div class="refresh-timer" style="margin-top: 2px">
+            RESETS AT 08:00 PH TIME
+          </div>
+        </div>
+      </div>
+
+      <!-- TABS -->
+      <div class="tabs">
+        <div class="tab active" onclick="switchTab('gacha')">
+          ⬡ FRAGMENT PULL
+        </div>
+        <div class="tab" onclick="switchTab('balls')">◎ CAPTURE GEAR</div>
+        <div class="tab" onclick="switchTab('boosters')">⚡ BOOSTERS</div>
+        <div class="tab" onclick="switchTab('history')">◈ PULL HISTORY</div>
+      </div>
+
+      <!-- TAB: GACHA -->
+      <div class="tab-content active" id="tab-gacha">
+        <div class="section-header">
+          <div class="section-title">FRAGMENT PULL</div>
+          <div class="section-badge">PITY SYSTEM ACTIVE</div>
+        </div>
+
+        <div class="banners-grid">
+          <!-- STANDARD BANNER -->
+          <div class="banner-card standard">
+            <div class="banner-tag">STANDARD BANNER</div>
+            <div class="banner-name">WASTELAND ARCHIVE</div>
+            <div class="banner-desc">
+              All Fragment chips available. Hard pity at 75 pulls — guaranteed
+              Legendary. 4★ guaranteed every 10 pulls. Grind your way up.
             </div>
-            <div style="text-align: center; margin-top: 18px">
-              <button type="submit" class="btn btn-encounter">
-                Buy Selected
+
+            <div class="banner-featured">
+              <div class="featured-chip" style="--chip-color: #ff80c0">
+                <img
+                  src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/150.png"
+                  alt="Mewtwo"
+                />
+                MEWTWO ★★★★★
+              </div>
+              <div class="featured-chip" style="--chip-color: #ffe040">
+                <img
+                  src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/145.png"
+                  alt="Zapdos"
+                />
+                ZAPDOS ★★★★★
+              </div>
+            </div>
+
+            <div class="pity-bar">
+              <div class="pity-row">
+                <span class="pity-label">5★ PITY</span>
+                <div class="pity-track">
+                  <div
+                    class="pity-fill"
+                    id="std-pity5-bar"
+                    style="--pity-color: #ffb830; width: 0%"
+                  ></div>
+                </div>
+                <span class="pity-num" id="std-pity5-num">0/75</span>
+              </div>
+              <div class="pity-row">
+                <span class="pity-label">4★ PITY</span>
+                <div class="pity-track">
+                  <div
+                    class="pity-fill"
+                    id="std-pity4-bar"
+                    style="--pity-color: #4ab8ff; width: 0%"
+                  ></div>
+                </div>
+                <span class="pity-num" id="std-pity4-num">0/10</span>
+              </div>
+            </div>
+
+            <div class="pull-btns">
+              <button class="pull-btn" onclick="doPullUI('standard', 1)">
+                PULL ×1
+                <span class="cost">160 FRG</span>
+              </button>
+              <button class="pull-btn" onclick="doPullUI('standard', 10)">
+                PULL ×10
+                <span class="cost">1,500 FRG</span>
               </button>
             </div>
-          </form>
-          <div id="pokeball-modal" class="modal">
-            <div class="modal-content">
-              <h3>Confirm Purchase</h3>
-              <ul id="pokeball-receipt-list"></ul>
-              <div style="margin-top: 18px">
-                <button id="confirm-pokeball-purchase">Confirm</button>
-                <button id="cancel-pokeball-purchase">Cancel</button>
+            <div class="insuf-note" id="std-insuf">
+              ⚠ INSUFFICIENT FRG — EARN MORE IN FIELD OPS
+            </div>
+          </div>
+
+          <!-- PREMIUM BANNER -->
+          <div class="banner-card premium">
+            <div class="banner-tag" style="color: var(--amber)">
+              LIMITED EVENT BANNER
+            </div>
+            <div class="banner-name" style="color: var(--amber)">
+              PROJECT GENESIS
+            </div>
+            <div class="banner-desc">
+              Featured rate-up for Mewtwo. 50/50 system — if you lose the 50/50
+              your next 5★ is guaranteed featured. Hard pity at 60 pulls.
+            </div>
+
+            <div class="banner-featured">
+              <div class="featured-chip" style="--chip-color: #ff80c0">
+                <img
+                  src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/150.png"
+                  alt="Mewtwo"
+                />
+                MEWTWO — RATE UP
               </div>
+              <div class="featured-chip" style="--chip-color: #ff6030">
+                <img
+                  src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/6.png"
+                  alt="Charizard"
+                />
+                CHARIZARD ★★★★
+              </div>
+              <div class="featured-chip" style="--chip-color: #b86aff">
+                <img
+                  src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/94.png"
+                  alt="Gengar"
+                />
+                GENGAR ★★★★
+              </div>
+            </div>
+
+            <div class="pity-bar">
+              <div class="pity-row">
+                <span class="pity-label">5★ PITY</span>
+                <div class="pity-track">
+                  <div
+                    class="pity-fill"
+                    id="prm-pity5-bar"
+                    style="--pity-color: #ffb830; width: 0%"
+                  ></div>
+                </div>
+                <span class="pity-num" id="prm-pity5-num">0/60</span>
+              </div>
+              <div class="pity-row">
+                <span class="pity-label">4★ PITY</span>
+                <div class="pity-track">
+                  <div
+                    class="pity-fill"
+                    id="prm-pity4-bar"
+                    style="--pity-color: #4ab8ff; width: 0%"
+                  ></div>
+                </div>
+                <span class="pity-num" id="prm-pity4-num">0/10</span>
+              </div>
+              <div
+                id="prm-5050"
+                style="
+                  font-family: var(--mono);
+                  font-size: 8px;
+                  letter-spacing: 2px;
+                  color: rgba(255, 184, 48, 0.5);
+                  margin-top: 4px;
+                  display: none;
+                "
+              >
+                ⚠ GUARANTEED FEATURED — 50/50 SECURED
+              </div>
+            </div>
+
+            <div class="pull-btns">
+              <button class="pull-btn" onclick="doPullUI('premium', 1)">
+                PULL ×1
+                <span class="cost">280 FRG</span>
+              </button>
+              <button class="pull-btn" onclick="doPullUI('premium', 10)">
+                PULL ×10
+                <span class="cost">2,600 FRG</span>
+              </button>
+            </div>
+            <div class="insuf-note" id="prm-insuf">
+              ⚠ INSUFFICIENT FRG — EARN MORE IN FIELD OPS
             </div>
           </div>
         </div>
-        <div class="shop-section">
-          <h2>Today's Pokémon</h2>
-          <form id="pokemon-shop-form">
-            <div class="shop-items" id="pokemon-shop-list">
-              <!-- Pokémon for sale will be rendered here -->
-            </div>
-          </form>
+
+        <!-- Drop rates info -->
+        <div
+          style="
+            margin-top: 20px;
+            padding: 14px;
+            background: var(--bg2);
+            border: 1px solid var(--border-dim);
+            border-radius: 3px;
+          "
+        >
+          <div
+            style="
+              font-family: var(--mono);
+              font-size: 8px;
+              letter-spacing: 3px;
+              color: var(--text-dim);
+              margin-bottom: 10px;
+            "
+          >
+            DROP RATES
+          </div>
+          <div style="display: flex; gap: 20px; flex-wrap: wrap">
+            <span
+              style="
+                font-family: var(--mono);
+                font-size: 9px;
+                letter-spacing: 1px;
+                color: var(--amber);
+              "
+              >★★★★★ 0.6% (soft pity from 60, hard pity 75)</span
+            >
+            <span
+              style="
+                font-family: var(--mono);
+                font-size: 9px;
+                letter-spacing: 1px;
+                color: var(--blue);
+              "
+              >★★★★ 5.1% (guaranteed every 10)</span
+            >
+            <span
+              style="
+                font-family: var(--mono);
+                font-size: 9px;
+                letter-spacing: 1px;
+                color: var(--green);
+              "
+              >★★★ 94.3%</span
+            >
+          </div>
         </div>
       </div>
-      <div class="ad-placeholder">AD RIGHT</div>
-    </main>
-    <footer>
-      <p>
-        <a href="#">Maps</a> | <a href="#">Profile</a> |
-        <a href="#">Pokemon</a> |
-        <a href="#">Battle</a>
-      </p>
-      <p>&copy; 2026 Bit-Pokemon by Kobe D. Estabalaya</p>
-    </footer>
+
+      <!-- TAB: CAPTURE GEAR -->
+      <div class="tab-content" id="tab-balls">
+        <div class="section-header">
+          <div class="section-title">CAPTURE GEAR</div>
+          <div class="section-badge">HARDCODED INVENTORY</div>
+        </div>
+        <div class="items-grid" id="ballsGrid"></div>
+      </div>
+
+      <!-- TAB: BOOSTERS -->
+      <div class="tab-content" id="tab-boosters">
+        <div class="section-header">
+          <div class="section-title">BOOSTERS</div>
+          <div class="section-badge">FIELD UPGRADES</div>
+        </div>
+        <div class="items-grid" id="boostersGrid"></div>
+      </div>
+
+      <!-- TAB: HISTORY -->
+      <div class="tab-content" id="tab-history">
+        <div class="section-header">
+          <div class="section-title">PULL HISTORY</div>
+          <div class="section-badge">LAST 50 PULLS</div>
+        </div>
+        <div class="history-wrap" id="historyWrap">
+          <span
+            style="
+              font-family: var(--mono);
+              font-size: 9px;
+              color: var(--text-dim);
+            "
+            >NO PULLS YET</span
+          >
+        </div>
+      </div>
+    </div>
+    <!-- end shop-page -->
+
+    <!-- PULL RESULT MODAL -->
+    <div class="result-overlay" id="resultOverlay">
+      <div class="result-box">
+        <div class="result-title" id="resultTitle">FRAGMENT ACQUIRED</div>
+        <div class="result-grid" id="resultGrid"></div>
+        <button class="result-close" onclick="closeResult()">✕ CLOSE</button>
+      </div>
+    </div>
+
+    <!-- CONFIRM MODAL -->
+    <div class="confirm-overlay" id="confirmOverlay">
+      <div class="confirm-box">
+        <div class="confirm-title" id="confirmTitle">CONFIRM PURCHASE</div>
+        <div class="confirm-desc" id="confirmDesc"></div>
+        <div class="confirm-cost" id="confirmCost"></div>
+        <div class="confirm-btns">
+          <button class="confirm-btn ok" id="confirmOk">CONFIRM</button>
+          <button class="confirm-btn cancel" onclick="closeConfirm()">
+            CANCEL
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOAST -->
+    <div class="toast" id="toast"></div>
 
     <script type="module">
-      // Render Pokéballs for sale
-      const pokeballShopList = document.getElementById("pokeball-shop-list");
-      const pokeballForm = document.getElementById("pokeball-shop-form");
-      const pokeballs = [
-        {
-          name: "Pokéball",
-          type: "pokeball",
-          price: 5,
-          img: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png",
-        },
-        {
-          name: "Great Ball",
-          type: "greatball",
-          price: 10,
-          img: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/great-ball.png",
-        },
-        {
-          name: "Ultra Ball",
-          type: "ultraball",
-          price: 20,
-          img: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/ultra-ball.png",
-        },
-        {
-          name: "Master Ball",
-          type: "masterball",
-          price: 30,
-          img: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/master-ball.png",
-        },
-      ];
-      if (pokeballShopList && pokeballForm) {
-        pokeballShopList.innerHTML = "";
-        pokeballs.forEach((ball, idx) => {
-          const div = document.createElement("div");
-          div.className = "shop-item";
-          div.innerHTML = `
-            <input type="checkbox" id="pokeball-check-${idx}" name="pokeball-check" value="${idx}" />
-            <img src="${ball.img}" alt="${ball.name}" />
-            <div class="item-name">${ball.name}</div>
-            <div class="item-price">${ball.price} WPC</div>
-            <input type="number" id="pokeball-qty-${idx}" name="pokeball-qty-${idx}" min="1" max="99" value="1" style="width:60px;" />
-          `;
-          pokeballShopList.appendChild(div);
-        });
-
-        const modal = document.getElementById("pokeball-modal");
-        const receiptList = document.getElementById("pokeball-receipt-list");
-        const confirmBtn = document.getElementById("confirm-pokeball-purchase");
-        const cancelBtn = document.getElementById("cancel-pokeball-purchase");
-        let pokeballPurchaseQueue = [];
-
-        pokeballForm.onsubmit = (e) => {
-          e.preventDefault();
-          const checked = Array.from(
-            pokeballForm.querySelectorAll(
-              'input[name="pokeball-check"]:checked',
-            ),
-          );
-          if (!checked.length)
-            return alert("Select at least one Pokéball to buy.");
-          pokeballPurchaseQueue = checked.map((c) => {
-            const idx = c.value;
-            const qty = Math.max(
-              1,
-              parseInt(document.getElementById(`pokeball-qty-${idx}`).value) ||
-                1,
-            );
-            return { ...pokeballs[idx], qty };
-          });
-          // Show modal
-          receiptList.innerHTML = pokeballPurchaseQueue
-            .map(
-              (ball) =>
-                `<li>${ball.name} × ${ball.qty} = <span style='color:#ffd700'>${ball.price * ball.qty} WPC</span></li>`,
-            )
-            .join("");
-          modal.style.display = "flex";
-        };
-
-        confirmBtn.onclick = async () => {
-          if (!pokeballPurchaseQueue.length) return;
-          let bought = [];
-          for (const ball of pokeballPurchaseQueue) {
-            if (!user_id || !token) return alert("Please log in.");
-            const res = await buyPokeball(user_id, ball.type, ball.qty, token);
-            if (res.success) {
-              bought.push(`${ball.name} × ${ball.qty}`);
-            } else {
-              alert(res.message || `Failed to buy ${ball.name}`);
-            }
-          }
-          if (bought.length) {
-            alert(`Purchased: ${bought.join(", ")}`);
-            updateNavbarWPC();
-          }
-          modal.style.display = "none";
-          pokeballPurchaseQueue = [];
-        };
-        cancelBtn.onclick = () => {
-          modal.style.display = "none";
-          pokeballPurchaseQueue = [];
-        };
-        // Hide modal on outside click
-        modal.onclick = (e) => {
-          if (e.target === modal) {
-            modal.style.display = "none";
-            pokeballPurchaseQueue = [];
-          }
-        };
-      }
       import {
-        buyPokeball,
-        buyPokemon,
-        getWPC,
-      } from "../assets/js/shop-api.js";
+        loadPity,
+        savePity,
+        doPull,
+        getPityInfo,
+        resetPity,
+        PULL_COSTS,
+        SHOP_ITEMS,
+      } from "../assets/js/pity.js";
 
-      // --- Helper: Generate 5 Pokémon (4 common, 1 rare/legendary/evo) ---
-      function getRandomPokemonSet() {
-        // Example pool (should be replaced with backend fetch)
-        const commons = [
-          {
-            name: "Pidgey",
-            type: "Normal/Flying",
-            rarity: "Common",
-            price: 100,
-            details: "A common bird Pokémon.",
-          },
-          {
-            name: "Rattata",
-            type: "Normal",
-            rarity: "Common",
-            price: 100,
-            details: "A quick and nimble rodent.",
-          },
-          {
-            name: "Caterpie",
-            type: "Bug",
-            rarity: "Common",
-            price: 100,
-            details: "A worm-like Pokémon.",
-          },
-          {
-            name: "Poliwag",
-            type: "Water",
-            rarity: "Common",
-            price: 100,
-            details: "A tadpole Pokémon.",
-          },
-          {
-            name: "Oddish",
-            type: "Grass/Poison",
-            rarity: "Common",
-            price: 100,
-            details: "A weed Pokémon.",
-          },
-        ];
-        const rares = [
-          {
-            name: "Gengar",
-            type: "Ghost/Poison",
-            rarity: "Rare",
-            price: 1000,
-            details: "A shadowy Pokémon with a mischievous grin.",
-          },
-          {
-            name: "Dragonair",
-            type: "Dragon",
-            rarity: "Rare",
-            price: 1000,
-            details: "A mystical dragon Pokémon.",
-          },
-          {
-            name: "Charmeleon",
-            type: "Fire",
-            rarity: "Rare",
-            price: 1000,
-            details: "The evolved form of Charmander.",
-          },
-        ];
-        const legendaries = [
-          {
-            name: "Mewtwo",
-            type: "Psychic",
-            rarity: "Legendary",
-            price: 5000,
-            details: "A legendary Pokémon created by science.",
-          },
-          {
-            name: "Zapdos",
-            type: "Electric/Flying",
-            rarity: "Legendary",
-            price: 5000,
-            details: "A legendary bird Pokémon.",
-          },
-        ];
-        // Pick 4 random commons
-        const shuffled = commons.sort(() => 0.5 - Math.random());
-        const selectedCommons = shuffled.slice(0, 4);
-        // 80% rare, 20% legendary
-        const isLegendary = Math.random() < 0.2;
-        let special;
-        if (isLegendary) {
-          special = legendaries[Math.floor(Math.random() * legendaries.length)];
-        } else {
-          special = rares[Math.floor(Math.random() * rares.length)];
-        }
-        return [...selectedCommons, special];
+      // ── STATE ──
+      let pityState = loadPity();
+      let frgBalance = parseInt(localStorage.getItem("frg_balance") || "0");
+
+      // In a real app this comes from API — for now mock it
+      // Try to load from localStorage if set by game
+      const storedFRG = localStorage.getItem("user_ingame_wallet");
+      if (storedFRG !== null) frgBalance = parseInt(storedFRG) || 0;
+
+      function saveFRG(val) {
+        frgBalance = val;
+        localStorage.setItem("frg_balance", val);
+        document.getElementById("frgBalance").textContent =
+          val.toLocaleString();
+        // Update navbar coin
+        const coinEl = document.getElementById("coin-amount");
+        if (coinEl) coinEl.textContent = val + " FRG";
       }
 
-      // --- Timer for next refresh (8am PH time) ---
-      function updateRefreshTimer() {
-        const now = new Date();
-        // PH time is UTC+8
-        const phNow = new Date(
-          now.getTime() + (0 - now.getTimezoneOffset() / 60) * 60 * 60 * 1000,
+      // ── UTILS ──
+      window.switchTab = function (name) {
+        document.querySelectorAll(".tab").forEach((t, i) => {
+          const names = ["gacha", "balls", "boosters", "history"];
+          t.classList.toggle("active", names[i] === name);
+        });
+        document
+          .querySelectorAll(".tab-content")
+          .forEach((c) => c.classList.remove("active"));
+        document.getElementById("tab-" + name).classList.add("active");
+        if (name === "history") renderHistory();
+      };
+
+      function toast(msg, type = "ok") {
+        const el = document.getElementById("toast");
+        el.textContent = msg;
+        el.className = `toast show ${type}`;
+        clearTimeout(el._t);
+        el._t = setTimeout(() => el.classList.remove("show"), 2800);
+      }
+
+      // ── PITY UI UPDATE ──
+      function updatePityUI() {
+        const std = getPityInfo("standard", pityState);
+        const prm = getPityInfo("premium", pityState);
+
+        document.getElementById("std-pity5-bar").style.width =
+          (std.pity5 / std.hardPity) * 100 + "%";
+        document.getElementById("std-pity5-num").textContent =
+          `${std.pity5}/${std.hardPity}`;
+        document.getElementById("std-pity4-bar").style.width =
+          (std.pity4 / 10) * 100 + "%";
+        document.getElementById("std-pity4-num").textContent =
+          `${std.pity4}/10`;
+
+        document.getElementById("prm-pity5-bar").style.width =
+          (prm.pity5 / prm.hardPity) * 100 + "%";
+        document.getElementById("prm-pity5-num").textContent =
+          `${prm.pity5}/${prm.hardPity}`;
+        document.getElementById("prm-pity4-bar").style.width =
+          (prm.pity4 / 10) * 100 + "%";
+        document.getElementById("prm-pity4-num").textContent =
+          `${prm.pity4}/10`;
+
+        const g5050 = document.getElementById("prm-5050");
+        if (g5050) g5050.style.display = prm.guaranteed5 ? "block" : "none";
+      }
+
+      // ── PULL ──
+      const ART = (id) =>
+        `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
+
+      window.doPullUI = function (bannerType, count) {
+        const cost =
+          count === 1
+            ? PULL_COSTS[bannerType].single
+            : PULL_COSTS[bannerType].ten;
+        const insufId = bannerType === "standard" ? "std-insuf" : "prm-insuf";
+
+        if (frgBalance < cost) {
+          document.getElementById(insufId).style.display = "block";
+          toast("Insufficient FRG — grind field ops for more!", "err");
+          return;
+        }
+        document.getElementById(insufId).style.display = "none";
+
+        // Deduct
+        saveFRG(frgBalance - cost);
+
+        // Run pity engine
+        const { results, state } = doPull(bannerType, count, pityState);
+        pityState = state;
+        updatePityUI();
+
+        // Show result modal
+        showResults(results, count);
+      };
+
+      function showResults(results, count) {
+        const grid = document.getElementById("resultGrid");
+        const title = document.getElementById("resultTitle");
+
+        const has5 = results.some((r) => r.rarity === 5);
+        const has4 = results.some((r) => r.rarity === 4);
+        title.textContent = has5
+          ? "⭐ LEGENDARY FRAGMENT!"
+          : has4
+            ? "FRAGMENT ACQUIRED"
+            : "FRAGMENT ACQUIRED";
+        title.style.color = has5 ? "var(--amber)" : "var(--green)";
+
+        grid.style.gridTemplateColumns = count === 1 ? "1fr" : "repeat(5,1fr)";
+
+        grid.innerHTML = results
+          .map((r, i) => {
+            const stars = "★".repeat(r.rarity);
+            const starColor =
+              r.rarity === 5
+                ? "#ffb830"
+                : r.rarity === 4
+                  ? "#4ab8ff"
+                  : "#4aff6a";
+            const borderColor =
+              r.rarity === 5
+                ? "rgba(255,184,48,.5)"
+                : r.rarity === 4
+                  ? "rgba(74,184,255,.4)"
+                  : "rgba(74,255,106,.2)";
+            return `
+      <div class="result-item r${r.rarity}" style="animation-delay:${i * 0.06}s;border-color:${borderColor};">
+        <img class="result-img" src="${ART(r.id)}" alt="${r.name}"/>
+        <div class="result-name" style="color:${r.color || starColor}">${r.name.toUpperCase()}</div>
+        <div class="result-star" style="color:${starColor}">${stars}</div>
+        ${r.featured ? `<div class="featured-tag">◆ FEATURED</div>` : ""}
+      </div>`;
+          })
+          .join("");
+
+        document.getElementById("resultOverlay").classList.add("open");
+        SFX(results);
+      }
+
+      window.closeResult = function () {
+        document.getElementById("resultOverlay").classList.remove("open");
+        renderHistory();
+      };
+
+      // ── SOUNDS ──
+      function SFX(results) {
+        try {
+          const c = new (window.AudioContext || window.webkitAudioContext)();
+          const has5 = results.some((r) => r.rarity === 5);
+          const has4 = results.some((r) => r.rarity === 4);
+          function o(f, t, d, v, fe) {
+            const osc = c.createOscillator(),
+              g = c.createGain();
+            osc.connect(g);
+            g.connect(c.destination);
+            osc.type = t;
+            osc.frequency.setValueAtTime(f, c.currentTime);
+            if (fe)
+              osc.frequency.linearRampToValueAtTime(fe, c.currentTime + d);
+            g.gain.setValueAtTime(v, c.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + d);
+            osc.start();
+            osc.stop(c.currentTime + d);
+          }
+          if (has5) {
+            o(440, "sine", 0.15, 0.08);
+            setTimeout(() => o(660, "sine", 0.15, 0.09), 160);
+            setTimeout(() => o(880, "sine", 0.25, 0.1), 320);
+            setTimeout(() => o(1100, "sine", 0.4, 0.08), 520);
+          } else if (has4) {
+            o(440, "sine", 0.1, 0.07);
+            setTimeout(() => o(660, "sine", 0.15, 0.08), 120);
+          } else {
+            o(600, "square", 0.04, 0.04);
+          }
+        } catch {}
+      }
+
+      // ── CONFIRM MODAL ──
+      let _confirmCb = null;
+      function confirm(title, desc, cost, cb) {
+        document.getElementById("confirmTitle").textContent = title;
+        document.getElementById("confirmDesc").textContent = desc;
+        document.getElementById("confirmCost").textContent = cost + " FRG";
+        _confirmCb = cb;
+        document.getElementById("confirmOverlay").classList.add("open");
+      }
+      window.closeConfirm = function () {
+        document.getElementById("confirmOverlay").classList.remove("open");
+        _confirmCb = null;
+      };
+      document.getElementById("confirmOk").onclick = function () {
+        if (_confirmCb) _confirmCb();
+        closeConfirm();
+      };
+
+      // ── RENDER BALLS ──
+      function renderBalls() {
+        const grid = document.getElementById("ballsGrid");
+        grid.innerHTML = SHOP_ITEMS.balls
+          .map((item) => {
+            return `
+      <div class="item-card">
+        <div class="item-icon-wrap"><img src="${item.img}" alt="${item.name}"/></div>
+        <div class="item-name">${item.name}</div>
+        <div class="item-desc">${item.desc}</div>
+        <div class="item-cost">${item.cost.toLocaleString()} <span>FRG EACH</span></div>
+        <div class="qty-row">
+          <button class="qty-btn" onclick="changeQty('${item.id}',-1)">−</button>
+          <span class="qty-val" id="qty-${item.id}">1</span>
+          <button class="qty-btn" onclick="changeQty('${item.id}',1)">+</button>
+        </div>
+        <button class="buy-btn" onclick="buyItem('${item.id}',${item.cost},'${item.name}')">BUY</button>
+      </div>`;
+          })
+          .join("");
+      }
+
+      // ── RENDER BOOSTERS ──
+      function renderBoosters() {
+        const grid = document.getElementById("boostersGrid");
+        grid.innerHTML = SHOP_ITEMS.boosters
+          .map((item) => {
+            return `
+      <div class="item-card booster">
+        <div class="item-icon-wrap"><div class="item-icon-emoji">${item.icon}</div></div>
+        <div class="item-name">${item.name}</div>
+        <div class="item-desc">${item.desc}</div>
+        <div class="item-cost">${item.cost.toLocaleString()} <span>FRG</span></div>
+        <button class="buy-btn amber-btn" onclick="buyBooster('${item.id}',${item.cost},'${item.name}')">ACQUIRE</button>
+      </div>`;
+          })
+          .join("");
+      }
+
+      // ── QTY CONTROL ──
+      const qtys = {};
+      window.changeQty = function (id, delta) {
+        qtys[id] = Math.max(1, Math.min(99, (qtys[id] || 1) + delta));
+        document.getElementById("qty-" + id).textContent = qtys[id];
+      };
+
+      // ── BUY ITEM ──
+      window.buyItem = function (id, costEach, name) {
+        const qty = qtys[id] || 1;
+        const total = costEach * qty;
+        confirm("CONFIRM PURCHASE", `${name} × ${qty}`, total, () => {
+          if (frgBalance < total) {
+            toast("Insufficient FRG!", "err");
+            return;
+          }
+          saveFRG(frgBalance - total);
+          // Save to localStorage inventory
+          const inv = JSON.parse(localStorage.getItem("inventory") || "{}");
+          inv[id] = (inv[id] || 0) + qty;
+          localStorage.setItem("inventory", JSON.stringify(inv));
+          toast(`${name} ×${qty} acquired`, "ok");
+        });
+      };
+
+      // ── BUY BOOSTER ──
+      window.buyBooster = function (id, cost, name) {
+        confirm(
+          "ACQUIRE BOOSTER",
+          name +
+            " — " +
+            document
+              .querySelector(`[onclick*="${id}"] + button, .item-card`)
+              ?.querySelector(".item-desc")?.textContent || "",
+          cost,
+          () => {
+            if (frgBalance < cost) {
+              toast("Insufficient FRG!", "err");
+              return;
+            }
+            saveFRG(frgBalance - cost);
+            const boosts = JSON.parse(localStorage.getItem("boosters") || "{}");
+            boosts[id] = (boosts[id] || 0) + 1;
+            localStorage.setItem("boosters", JSON.stringify(boosts));
+            toast(`${name} activated`, "ok");
+          },
         );
-        let next = new Date(phNow);
-        next.setHours(8, 0, 0, 0);
-        if (phNow.getHours() >= 8) next.setDate(next.getDate() + 1);
-        const diff = next - phNow;
+      };
+
+      // ── HISTORY ──
+      function renderHistory() {
+        const wrap = document.getElementById("historyWrap");
+        if (!pityState.history || !pityState.history.length) {
+          wrap.innerHTML =
+            '<span style="font-family:var(--mono);font-size:9px;color:var(--text-dim)">NO PULLS YET</span>';
+          return;
+        }
+        wrap.innerHTML = pityState.history
+          .map(
+            (r) => `
+    <div class="history-chip r${r.rarity}">
+      <img src="${ART(r.id)}" alt="${r.name}"/>
+      ${r.name.toUpperCase()}
+    </div>
+  `,
+          )
+          .join("");
+      }
+
+      // ── REFRESH TIMER ──
+      function updateTimer() {
+        const now = new Date();
+        const ph = new Date(now.getTime() + 8 * 3600000);
+        const next = new Date(ph);
+        next.setUTCHours(0, 0, 0, 0);
+        if (ph.getUTCHours() >= 8) next.setUTCDate(next.getUTCDate() + 1);
+        next.setUTCHours(8 - 8, 0, 0, 0);
+        const diff = next - now;
         const h = String(Math.floor(diff / 3600000)).padStart(2, "0");
         const m = String(Math.floor((diff % 3600000) / 60000)).padStart(2, "0");
         const s = String(Math.floor((diff % 60000) / 1000)).padStart(2, "0");
-        const timerElem = document.getElementById("refresh-timer");
-        if (timerElem) timerElem.textContent = `${h}:${m}:${s}`;
+        const el = document.getElementById("refreshTimer");
+        if (el) el.textContent = `${h}:${m}:${s}`;
       }
-      setInterval(updateRefreshTimer, 1000);
-      updateRefreshTimer();
+      setInterval(updateTimer, 1000);
+      updateTimer();
 
-      // --- Main logic ---
-      document.addEventListener("DOMContentLoaded", () => {
-        // Get user_id and token from localStorage
-        const user_id = localStorage.getItem("user_id");
-        const token = localStorage.getItem("token");
+      // ── INIT ──
+      saveFRG(frgBalance); // render balance
+      updatePityUI();
+      renderBalls();
+      renderBoosters();
 
-        // Load navbar and update WPC dynamically
-        fetch("navbar.html")
-          .then((res) => res.text())
-          .then((html) => {
-            const nav = document.getElementById("navbar-placeholder");
-            if (nav) nav.innerHTML = html;
-            updateNavbarWPC();
-          });
-
-        async function updateNavbarWPC() {
-          if (!user_id || !token) return;
-          const res = await getWPC(user_id, token);
-          const wpc = res && res.wpc ? res.wpc : 0;
-          const coinDisplay = document.querySelector(".coin-display");
-          if (coinDisplay) {
-            coinDisplay.textContent = `WPC = ${wpc}`;
-          }
-          const walletElem = document.getElementById("wallet-balance");
-          if (walletElem) walletElem.textContent = wpc;
-        }
-
-        // Render Pokémon for sale
-        const pokemonShopList = document.getElementById("pokemon-shop-list");
-        // Store the daily Pokémon set so it doesn't change on reload
-        let todaysPokemon = getRandomPokemonSet();
-        if (pokemonShopList) {
-          pokemonShopList.innerHTML = "";
-          todaysPokemon.forEach((poke, idx) => {
-            // Map name to Pokédex ID for GIFs
-            const nameToId = {
-              Pidgey: 16,
-              Rattata: 19,
-              Caterpie: 10,
-              Poliwag: 60,
-              Oddish: 43,
-              Gengar: 94,
-              Dragonair: 148,
-              Charmeleon: 5,
-              Mewtwo: 150,
-              Zapdos: 145,
-            };
-            const pokeId = nameToId[poke.name];
-            // Use PokéAPI animated GIF sprite if possible
-            const pokeApiGif = pokeId
-              ? `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/${pokeId}.gif`
-              : "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png";
-            const fallbackImg =
-              "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png";
-            const div = document.createElement("div");
-            div.className = "shop-item pokemon";
-            div.innerHTML = `
-              <input type="checkbox" id="poke-check-${idx}" name="poke-check" value="${idx}" />
-              <img src="${pokeApiGif}" alt="${poke.name}" onerror=\"this.onerror=null;this.src='${fallbackImg}'\" />
-              <div class="poke-rarity" style="color:${poke.rarity === "Legendary" ? "#ffd700" : poke.rarity === "Rare" ? "#4cafef" : "#aaa"}">${poke.rarity}</div>
-              <div class="item-name">${poke.name}</div>
-              <div class="poke-details">${poke.type} <br>${poke.details}</div>
-              <div class="item-price">${poke.price} WPC</div>
-              <button class="btn btn-encounter" onclick="window.buyPokemonShop(${idx})">Buy</button>
-            `;
-            pokemonShopList.appendChild(div);
-          });
-        }
-
-        // Buy Pokémon logic for shop
-        window.buyPokemonShop = async function (idx) {
-          const poke = todaysPokemon[idx];
-          if (!user_id || !token) return alert("Please log in.");
-          const res = await buyPokemon(user_id, poke, token);
-          if (res.success) {
-            alert(`Purchased: ${poke.name}`);
-            updateNavbarWPC();
-          } else {
-            alert(res.message || `Failed to buy ${poke.name}`);
-          }
-        };
-
-        // Buy Pokéball logic
-        window.buyItem = async function (type, price) {
-          if (!user_id || !token) return alert("Please log in.");
-          // Map type to backend type
-          let backendType = type;
-          if (
-            type === "pokeball" ||
-            type === "greatball" ||
-            type === "ultraball" ||
-            type === "masterball"
-          ) {
-            const res = await buyPokeball(user_id, backendType, 1, token);
-            if (res.success) {
-              alert(
-                `Purchased 1 ${type.charAt(0).toUpperCase() + type.slice(1)}!`,
-              );
-              updateNavbarWPC();
-            } else {
-              alert(res.message || "Purchase failed");
-            }
-          }
-        };
-
-        // Initial WPC fetch
-        updateNavbarWPC();
-      });
+      // Navbar
+      fetch("navbar.html")
+        .then((r) => r.text())
+        .then((data) => {
+          document.getElementById("navbar-placeholder").innerHTML = data;
+          if (typeof window.attachLogoutHandler === "function")
+            window.attachLogoutHandler();
+          if (typeof window.loadProfileName === "function")
+            window.loadProfileName();
+          if (typeof window.updateWPCBalance === "function")
+            window.updateWPCBalance();
+        });
     </script>
   </body>
 </html>

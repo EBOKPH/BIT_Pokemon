@@ -684,11 +684,11 @@ function faction(flagId, nameColor, name, mottoColor, motto, body, chips) {
 // ── BOOK CONTENT ──
 // Each book is one big scroll of HTML
 var BOOK_COVERS = [
-  { bk:'bk1', grad:'g1', vol:'I',  title:'THE AGE<br>BEFORE',    quote:'"They walked beside us once.<br>We did not deserve them."',       roman:'I',   spine:'The Age Before',   label:'Book I &mdash; The Age Before',   roman_txt:'I'   },
-  { bk:'bk2', grad:'g2', vol:'II', title:'THE<br>FRACTURE',       quote:'"The day the world forgot how to be whole."',                      roman:'II',  spine:'The Fracture',      label:'Book II &mdash; The Fracture',     roman_txt:'II'  },
-  { bk:'bk3', grad:'g3', vol:'III',title:'THE<br>FRAGMENTS',      quote:'"He could not save their bodies.<br>So he saved their souls."',    roman:'III', spine:'The Fragments',     label:'Book III &mdash; The Fragments',   roman_txt:'III' },
-  { bk:'bk4', grad:'g4', vol:'IV', title:'THE<br>FACTIONS',       quote:'"Three visions of the future.<br>Only one can be right."',         roman:'IV',  spine:'The Factions',      label:'Book IV &mdash; The Factions',     roman_txt:'IV'  },
-  { bk:'bk5', grad:'g5', vol:'V',  title:'THE<br>HUNTER\'S PATH', quote:'"Your PIP is strapped to your wrist.<br>The beam fires."',         roman:'V',   spine:'The Hunter\'s Path',label:'Book V &mdash; The Hunter\'s Path', roman_txt:'V'   },
+  { bk:'bk1', grad:'g1', vol:'I',  title:'THE AGE<br>BEFORE',       quote:'"They walked beside us once.<br>We did not deserve them."',             roman:'I',   spine:'The Age Before',    label:'Book I &mdash; The Age Before',    roman_txt:'I'   },
+  { bk:'bk2', grad:'g2', vol:'II', title:'THE<br>WARDEN\'S CURSE',   quote:'"It did not destroy us.<br>It simply stopped protecting us."',           roman:'II',  spine:"The Warden's Curse", label:"Book II &mdash; The Warden's Curse", roman_txt:'II'  },
+  { bk:'bk3', grad:'g3', vol:'III',title:'THE FIRST<br>ORDER',       quote:'"They fought the wrong war<br>for all the right reasons."',              roman:'III', spine:'The First Order',    label:'Book III &mdash; The First Order',  roman_txt:'III' },
+  { bk:'bk4', grad:'g4', vol:'IV', title:'THE<br>FACTIONS',          quote:'"Three flags. Three lies.<br>One wasteland."',                            roman:'IV',  spine:'The Factions',       label:'Book IV &mdash; The Factions',      roman_txt:'IV'  },
+  { bk:'bk5', grad:'g5', vol:'V',  title:'THE<br>LAST GUARD',        quote:'"Twelve went into the ravine.<br>One came back. That one was you."',      roman:'V',   spine:'The Last Guard',     label:'Book V &mdash; The Last Guard',     roman_txt:'V'   },
 ];
 
 var BOOKS = {
@@ -696,170 +696,173 @@ var BOOKS = {
   '<div class="s-bookhead">Book I &mdash; The Age Before</div>'+
 
   '<div class="s-section">A Note to the Reader</div>'+
-  '<p class="s-p s-drop">What you hold is not a history book. History requires objectivity. What follows is a reckoning &mdash; a piecing-together of fragments both literal and figurative, assembled from corrupted data drives, oral testimonies, and the rare intact archive that survived the Fracture.</p>'+
-  '<p class="s-p">Scholars disagree on the dates. They disagree on the causes. They disagree on almost everything. What no one disputes is the shape of the world that came before, and the shape of the world that came after. The difference between those two shapes is the story of everything.</p>'+
-  '<div class="s-quote">&ldquo;Do not mourn what was. Understand it. Only then can you decide what comes next.&rdquo; &mdash; Fragment recovered from Voss Institute, origin unknown</div>'+
-  '<p class="s-p">This is Book One. The age of green fields and open skies. The age when the creatures called Pok&eacute;mon were not weapons, not myths, not memories &mdash; but neighbours.</p>'+
+  '<p class="s-p s-drop">What follows is not history. History requires distance. What follows is memory &mdash; the kind that survives in old songs, in the names children are still given without knowing why, in the instinctive discomfort a person feels when they walk through a forest that is too quiet.</p>'+
+  '<p class="s-p">The world that existed before the Warden\'s Curse is not recoverable. The records were lost. The cities were razed. The people who remembered it firsthand are five centuries dead. What remains are fragments &mdash; not the crystal kind &mdash; the human kind. Stories passed mouth to mouth until the original words wore away and only the shape of the feeling remained.</p>'+
+  '<div class="s-quote">&ldquo;They were not gods. They were not pets. They were not weapons. They were neighbours. And we drove them out of their own world.&rdquo; &mdash; recovered oral history, settlement unknown</div>'+
+  '<p class="s-p">This is Book One. The age before everything went wrong. Read it not as a record but as a reckoning.</p>'+
 
   '<div class="s-divider"></div>'+
 
-  ch('I','A World Alive','"Before the silence, there was a sound unlike anything the new world has ever known &mdash; ten thousand different calls rising from ten thousand different creatures, echoing across a world that was, for all its conflicts, genuinely alive."')+
+  ch('I','A World Shared','"Before the silence, there was a sound unlike anything the world has known since &mdash; ten thousand different calls rising from ten thousand different creatures, in a world that was, for all its violence, genuinely alive."')+
 
-  '<p class="s-p s-drop">Long before circuits and steel, the world breathed differently. The forests were thick and loud. The oceans ran deep and clean. And in every environment that existed &mdash; from volcanic peaks to frozen tundra, from coral reefs to grassy plains &mdash; there were creatures that defied every category the old scientists tried to put them in.</p>'+
-  '<p class="s-p">They called them Pok&eacute;mon. The word predates the era itself, an ancient compound that had come to mean something specific and irreplaceable: a living being of extraordinary power that chose, of its own will, to share that power with a human companion.</p>'+
-  '<p class="s-p">That last part mattered enormously. The choice was theirs. A Charizard did not breathe fire because it was commanded to. It breathed fire because it decided the person beside it was worth fighting for.</p>'+
-  '<div class="s-quote">&ldquo;A Pok&eacute;mon that has bonded with a trainer is not a pet, not a weapon, not a tool. It is a partner. The distinction is not philosophical &mdash; it is practical. Partners fight harder.&rdquo;</div>'+
+  '<p class="s-p s-drop">Pok&eacute;mon did not always live in containment devices. That is a fact the old world\'s historians recorded with embarrassment, as if acknowledging it implicated them in something. It did. In the earliest centuries of recorded human-Pok&eacute;mon coexistence, the two species occupied the same spaces as genuine equals &mdash; competing for territory, occasionally fighting, occasionally cooperating, always watching each other across a boundary of mutual uncertainty.</p>'+
+  '<p class="s-p">The Pok&eacute;ball changed the relationship permanently. A compact sphere that reduced a living creature to stored energy &mdash; compact, portable, infinitely convenient. The trainer tradition that emerged around it was sincere. The bond it enabled was real. But beneath that bond was something that would never be fully acknowledged until it was too late: the Pok&eacute;ball was a device of control. And the Pok&eacute;mon inside it were, by definition, contained.</p>'+
+  '<div class="s-quote">&ldquo;A Pok&eacute;mon that has bonded with a trainer is not a pet, not a weapon, not a tool. It is a partner. We told ourselves this often enough that we forgot to ask whether the Pok&eacute;mon had been given a choice.&rdquo;</div>'+
 
   pkHtml(6, 180)+
   '<div class="s-poke-cap" style="text-align:center;font-family:\'Cinzel\',serif;font-size:9px;letter-spacing:4px;color:rgba(100,70,20,.5);text-transform:uppercase">Charizard &middot; No. 006</div>'+
-  '<div class="s-poke-sub" style="text-align:center;font-family:\'Crimson Text\',serif;font-style:italic;font-size:12px;color:rgba(80,55,15,.42);margin-bottom:12px">&ldquo;The apex of an unbroken bond between trainer and flame.&rdquo;</div>'+
+  '<div class="s-poke-sub" style="text-align:center;font-family:\'Crimson Text\',serif;font-style:italic;font-size:12px;color:rgba(80,55,15,.42);margin-bottom:12px">&ldquo;The apex of an unbroken bond between trainer and flame. Or so they believed.&rdquo;</div>'+
 
-  '<div class="s-section">The Bond</div>'+
-  '<p class="s-p s-drop">Trainers carried their Pok&eacute;mon in devices called Pok&eacute;balls &mdash; compact spheres that converted a living creature into stored energy. Children received their first Pok&eacute;ball at age ten. That was the tradition. A ten-year-old would walk into the tall grass alone for the first time, heart hammering, and there &mdash; in that terrifying, glorious moment &mdash; would meet the creature that might become the companion of a lifetime.</p>'+
-  '<p class="s-p">Most trainers never forgot their first encounter. The shaking grass. The cry. The moment of recognition that changed everything.</p>'+
-  '<div class="s-quote">&ldquo;I choose you.&rdquo; Three words. The most important three words in a world that no longer exists.</div>'+
-  '<p class="s-p">The battles were real, and the bonds were realer. When a trainer lost a Pok&eacute;mon in battle, they didn\'t lose property. They lost a friend.</p>'+
-
-  '<div class="s-divider"></div>'+
-
-  ch('II','The Last Days of Green','"The warnings came quietly, the way they always do. Not as catastrophe &mdash; as inconvenience. A slightly smaller harvest. A species spotted far from its usual range. A sky that stayed grey a day longer than it should."')+
-
-  '<p class="s-p s-drop">The old world did not end suddenly. It ended the way all things end that are too large to comprehend &mdash; gradually, then all at once.</p>'+
-  '<p class="s-p">The first signs were ecological. Pok&eacute;mon populations in certain regions began declining sharply. The species most sensitive to environmental change started disappearing from their recorded territories. Researchers filed reports. Governments debated. Industries lobbied. Nothing changed fast enough.</p>'+
-  '<div class="s-section">The Collapse of the Wild</div>'+
-  '<p class="s-p">When Pok&eacute;mon began disappearing from the wild in earnest, the effect on human civilization was immediate and devastating. The bond between human and Pok&eacute;mon was not merely emotional &mdash; it was infrastructural. Entire economies depended on Pok&eacute;mon labour, Pok&eacute;mon energy generation, Pok&eacute;mon-assisted construction and agriculture.</p>'+
-  '<p class="s-p">When the wild Pok&eacute;mon vanished, the ecosystem they maintained vanished with them. Rivers silted up. Weather patterns destabilised. Food chains collapsed at speeds that no one had modelled because no one had seriously imagined this scenario.</p>'+
-  '<div class="s-quote">&ldquo;We had fifteen hundred known species of Pok&eacute;mon. We studied their biology, their habitats, their power signatures. We never once studied what the world would look like without them.&rdquo;</div>',
+  '<div class="s-section">The Collapse of Restraint</div>'+
+  '<p class="s-p s-drop">The old world had laws. Pok&eacute;mon protection statutes. Habitat preservation requirements. Breeding regulations. They existed on paper. They were systematically ignored in practice. The industrial era brought with it an appetite for Pok&eacute;mon labour, Pok&eacute;mon energy, Pok&eacute;mon combat, Pok&eacute;mon spectacle, that no legislation could fully contain.</p>'+
+  '<p class="s-p">By the century before the Curse, the wild Pok&eacute;mon population had declined to a fraction of its historical numbers. Dragon-type species had retreated to locations so remote that most trainers had never seen one in the wild. Legendary Pok&eacute;mon &mdash; the great singular creatures whose existence predated human civilisation &mdash; had not been reliably documented in decades.</p>'+
+  '<p class="s-p">Most humans interpreted this as progress. The frontier was being settled. The wild was being tamed. What they failed to understand &mdash; what they would not understand until it was catastrophically too late &mdash; was that certain Pok&eacute;mon were not merely animals. They were something older. Something that had, for reasons no researcher ever fully explained, taken an interest in whether the world deserved to continue.</p>'+
+  '<div class="s-quote">&ldquo;I choose you.&rdquo; Three words. The most important three words in a world that no longer exists. We said them to them. We never thought to ask what they chose.&rdquo;</div>',
 
 2:
-  '<div class="s-bookhead">Book II &mdash; The Fracture</div>'+
+  '<div class="s-bookhead">Book II &mdash; The Warden\'s Curse</div>'+
 
-  '<div class="s-section">Preface: On Naming the Wound</div>'+
-  '<p class="s-p s-drop">Historians argue about what to call it. The Collapse. The Silence. The Great Unmaking. The faction known as the Hollow calls it the Reckoning &mdash; capital R, as if it were something deserved. Ironclad soldiers call it the Break and move on. Scientists in the Echo Syndicate refuse to name it at all, claiming that naming implies understanding, and we do not yet understand.</p>'+
-  '<p class="s-p">Most people just call it the Fracture. The word is imprecise. But imprecise words have a way of surviving when precise ones don\'t.</p>'+
-  '<div class="s-quote">&ldquo;The Fracture did not kill the old world. It revealed that the old world had been dying for a long time, and we had simply been too busy living in it to notice.&rdquo; &mdash; Echo Syndicate Archive, Document 0044-F</div>'+
+  '<div class="s-section">On the Nature of What Happened</div>'+
+  '<p class="s-p s-drop">No one knows which Pok&eacute;mon did it. This is the detail that historians, theologians, and faction ideologues have argued over for five hundred years. The Hollow calls it Giratina. Ironclad\'s official position is that the Curse was a natural phenomenon, not a conscious act &mdash; an admission, some say, of how little they understand about what they are fighting with. The Echo Syndicate has seventeen competing theories and considers all of them plausible.</p>'+
+  '<p class="s-p">What is not disputed is what happened. On a day that has no agreed-upon name, across every region simultaneously, Pok&eacute;balls failed. Not degraded. Not malfunctioned. Failed &mdash; completely, permanently, and without any technical explanation that satisfied the engineers who examined them. The spheres still opened. The energy transfer mechanism still functioned. But Pok&eacute;mon released from them did not return. They simply&hellip; left.</p>'+
+  '<div class="s-quote">&ldquo;The device works. The ball opens. The light goes out. And where a Charizard should be standing, there is nothing. Just ash and a smell like ozone and the sound of your Pok&eacute;mon not coming back.&rdquo; &mdash; Trainer field report, Day One, exact location lost</div>'+
 
   '<div class="s-divider"></div>'+
 
-  ch('III','The Day the Grid Died','"No one remembers exactly where they were. Everyone remembers the moment the lights went out and did not come back on."')+
+  ch('II','The Day the Bond Broke','"Every trainer in recorded history remembered where they were when it happened. Not because they kept journals. Because some things brand themselves into you."')+
 
-  '<p class="s-p s-drop">The cascading failure began in the energy infrastructure &mdash; the vast network of power stations, many of which ran on Pok&eacute;mon-assisted generation systems that had been standard for decades. When the Pok&eacute;mon stopped coming, the stations began running on backup systems that were never designed to be primary systems.</p>'+
-  '<p class="s-p">They held for eleven months. Then, in rapid succession, they didn\'t.</p>'+
-  '<p class="s-p">Within seventy-two hours of the first major grid failure, thirty-four cities lost primary power. Within a week, a third of the populated world was operating on backup generators, and the fuel was running out faster than anyone could resupply.</p>'+
-  '<div class="s-quote">&ldquo;A frightened Pok&eacute;mon is not a threat. A frightened Pok&eacute;mon that has lost the trainer who gave it context is something else entirely.&rdquo;</div>'+
+  '<p class="s-p s-drop">The Pok&eacute;mon did not attack immediately. That is the detail that haunts the old records most. For the first three days, they simply&hellip; wandered. Trainers reported finding their bonded Pok&eacute;mon sitting in fields, standing in rivers, perched on rooftops &mdash; alive, uninjured, but wholly indifferent to any command, any call, any bond that had previously existed. The eyes that had once looked at their trainers with recognition now looked through them as if they were not there.</p>'+
+  '<p class="s-p">On the fourth day, the first attacks began. Not random &mdash; targeted. Systematically and precisely targeted at human infrastructure. Power stations. Water treatment facilities. Agricultural complexes that depended on Pok&eacute;mon labour. Whoever &mdash; or whatever &mdash; had broken the bond had also, apparently, given the Pok&eacute;mon a direction.</p>'+
 
   pkHtml(150, 180)+
   '<div class="s-poke-cap" style="text-align:center;font-family:\'Cinzel\',serif;font-size:9px;letter-spacing:4px;color:rgba(100,70,20,.5);text-transform:uppercase">Mewtwo &middot; No. 150</div>'+
-  '<div class="s-poke-sub" style="text-align:center;font-family:\'Crimson Text\',serif;font-style:italic;font-size:12px;color:rgba(80,55,15,.42);margin-bottom:12px">&ldquo;The most powerful Pok&eacute;mon ever recorded. And the most alone.&rdquo;</div>'+
+  '<div class="s-poke-sub" style="text-align:center;font-family:\'Crimson Text\',serif;font-style:italic;font-size:12px;color:rgba(80,55,15,.42);margin-bottom:12px">&ldquo;The most powerful Pok&eacute;mon ever recorded. It did not choose sides. It simply waited.&rdquo;</div>'+
+
+  '<div class="s-section">The Warden Theory</div>'+
+  '<p class="s-p">The dominant scholarly framework &mdash; contested by Ironclad, accepted by the Echo Syndicate, considered irrelevant by the Hollow &mdash; is the Warden Theory. It holds that certain Legendary Pok&eacute;mon had always functioned as a kind of silent governance over the natural world: monitoring, balancing, correcting. Not gods. Not rulers. Wardens. Custodians of an equilibrium that most humans had never known existed because it was maintained so quietly.</p>'+
+  '<p class="s-p">The theory holds that the Curse was not an act of malice but of judgment. That the Warden &mdash; whichever Pok&eacute;mon it was &mdash; had reached a threshold. That it had watched the human relationship with Pok&eacute;mon reach a point of exploitation so complete, so unconscious, so total, that intervention became necessary. Not to destroy humanity. To withdraw consent. To remove the cooperation that humans had mistaken for submission and show them what the world looked like without it.</p>'+
+  '<div class="s-quote">&ldquo;It did not destroy us. It simply stopped protecting us. The difference, as it turned out, was everything.&rdquo; &mdash; Echo Syndicate Archive, Document 0044-F</div>'+
 
   '<div class="s-divider"></div>'+
 
-  ch('IV','Silence','"My daughter was born three years after the Fracture. She has never heard a Pidgey sing. She doesn\'t know what she\'s missing. I envy her for that." &mdash; Oral history recording, settlement unknown')+
+  ch('III','The Years of Fire','"The Pok&eacute;mon did not hate us. That was the worst part. Hatred implies we mattered enough to hate. They were simply&hellip; correcting an imbalance."')+
 
-  '<p class="s-p s-drop">The silence that followed the Fracture was not metaphorical. In the old world, Pok&eacute;mon cries were omnipresent. They were background noise that humanity had lived with for so long it had stopped being heard. When it stopped, everyone heard it stop.</p>'+
-  '<p class="s-p">The world that rebuilt itself from the ashes of the Fracture did not rebuild the relationship between humans and Pok&eacute;mon. It couldn\'t. There were no Pok&eacute;mon left to rebuild with. That relationship, like so much else, became history. Then myth. Then legend.</p>'+
-  '<p class="s-p">Until the chips.</p>',
+  '<p class="s-p s-drop">The years immediately following the Curse were not a war. Wars have two sides. What followed the Curse was a rout. Human settlements that had been built around Pok&eacute;mon labour &mdash; which was to say, virtually all of them &mdash; collapsed within months. The infrastructure that remained was targeted with a precision that suggested either coordination or intelligence that no one wanted to formally acknowledge.</p>'+
+  '<p class="s-p">The Legendary Pok&eacute;mon, when they appeared, were not seen to fight. They moved through the destruction the way a storm moves through a forest &mdash; not angry, not triumphant, simply inevitable. Dragon-type Pok&eacute;mon that had not been sighted in decades emerged from their retreats and were observed flying reconnaissance patterns over human population centres. The purpose was unclear. The effect on morale was absolute.</p>'+
+  '<p class="s-p">Human population fell by an estimated forty percent in the first decade. The records become unreliable after that &mdash; the people keeping them had other priorities.</p>',
 
 3:
-  '<div class="s-bookhead">Book III &mdash; The Fragments</div>'+
+  '<div class="s-bookhead">Book III &mdash; The First Order</div>'+
 
-  '<div class="s-section">Preface: The Man Who Refused</div>'+
-  '<p class="s-p s-drop">Every age of catastrophe produces, eventually, someone who refuses to accept what has happened. Someone whose refusal is so total, so consuming, that it becomes its own kind of creation. In the years immediately following the Fracture, that person was Dr. Elias Voss.</p>'+
-  '<p class="s-p">He was not the most decorated scientist of the old world. He was not the most funded. He was, by most accounts, difficult &mdash; obsessive, dismissive of authority, prone to working in isolation for months at a time.</p>'+
-  '<div class="s-quote">&ldquo;The Pok&eacute;mon are not gone. They cannot be gone. Energy does not disappear &mdash; it transforms. I am going to find where it went.&rdquo; &mdash; Dr. Elias Voss, personal journal, Year 2 Post-Fracture</div>'+
-
-  '<div class="s-divider"></div>'+
-
-  ch('V','Doctor Voss and the Thirty-Year Obsession','"He outlived his funding, his colleagues, and his reputation. He did not outlive his work."')+
-
-  '<p class="s-p s-drop">Elias Voss began his research in the ruins of what had been a prominent Pok&eacute;mon research institute. He set up in what remained of the east wing, alone, with salvaged equipment and a theoretical framework that his former colleagues would have described as either brilliant or delusional depending on the day.</p>'+
-  '<p class="s-p">His core hypothesis: that a Pok&eacute;mon\'s identity &mdash; its power signature, its behavioural patterns, its willingness to bond &mdash; was not stored in its body but in a layered bioelectric field that surrounded and interpenetrated its physical form. He called this the <em>neural essence</em>.</p>'+
-  '<div class="s-section">The Neural Essence Theory</div>'+
-  '<p class="s-p">If the neural essence could be mapped &mdash; every frequency, every pattern, every recursive loop that made a specific Pikachu <em>that</em> Pikachu &mdash; then in theory it could be recorded. Stored. Reproduced.</p>'+
-  '<p class="s-p">Voss spent twelve years developing what he called the Fragment substrate &mdash; a crystalline lattice structure of his own design, capable of holding bioelectric information at densities no previous storage technology had approached.</p>'+
-  '<div class="s-quote">&ldquo;When I held the first successful Fragment in my hand, it vibrated. Not physically. But I could feel it. Thirty years of work, and it fit between two fingers.&rdquo; &mdash; Voss Journal, Year 31</div>'+
+  '<div class="s-section">The Refusal</div>'+
+  '<p class="s-p s-drop">Every catastrophe produces, eventually, someone who refuses to accept it. In the years immediately following the Curse, that person was Professor Daelan Voss. He was not the most decorated scientist of the old world. He was not the most celebrated. He was, by most accounts, impossible &mdash; combative, obsessive, contemptuous of consensus, and absolutely certain that the correct response to the Warden\'s Curse was not surrender.</p>'+
+  '<div class="s-quote">&ldquo;The Pok&eacute;mon are not our enemies. The entity that broke the bond &mdash; whatever it is &mdash; is our enemy. Everything else is a symptom. I intend to treat the disease.&rdquo; &mdash; Professor Daelan Voss, personal record, Year 3 Post-Curse</div>'+
+  '<p class="s-p">Voss\'s insight was singular and, in retrospect, obvious: the Pok&eacute;ball had failed because it was a device of containment. It worked only with the cooperation of the Pok&eacute;mon inside it. Remove that cooperation, and the ball was just a sphere. The solution was not to repair the ball. The solution was to stop relying on cooperation entirely.</p>'+
 
   '<div class="s-divider"></div>'+
 
-  ch('VI','The PIP Device','"A beam fires toward the ground. The neural essence propagates along it. Where the beam strikes, mass coalesces. The Pok&eacute;mon forms fully in seconds."')+
+  ch('IV','The Particle Interface Projector','"A beam fires. It finds the target. It reads the target. It makes a copy of the target. The copy is loyal. The original is no longer your problem."')+
+
+  '<p class="s-p s-drop">The PIP &mdash; Particle Interface Projector &mdash; was not built to be humane. Voss, to his credit, never claimed otherwise. The device worked by capturing a Pok&eacute;mon\'s complete bioelectric signature &mdash; every frequency, every pattern, every recursive loop that constituted a specific Pok&eacute;mon\'s identity &mdash; and encoding it into a crystalline substrate he called a Fragment chip. The chip could then be loaded into the PIP\'s reader slot and the Pok&eacute;mon reconstituted at will, beam fired at the ground, mass coalescing in seconds.</p>'+
+  '<p class="s-p">The critical innovation &mdash; and the one that made the technology militarily decisive &mdash; was the loyalty architecture. Pok&eacute;mon reconstituted from a Fragment chip emerged bonded, not to the species that had broken them, but to the specific individual whose PIP had reconstituted them. The Warden\'s Curse had broken the old bond. Voss had simply built a new one. A harder one. One that did not require consent.</p>'+
 
   pkHtml(25, 170)+
   '<div class="s-poke-cap" style="text-align:center;font-family:\'Cinzel\',serif;font-size:9px;letter-spacing:4px;color:rgba(100,70,20,.5);text-transform:uppercase">Pikachu &middot; No. 025</div>'+
-  '<div class="s-poke-sub" style="text-align:center;font-family:\'Crimson Text\',serif;font-style:italic;font-size:12px;color:rgba(80,55,15,.42);margin-bottom:12px">&ldquo;The first successful Fragment summoning. The electricity shorted out Voss\'s entire lab.&rdquo;</div>'+
+  '<div class="s-poke-sub" style="text-align:center;font-family:\'Crimson Text\',serif;font-style:italic;font-size:12px;color:rgba(80,55,15,.42);margin-bottom:12px">&ldquo;The first successful Fragment summoning. The electricity shorted out Voss\'s entire laboratory. He considered it a success.&rdquo;</div>'+
 
-  '<div class="s-section">The Particle Interface Projector</div>'+
-  '<p class="s-p s-drop">The PIP &mdash; Particle Interface Projector &mdash; is worn as a bracer on the forearm. At its core is a Fragment reader: a precisely calibrated receiver that interfaces with the crystalline lattice of a loaded chip and reads the bioelectric signature encoded within. When activated, the PIP fires a focused beam of structured photonic energy toward the ground. The Pok&eacute;mon forms fully in seconds. Real mass. Real power. Real presence.</p>'+
-  '<div class="s-section">The Five-Slot Architecture</div>'+
-  '<p class="s-p">Voss designed the PIP with five active reader slots &mdash; not by accident, but by careful calculation. His field tests showed that maintaining more than five simultaneous Fragment resonance fields created destructive interference between signatures, destabilising all active summons. Five was the hard limit that physics imposed. A Hunter may carry as many chips as they can acquire. But only five may be loaded into the PIP at any given time. Choosing which five is one of the most consequential tactical decisions a Hunter makes.</p>'+
-  '<div class="s-section">The 200-Fragment Vault</div>'+
-  '<p class="s-p">Each Fragment chip is not simply a single data point. Voss designed his storage substrate to hold up to <strong>200 distinct neural essence records</strong> on a single chip. This means a single chip in a Hunter\'s pocket could contain two hundred Pok&eacute;mon &mdash; two hundred fragments of the old world, waiting in silence, patient as crystal.</p>'+
-  '<div class="s-section">Real-World Consequences</div>'+
-  '<p class="s-p">When Pikachu fires a Thunderbolt in the wasteland, the electricity is real. It will kill. It will arc through every conductor in range and stun anyone caught in its field. When Blastoise releases a Hydro Cannon in a narrow street, the concussive force will bring down walls. When a Gengar\'s Shadow Ball tears through the air, it leaves a cold wound that lingers for hours.</p>'+
-  '<div class="s-quote">&ldquo;We used to worry about guns. Guns are quaint. A gun fires one bullet. A Charizard fires everything, everywhere, and it does it because it chose to.&rdquo; &mdash; Ironclad Field Manual, Chapter 1</div>'+
-  '<div class="s-section">The Slot-In Protocol</div>'+
-  '<p class="s-p">In the old world, a trainer would reach for a Pok&eacute;ball and say the words: <em>I choose you.</em> In this world, a Hunter reaches for a chip, presses it into the active reader slot of their PIP, and activates the beam. The wasteland calls this <em>slotting in.</em> The words are different. The weight of the moment &mdash; the Pok&eacute;mon opening its eyes, assessing you, making its choice &mdash; that part is exactly the same.</p>',
+  '<div class="s-section">The First Order and the Cloning Doctrine</div>'+
+  '<p class="s-p s-drop">The military force that coalesced around Voss\'s technology called itself the First Order &mdash; a name chosen deliberately, intended to convey that they were not a government, not a nation, but a principle. Order, first. Everything else second. Their initial strategy was straightforward and brutal: focus all capture operations on Fighting-type Pok&eacute;mon. Reconstitute them in volume. Deploy them against the feral population.</p>'+
+  '<p class="s-p">Fragment capture worked on a one-to-one basis. One beam, one signature, one chip. To produce ten Machamp soldiers, you needed to capture and encode ten Machamp. The First Order\'s solution was industrial scale. Capture operations ran continuously. Fragment chips were mass-produced. At the height of the campaign, First Order field units were reconstituting hundreds of Pok&eacute;mon per day across dozens of active fronts.</p>'+
+  '<div class="s-quote">&ldquo;We are not trainers. Trainers asked permission. We are soldiers, and we are taking back what was taken from us.&rdquo; &mdash; First Order Field Commander, Year 14 Post-Curse</div>'+
+
+  '<div class="s-section">The Campaign and Its Limits</div>'+
+  '<p class="s-p">For forty years, the First Order fought. They were disciplined, organised, and increasingly effective. By Year 40, Fragment signatures had been captured for almost every known Pok&eacute;mon species. The great catalogue that Voss had envisioned &mdash; every species encoded, every DNA signature preserved &mdash; was within reach.</p>'+
+  '<p class="s-p">What remained uncaptured were three categories. Dragon-type Pok&eacute;mon, whose bioelectric signatures proved resistant to standard encoding and required specialised equipment that was still in development. Ultra-class Legendaries, which had not been directly sighted since the earliest years of the Curse and were believed to be operating at ranges far beyond First Order patrol zones. And the Warden itself &mdash; whatever entity had initiated the Curse &mdash; which had not been seen at all.</p>'+
+  '<div class="s-quote">&ldquo;We won every battle. We were winning the war. I have spent forty years trying to understand how that was possible and still not be enough.&rdquo; &mdash; First Order Commander-General Hadris, final journal entry</div>'+
+
+  '<div class="s-divider"></div>'+
+
+  ch('V','The Fall of Straive','"They came out of the places we had stopped looking. They always do."')+
+
+  '<p class="s-p s-drop">Straive was not the largest city in the First Order\'s territory. It was not the most strategically significant in conventional terms. It was significant for one reason: it was where Voss had built his laboratory. Where the PIP had been invented. Where the Fragment programme had begun. For the First Order, Straive was not just a city. It was a symbol. The proof that humanity could fight back.</p>'+
+  '<p class="s-p">In Year 47 Post-Curse, the Dragon-type Pok&eacute;mon that had been absent from the conflict for decades emerged simultaneously across seventeen separate fronts. They had not been resting. They had been waiting &mdash; coordinating, preparing, learning the patterns of First Order operations with a patience that no military planner had thought to account for. The counter-offensive was not chaotic. It was precise. First Order supply lines were cut first. Communication infrastructure second. Reinforcement routes third.</p>'+
+  '<p class="s-p">Straive fell in eleven days. The laboratory was destroyed. The central command was gone. Voss himself died in the evacuation &mdash; some accounts say he refused to leave his research, that he was still encoding signatures when the walls came down. No one who was in the laboratory that day survived to clarify.</p>'+
+  '<p class="s-p">The First Order did not surrender. It fragmented. Soldiers who had given decades to the campaign looked at the ruins of their command structure and made different choices. Some kept fighting, localised and increasingly desperate. Some laid down their arms. Three groups, in three different cities that had survived the assault, raised new flags over new ideologies. And the long age of the Wasteland began.</p>'+
+
+  pkHtml(149, 160)+
+  '<div class="s-poke-cap" style="text-align:center;font-family:\'Cinzel\',serif;font-size:9px;letter-spacing:4px;color:rgba(100,70,20,.5);text-transform:uppercase">Dragonite &middot; No. 149</div>'+
+  '<div class="s-poke-sub" style="text-align:center;font-family:\'Crimson Text\',serif;font-style:italic;font-size:12px;color:rgba(80,55,15,.42);margin-bottom:12px">&ldquo;The vanguard of the counter-offensive. Its silhouette over Straive was the last thing many soldiers saw.&rdquo;</div>',
 
 4:
   '<div class="s-bookhead">Book IV &mdash; The Factions</div>'+
 
-  '<div class="s-section">A World Divided</div>'+
-  '<p class="s-p s-drop">The PIP changed the balance of power in the wasteland as completely as any weapon in history. Within a generation of Voss\'s schematics leaking to the black market, the old structures of governance and control had been dissolved and replaced by something new, something harder, something that operates on a simpler and more brutal logic: whoever holds the strongest Fragments holds power.</p>'+
-  '<p class="s-p">Three major factions rose from this new reality. Their reach extends across the entire known world. Their decisions shape the lives of everyone whether those people have chosen a side or not.</p>'+
-  '<div class="s-quote">&ldquo;There are no neutral parties in a world where the most powerful weapons wear the faces of creatures your grandparents loved.&rdquo; &mdash; Fragment Hunter proverb</div>'+
-  '<p class="s-p">Each faction believes it is right. Each faction has evidence for that belief. This is what makes them dangerous.</p>'+
+  '<div class="s-section">Five Hundred Years</div>'+
+  '<p class="s-p s-drop">Five centuries is a long time. Long enough for the First Order to pass from history into mythology. Long enough for the Wasteland to develop its own culture, its own laws, its own language of survival. Long enough for the human population &mdash; devastated by the Curse, further depleted by the Campaign and its collapse &mdash; to recover to something approaching stability. Not prosperity. Not safety. Stability, which in the Wasteland means something specific: the knowledge of which threats are predictable and which are not.</p>'+
+  '<p class="s-p">The Pok&eacute;mon did not leave. That is the central fact of the Wasteland that newcomers always misunderstand. They are here. They have always been here. They live in the ruins, in the dead zones, in the territories between settlements. Some are passive. Some are territorial. Some are something older and stranger that does not map neatly onto either category. They will attack humans on sight in most uninhabited areas. This is simply the condition of the world.</p>'+
+  '<div class="s-quote">&ldquo;There are no neutral parties in a world where the most powerful weapons wear the faces of creatures your grandparents called companions.&rdquo; &mdash; Wasteland saying, origin unknown</div>'+
+  '<p class="s-p">The Fragment chips scattered by the First Order\'s collapse are still out there. In ruins. In vaults. In the hands of scavengers who do not know what they have, and in the hands of people who know exactly what they have and intend to keep it. Three factions have built entire civilisations on the power those chips represent. Each believes it is right. Each has evidence for that belief. This is what makes them dangerous.</p>'+
 
   '<div class="s-divider"></div>'+
 
   faction('flag-ironclad','#6b1a1a','IRONCLAD','#8b3030','&ldquo;Order through dominance.&rdquo;',
-    'The largest and most militarised faction in the wasteland. Ironclad emerged from the remnants of old-world private security corporations. They recognised immediately that Fragment-summoned Pok&eacute;mon were the most powerful weapons ever created, and weapons required governance. Ironclad enforcers wear heavy-plated PIPs capable of holding two active Fragments simultaneously, specialising in tank-class Pok&eacute;mon whose physical mass and brute-force can level city blocks.',
+    'Ironclad emerged from the largest surviving battalion of the First Order &mdash; soldiers who refused to stop fighting after Straive fell, who simply redirected their campaign from defeating the Pok&eacute;mon to controlling the humans. They are the largest and most militarised faction in the Wasteland. Their ideology is the ideology of the First Order, stripped of its science and reduced to its operational core: if you hold the strongest Fragments, you hold power. Everything else is philosophy. Ironclad has no interest in philosophy.',
     ['Machamp','Golem','Rhydon','Snorlax','Tyranitar'])+
 
   pkHtml(68, 160)+
   '<div class="s-poke-cap" style="text-align:center;font-family:\'Cinzel\',serif;font-size:9px;letter-spacing:4px;color:rgba(100,70,20,.5);text-transform:uppercase">Machamp &middot; Ironclad Frontliner</div>'+
-  '<div class="s-poke-sub" style="text-align:center;font-family:\'Crimson Text\',serif;font-style:italic;font-size:12px;color:rgba(80,55,15,.42);margin-bottom:12px">&ldquo;Four arms. Zero hesitation.&rdquo;</div>'+
-  '<div class="s-quote">&ldquo;The alternative to us is not freedom. The alternative to us is chaos. We have seen chaos. We chose this.&rdquo; &mdash; Ironclad Commander\'s Oath</div>'+
+  '<div class="s-poke-sub" style="text-align:center;font-family:\'Crimson Text\',serif;font-style:italic;font-size:12px;color:rgba(80,55,15,.42);margin-bottom:12px">&ldquo;Four arms. Zero hesitation. No questions asked and none welcomed.&rdquo;</div>'+
+  '<div class="s-quote">&ldquo;The alternative to us is not freedom. The alternative to us is Straive. We have seen Straive. We chose this.&rdquo; &mdash; Ironclad Commander\'s Oath</div>'+
 
   '<div class="s-divider"></div>'+
 
-  faction('flag-echo','#1a3a8b','THE ECHO SYNDICATE','#2a5abb','&ldquo;Knowledge is the only currency.&rdquo;',
-    'If Ironclad is the fist, the Echo Syndicate is the mind. Founded by scientists and hackers who believe Voss\'s work was only the beginning, the Syndicate\'s obsession is not power but understanding. They trade in Fragment data &mdash; decoded neural maps, not the chips themselves. Their real secret: they believe Voss encoded something inside the Fragment system he called <strong>Project Genesis</strong> &mdash; a way to restore Pok&eacute;mon to the world permanently. Without chips. Without PIPs.',
+  faction('flag-echo','#1a3a8b','THE ECHO SYNDICATE','#2a5abb','&ldquo;Knowledge is the only currency that cannot be seized.&rdquo;',
+    'If Ironclad is the inheritance of the First Order\'s military, the Echo Syndicate is the inheritance of its science. Founded by researchers who escaped Straive with Voss\'s incomplete notes and the conviction that his work was not finished, the Syndicate\'s obsession is not power but understanding. They believe that embedded in the Fragment substrate itself &mdash; not in any individual chip, but in the mathematical structure of the medium &mdash; Voss left a message. They call what they are searching for Project Genesis: a method not for controlling Pok&eacute;mon, but for undoing the Warden\'s Curse entirely. For making the old world real again.',
     ['Alakazam','Mewtwo','Starmie','Gengar','Espeon'])+
 
+  '<div class="s-quote">&ldquo;Voss didn\'t just want to preserve Pok&eacute;mon. He wanted to give them back to a world that had finally learned to deserve them. We are not there yet. We are trying.&rdquo; &mdash; Echo Syndicate, Internal Report 0089-G</div>'+
+
   '<div class="s-divider"></div>'+
 
-  faction('flag-hollow','#6622bb','THE HOLLOW','#9933ff','&ldquo;They belonged to the world. The world should burn.&rdquo;',
-    'The most dangerous faction, and the hardest to understand. The Hollow began as a survivor cult &mdash; people who lost everything in Fragment-related violence. Their belief: Pok&eacute;mon were not meant to be weaponised. They have found a way to <em>corrupt</em> Fragments &mdash; stripping the Pok&eacute;mon\'s loyalty, turning them feral. A corrupted Fragment summons something that obeys no one. They deploy these deliberately in populated areas as acts of what they call justice.',
+  faction('flag-hollow','#6622bb','THE HOLLOW','#9933ff','&ldquo;They belonged to the world. The world should burn for what it did to them.&rdquo;',
+    'The Hollow does not have a military. It does not have a government. It does not, technically, have a membership. What it has is a belief: that the Warden\'s Curse was just. That the First Order was a crime. That Fragment technology &mdash; the loyalty architecture, the forced bonding, the industrial reconstitution of beings that had chosen to be free &mdash; is the continuation of the original sin that caused the Curse. The Hollow has discovered a method of corrupting Fragment chips, stripping the loyalty architecture and releasing what they call true Pok&eacute;mon &mdash; feral, unbonded, obedient to nothing. They deploy these in populated areas. They call it justice. Everyone else calls it terrorism.',
     ['Gengar','Haunter','Gyarados','Dragonite','Charizard &#10007;'])+
 
-  '<div class="s-quote">&ldquo;We are not the monsters. We are the consequence.&rdquo; &mdash; The Hollow, recovered manifesto</div>',
+  '<div class="s-quote">&ldquo;We are not the monsters. We are the consequence. If you want to end us, stop doing the thing that creates us.&rdquo; &mdash; The Hollow, recovered manifesto, no author attributed</div>',
 
 5:
-  '<div class="s-bookhead">Book V &mdash; The Hunter\'s Path</div>'+
+  '<div class="s-bookhead">Book V &mdash; The Last Guard</div>'+
 
-  '<div class="s-section">You</div>'+
-  '<p class="s-p s-drop">You are a Fragment Hunter. The term is functional, not romantic. You find Fragments &mdash; in ruins, in vaults, in the hands of people who don\'t know what they have or people who know exactly what they have and intend to keep it. You recover them. You trade them, use them, study them.</p>'+
-  '<p class="s-p">You are not aligned with any faction. Not yet. In this world, that independence is simultaneously your greatest asset and your greatest liability. Every faction wants Fragment Hunters working for them. Every faction will turn on a Hunter the moment it becomes convenient.</p>'+
+  '<div class="s-section">The Outskirts</div>'+
+  '<p class="s-p s-drop">The three factions do not care about the small villages. This is not generosity &mdash; it is arithmetic. The villages are too scattered, too poor, too lightly Fragmented to be worth the administrative cost of incorporation. They exist in the gaps between faction territory, surviving through obscurity, through careful non-alignment, through the simple fact that there is nothing in them worth taking.</p>'+
+  '<p class="s-p">You grew up in one of these villages. Boundary post, technically. Guard rotation, two shifts, nothing ever happened. The Pok&eacute;mon that wandered too close to the perimeter were small. You had a Fragment chip that had been in your family for two generations, encoded with something no one had been able to identify because the signal degraded before it could be fully read. You kept it anyway. It was warm to the touch in a way that no crystal should be warm.</p>'+
   '<div class="s-quote">&ldquo;A Fragment Hunter who survives their first year is either very skilled, very lucky, or very careful about which jobs they take. Usually all three.&rdquo; &mdash; Wasteland saying</div>'+
-  '<p class="s-p">The PIP on your wrist was your first real investment. The chip slotted into the reader was your first Fragment &mdash; smaller than a thumbnail, heavier than it looks, warm to the touch in a way that no crystal should be warm.</p>'+
-  '<p class="s-p">When you activate it for the first time and the beam fires and the Pok&eacute;mon materialises in front of you &mdash; its eyes open, its power radiating, looking at you the way only a Pok&eacute;mon looks at a person, with that specific and terrifying question of <em>are you worth it</em> &mdash; that is the moment the journey begins.</p>'+
 
   '<div class="s-divider"></div>'+
 
-  ch('VII','Project Genesis and the Question That Changes Everything','"What if the chips were never meant to be permanent? What if they were always a bridge &mdash; and Voss built the other side?"')+
+  ch('VI','The Day the Legend Found You','"It did not look for your village. Your village was simply in the direction it was moving. The distinction, to eleven of the twelve people who came after it, did not matter."')+
 
-  '<p class="s-p s-drop">The Echo Syndicate has spent decades trying to decode the signal they believe Voss embedded in the Fragment substrate itself &mdash; not in any individual chip, but in the base structure of the medium. A message written not in text but in the mathematics of the crystal lattice.</p>'+
-  '<p class="s-p">What they have decoded so far suggests something that most of their own members find difficult to believe: the Fragment system was never intended to be the final form of Voss\'s work. It was a preservation method. A stasis. A way of keeping Pok&eacute;mon safe until something else could be built.</p>'+
-  '<div class="s-section">The Other Side of the Bridge</div>'+
-  '<p class="s-p">Project Genesis, as best as the Syndicate has reconstructed it, is a system for reversing the Fracture\'s effect on the physical world &mdash; creating conditions under which Pok&eacute;mon could once again exist in the physical world permanently, without chips, without PIPs. Alive. Wild. Themselves.</p>'+
-  '<div class="s-quote">&ldquo;Voss didn\'t just want to preserve Pok&eacute;mon. He wanted to give them back to a world that was finally ready to deserve them again.&rdquo; &mdash; Echo Syndicate, Internal Report 0089-G</div>'+
+  '<p class="s-p s-drop">No one in the village had ever seen a Legendary Pok&eacute;mon. The oldest records described them as myths &mdash; things the First Order had failed to capture, things the factions claimed to be searching for, things that most Wasteland residents had quietly concluded were simply gone. You had grown up treating the stories as allegory.</p>'+
+  '<p class="s-p">The attack was not an attack in any conventional sense. The Legendary did not appear to notice the village. It was moving &mdash; migrating, perhaps, or pursuing something, or simply following a route laid down before the settlement existed. The destruction was incidental. A wing swept through a building the way wind sweeps through tall grass. It is not malice. It is scale.</p>'+
+  '<p class="s-p">Twelve of you survived the initial impact. Twelve was enough. Twelve was a hunting party. Twelve was enough to convince each other that what you were doing was not suicidal.</p>'+
+  '<p class="s-p">You were not trying to kill it. You were trying to clip it &mdash; wound it enough to ground it, capture its Fragment signature, and sell the chip to whoever would pay the most. A Legendary-class Fragment on the black market would buy your village three generations of protection. That was the plan. Plans are useful until they encounter the thing they were made to address.</p>'+
 
-  pkHtml(149, 180)+
-  '<div class="s-poke-cap" style="text-align:center;font-family:\'Cinzel\',serif;font-size:9px;letter-spacing:4px;color:rgba(100,70,20,.5);text-transform:uppercase">Dragonite &middot; No. 149</div>'+
-  '<div class="s-poke-sub" style="text-align:center;font-family:\'Crimson Text\',serif;font-style:italic;font-size:12px;color:rgba(80,55,15,.42);margin-bottom:12px">&ldquo;Last confirmed wild sighting: Year 0 of the Fracture. Fragment value: incalculable.&rdquo;</div>'+
+  pkHtml(384, 180)+
+  '<div class="s-poke-cap" style="text-align:center;font-family:\'Cinzel\',serif;font-size:9px;letter-spacing:4px;color:rgba(100,70,20,.5);text-transform:uppercase">Rayquaza &middot; The Sky Warden</div>'+
+  '<div class="s-poke-sub" style="text-align:center;font-family:\'Crimson Text\',serif;font-style:italic;font-size:12px;color:rgba(80,55,15,.42);margin-bottom:12px">&ldquo;Last confirmed sighting before the raid on your village: unknown. Last confirmed sighting after: you are the only witness still alive.&rdquo;</div>'+
 
-  '<div class="s-section">The Real Stakes</div>'+
-  '<p class="s-p">Fragment battles accumulate damage on the world. Scorched ground. Psychic pressure zones. Structural decay. The world is already broken. Every Fragment battle breaks it a little more.</p>'+
-  '<p class="s-p">That is the real question underneath everything else: are you helping rebuild the old world &mdash; or are you just finishing what the Fracture started?</p>'+
+  '<div class="s-section">The Ravine</div>'+
+  '<p class="s-p s-drop">You clipped it. One of your twelve managed to clip it &mdash; a modified signal disruptor, salvaged First Order tech, something that was never supposed to work against a target that size. It worked well enough. The Legendary fell toward the ravine &mdash; a circular depression in the dead land, the kind the Wasteland makes a lot of, geology expressing its grief. You and your twelve went in after it.</p>'+
+  '<p class="s-p">You were the one who chose your character from the twelve. That choice was made before the ravine. After the ravine, the choice was made for you, by something that does not negotiate and does not explain itself.</p>'+
+  '<p class="s-p">Eleven of your twelve did not come back out. The details of that are yours to carry. This record will not catalogue them. What matters is what you found when the noise stopped and the dust settled and you understood that you were the only one still breathing.</p>'+
+  '<p class="s-p">In the rubble, half-buried, exactly where your group had left it when they came in: the chest. And inside the chest, where it had always been, the old PIP device that one of your number had dragged along as an afterthought &mdash; just in case, they had said. Just in case.</p>'+
+
+  '<div class="s-section">The Moment the Journey Begins</div>'+
+  '<p class="s-p s-drop">The reader slot already has a chip in it. You do not know whose it is. You do not know what it contains. You do not know if the device still works after however long it spent in that chest in that rubble. It is warm to the touch in a way that no crystal should be warm.</p>'+
+  '<p class="s-p">You are injured. You are alone. The Legendary is somewhere in the ravine and you do not know if it is dead or simply resting. The factions will send scouts when the seismic readings filter through their monitoring systems &mdash; a Legendary going down generates a signature that can be read from three hundred kilometres. You have perhaps six hours before the first of them arrives.</p>'+
+  '<p class="s-p">You strap the PIP to your wrist. You activate the beam. The chip reads. The Pok&eacute;mon forms &mdash; real mass, real power, real presence &mdash; and it opens its eyes and it looks at you with that specific and terrifying question that every Pok&eacute;mon has asked every human since the beginning of the bond.</p>'+
+  '<p class="s-p"><em>Are you worth it?</em></p>'+
+  '<p class="s-p">That is where your story starts. Everything else &mdash; the factions, the Legendary, Project Genesis, the Warden\'s Curse, five hundred years of history bearing down on a single point &mdash; that comes after.</p>'+
+  '<p class="s-p">First: are you worth it?</p>'+
   '<div class="s-ornament">&#10022; &middot; &middot; &middot; &#10022;</div>',
 };
 

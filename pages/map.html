@@ -1098,6 +1098,17 @@ function sfxHover() { osc(1200,'square',.02,.03); }
 // Add hover sounds to zone nodes
 document.querySelectorAll('.zone-node').forEach(n => {
   n.addEventListener('mouseenter', sfxHover);
+  // Double click — select zone AND scroll down to details
+  n.addEventListener('dblclick', () => {
+    const zid = parseInt(n.dataset.zone);
+    selectZone(zid);
+    setTimeout(() => {
+      document.getElementById('detailPanel').scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }, 150); // slight delay so panel has time to become visible first
+  });
 });
 
 // ── LOAD NAVBAR ──

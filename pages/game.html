@@ -1,877 +1,1979 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>BIT-POKEMON — Field Operations</title>
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet"/>
-<style>
-:root {
-  --green:      #4aff6a;
-  --green-dim:  rgba(74,255,106,.15);
-  --green-dark: #0a1f0f;
-  --amber:      #ffb830;
-  --red:        #ff4444;
-  --bg:         #060908;
-  --border:     rgba(74,255,106,.18);
-  --border-dim: rgba(74,255,106,.08);
-  --text:       #c8e8a0;
-  --text-dim:   #4a6a38;
-  --mono:       'Share Tech Mono', monospace;
-  --ui:         'Rajdhani', sans-serif;
-  --display:    'Bebas Neue', sans-serif;
-}
-*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
-html,body{width:100%;height:100vh;overflow:hidden;font-family:var(--ui);color:var(--text);}
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BIT-POKEMON — Field Operations</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Bebas+Neue&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --green: #4aff6a;
+        --green-dim: rgba(74, 255, 106, 0.15);
+        --green-dark: #0a1f0f;
+        --amber: #ffb830;
+        --red: #ff4444;
+        --bg: #060908;
+        --border: rgba(74, 255, 106, 0.18);
+        --border-dim: rgba(74, 255, 106, 0.08);
+        --text: #c8e8a0;
+        --text-dim: #4a6a38;
+        --mono: "Share Tech Mono", monospace;
+        --ui: "Rajdhani", sans-serif;
+        --display: "Bebas Neue", sans-serif;
+      }
+      *,
+      *::before,
+      *::after {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        width: 100%;
+        height: 100vh;
+        overflow: auto;
+        font-family: var(--ui);
+        color: var(--text);
+      }
 
-/* ── MAP BACKGROUND (full screen, low opacity) ── */
-#map-bg {
-  position:fixed;inset:0;z-index:0;
-  background-size:cover;
-  background-position:center;
-  background-repeat:no-repeat;
-  opacity:0.22;
-  transition:opacity 1s ease, background-image .5s ease;
-  filter:saturate(1.4) contrast(1.1);
-}
-/* Dark vignette over map */
-#map-vignette {
-  position:fixed;inset:0;z-index:1;pointer-events:none;
-  background:
-    radial-gradient(ellipse 70% 70% at 50% 50%, transparent 30%, rgba(6,9,8,.7) 100%),
-    linear-gradient(180deg, rgba(6,9,8,.6) 0%, transparent 15%, transparent 85%, rgba(6,9,8,.8) 100%);
-}
-/* Scanlines */
-body::after{content:'';position:fixed;inset:0;z-index:2;pointer-events:none;
-  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.06) 2px,rgba(0,0,0,.06) 4px);}
+      /* ── MAP BACKGROUND (full screen, low opacity) ── */
+      #map-bg {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        opacity: 0.55;
+        transition:
+          opacity 1s ease,
+          background-image 0.5s ease;
+        filter: saturate(1.1) contrast(1.05);
+      }
+      /* Dark vignette over map */
+      #map-vignette {
+        position: fixed;
+        inset: 0;
+        z-index: 1;
+        pointer-events: none;
+        background:
+          radial-gradient(
+            ellipse 70% 70% at 50% 50%,
+            transparent 30%,
+            rgba(6, 9, 8, 0.7) 100%
+          ),
+          linear-gradient(
+            180deg,
+            rgba(6, 9, 8, 0.6) 0%,
+            transparent 15%,
+            transparent 85%,
+            rgba(6, 9, 8, 0.8) 100%
+          );
+      }
+      /* Scanlines */
+      body::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        z-index: 2;
+        pointer-events: none;
+        background: repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 2px,
+          rgba(0, 0, 0, 0.06) 2px,
+          rgba(0, 0, 0, 0.06) 4px
+        );
+      }
 
-/* ── NAVBAR ── */
-#navbar-placeholder{position:relative;z-index:100;}
+      /* ── NAVBAR ── */
+      #navbar-placeholder {
+        position: relative;
+        z-index: 100;
+      }
 
-/* ── MAIN LAYOUT ── */
-.game-page {
-  position:relative;z-index:10;
-  height:calc(100vh - 58px);
-  display:grid;
-  grid-template-columns:clamp(140px,15vw,200px) 1fr clamp(140px,15vw,200px);
-  grid-template-rows:1fr auto;
-  gap:0;
-  width:100%;
-  max-width:1200px;
-  margin:0 auto;
-  padding:0;
-}
+      /* ── MAIN LAYOUT ── */
+      .game-page {
+        position: relative;
+        z-index: 10;
+        height: calc(100vh - 58px);
+        display: grid;
+        grid-template-columns: clamp(140px, 15vw, 200px) 1fr clamp(
+            140px,
+            15vw,
+            200px
+          );
+        grid-template-rows: 1fr auto;
+        gap: 0;
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0;
+      }
 
-/* ── SIDE PANELS ── */
-.side-panel {
-  display:flex;flex-direction:column;
-  justify-content:center;gap:10px;
-  padding:8px 14px;
-  position:relative;z-index:10;
-  background:transparent;
-}
-.side-panel.left  {padding-right:20px;align-items:flex-end;}
-.side-panel.right {padding-left:20px; align-items:flex-start;}
+      /* ── SIDE PANELS ── */
+      .side-panel {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 10px;
+        padding: 8px 14px;
+        position: relative;
+        z-index: 10;
+        background: transparent;
+      }
+      .side-panel.left {
+        padding-right: 20px;
+        align-items: flex-end;
+      }
+      .side-panel.right {
+        padding-left: 20px;
+        align-items: flex-start;
+      }
 
-/* Connector lines from buttons to centre device */
-.pip-btn {
-  position:relative;
-}
-/* Left panel buttons — line extends to the right */
-.side-panel.left .pip-btn::after {
-  content:'';
-  position:absolute;
-  top:50%;right:-20px;
-  height:1px;
-  width:20px;
-  background:linear-gradient(90deg, rgba(74,255,106,.25), rgba(74,255,106,.08));
-  pointer-events:none;
-  transition:opacity .2s;
-}
-.side-panel.left .pip-btn:hover::after {
-  background:linear-gradient(90deg, rgba(74,255,106,.7), rgba(74,255,106,.2));
-  box-shadow:0 0 4px rgba(74,255,106,.3);
-}
-/* Right panel buttons — line extends to the left */
-.side-panel.right .pip-btn::after {
-  content:'';
-  position:absolute;
-  top:50%;left:-20px;
-  height:1px;
-  width:20px;
-  background:linear-gradient(270deg, rgba(74,255,106,.25), rgba(74,255,106,.08));
-  pointer-events:none;
-  transition:opacity .2s;
-}
-.side-panel.right .pip-btn:hover::after {
-  background:linear-gradient(270deg, rgba(74,255,106,.7), rgba(74,255,106,.2));
-  box-shadow:0 0 4px rgba(74,255,106,.3);
-}
-/* Amber buttons get amber lines */
-.side-panel.left  .pip-btn.amber::after { background:linear-gradient(90deg,  rgba(255,184,48,.25), rgba(255,184,48,.06)); }
-.side-panel.right .pip-btn.amber::after { background:linear-gradient(270deg, rgba(255,184,48,.25), rgba(255,184,48,.06)); }
-.side-panel.left  .pip-btn.amber:hover::after { background:linear-gradient(90deg,  rgba(255,184,48,.7), rgba(255,184,48,.2)); }
-.side-panel.right .pip-btn.amber:hover::after { background:linear-gradient(270deg, rgba(255,184,48,.7), rgba(255,184,48,.2)); }
-/* Red buttons */
-.side-panel.left  .pip-btn.red-btn::after { background:linear-gradient(90deg,  rgba(255,68,68,.25), rgba(255,68,68,.06)); }
-.side-panel.right .pip-btn.red-btn::after { background:linear-gradient(270deg, rgba(255,68,68,.25), rgba(255,68,68,.06)); }
-.side-panel.left  .pip-btn.red-btn:hover::after { background:linear-gradient(90deg,  rgba(255,68,68,.7), rgba(255,68,68,.2)); }
-.side-panel.right .pip-btn.red-btn:hover::after { background:linear-gradient(270deg, rgba(255,68,68,.7), rgba(255,68,68,.2)); }
+      /* Connector lines from buttons to centre device */
+      .pip-btn {
+        position: relative;
+      }
+      /* Left panel buttons — line extends to the right */
+      .side-panel.left .pip-btn::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        right: -20px;
+        height: 1px;
+        width: 20px;
+        background: linear-gradient(
+          90deg,
+          rgba(74, 255, 106, 0.25),
+          rgba(74, 255, 106, 0.08)
+        );
+        pointer-events: none;
+        transition: opacity 0.2s;
+      }
+      .side-panel.left .pip-btn:hover::after {
+        background: linear-gradient(
+          90deg,
+          rgba(74, 255, 106, 0.7),
+          rgba(74, 255, 106, 0.2)
+        );
+        box-shadow: 0 0 4px rgba(74, 255, 106, 0.3);
+      }
+      /* Right panel buttons — line extends to the left */
+      .side-panel.right .pip-btn::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: -20px;
+        height: 1px;
+        width: 20px;
+        background: linear-gradient(
+          270deg,
+          rgba(74, 255, 106, 0.25),
+          rgba(74, 255, 106, 0.08)
+        );
+        pointer-events: none;
+        transition: opacity 0.2s;
+      }
+      .side-panel.right .pip-btn:hover::after {
+        background: linear-gradient(
+          270deg,
+          rgba(74, 255, 106, 0.7),
+          rgba(74, 255, 106, 0.2)
+        );
+        box-shadow: 0 0 4px rgba(74, 255, 106, 0.3);
+      }
+      /* Amber buttons get amber lines */
+      .side-panel.left .pip-btn.amber::after {
+        background: linear-gradient(
+          90deg,
+          rgba(255, 184, 48, 0.25),
+          rgba(255, 184, 48, 0.06)
+        );
+      }
+      .side-panel.right .pip-btn.amber::after {
+        background: linear-gradient(
+          270deg,
+          rgba(255, 184, 48, 0.25),
+          rgba(255, 184, 48, 0.06)
+        );
+      }
+      .side-panel.left .pip-btn.amber:hover::after {
+        background: linear-gradient(
+          90deg,
+          rgba(255, 184, 48, 0.7),
+          rgba(255, 184, 48, 0.2)
+        );
+      }
+      .side-panel.right .pip-btn.amber:hover::after {
+        background: linear-gradient(
+          270deg,
+          rgba(255, 184, 48, 0.7),
+          rgba(255, 184, 48, 0.2)
+        );
+      }
+      /* Red buttons */
+      .side-panel.left .pip-btn.red-btn::after {
+        background: linear-gradient(
+          90deg,
+          rgba(255, 68, 68, 0.25),
+          rgba(255, 68, 68, 0.06)
+        );
+      }
+      .side-panel.right .pip-btn.red-btn::after {
+        background: linear-gradient(
+          270deg,
+          rgba(255, 68, 68, 0.25),
+          rgba(255, 68, 68, 0.06)
+        );
+      }
+      .side-panel.left .pip-btn.red-btn:hover::after {
+        background: linear-gradient(
+          90deg,
+          rgba(255, 68, 68, 0.7),
+          rgba(255, 68, 68, 0.2)
+        );
+      }
+      .side-panel.right .pip-btn.red-btn:hover::after {
+        background: linear-gradient(
+          270deg,
+          rgba(255, 68, 68, 0.7),
+          rgba(255, 68, 68, 0.2)
+        );
+      }
 
-/* Metal panel bg */
-/* Side panels — no background, buttons float freely */
-.side-panel::before { display:none; }
+      /* Metal panel bg */
+      /* Side panels — no background, buttons float freely */
+      .side-panel::before {
+        display: none;
+      }
 
-/* ── PIP BUTTONS (same style as pip_interface) ── */
-.pip-btn {
-  position:relative;
-  width:clamp(120px,13vw,154px);
-  padding:0;background:none;border:none;
-  cursor:pointer;font-family:var(--ui);outline:none;
-  transition:transform .1s;
-}
-.pip-btn:active{transform:scale(.97);}
-.pip-btn-inner {
-  position:relative;
-  background:linear-gradient(180deg,rgba(6,14,4,.88) 0%,rgba(4,10,2,.92) 100%);
-  border:1px solid var(--border);
-  border-radius:3px;
-  padding:9px 14px 8px;
-  display:flex;flex-direction:column;gap:3px;
-  overflow:hidden;
-  transition:border-color .2s,background .15s;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.04),inset 0 -1px 0 rgba(0,0,0,.4),0 2px 12px rgba(0,0,0,.65),0 0 0 1px rgba(0,0,0,.3);
-  backdrop-filter:blur(6px);
-}
-.pip-btn-inner::before {
-  content:'';position:absolute;top:8px;right:10px;
-  width:5px;height:5px;border-radius:50%;
-  background:var(--green-dim);box-shadow:0 0 4px var(--green-dim);
-  transition:all .2s;
-}
-.pip-btn:hover .pip-btn-inner {border-color:rgba(74,255,106,.35);background:linear-gradient(180deg,rgba(16,28,10,.92) 0%,rgba(10,18,6,.95) 100%);}
-.pip-btn:hover .pip-btn-inner::before {background:var(--green);box-shadow:0 0 8px var(--green),0 0 16px rgba(74,255,106,.3);}
-.pip-btn.amber:hover .pip-btn-inner::before {background:var(--amber);box-shadow:0 0 8px var(--amber),0 0 16px rgba(255,184,48,.3);}
-.pip-btn.red-btn:hover .pip-btn-inner::before {background:var(--red);box-shadow:0 0 8px var(--red),0 0 16px rgba(255,68,68,.3);}
-.pip-btn-inner::after {
-  content:'';position:absolute;top:-100%;left:0;right:0;height:40%;
-  background:linear-gradient(180deg,transparent,rgba(74,255,106,.04),transparent);
-  transition:top .0s;
-}
-.pip-btn:hover .pip-btn-inner::after{top:150%;transition:top .6s linear;}
-.btn-id    {font-family:var(--mono);font-size:clamp(7px,1.1vw,9px);letter-spacing:3px;color:var(--text-dim);}
-.btn-label {font-family:var(--display);font-size:clamp(10px,1.4vw,14px);letter-spacing:3px;color:var(--green);line-height:1.1;}
-.btn-sub   {font-family:var(--mono);font-size:clamp(6px,.9vw,9px);letter-spacing:2px;color:var(--text-dim);text-transform:uppercase;}
-.pip-btn.amber .btn-label{color:var(--amber);}
-.pip-btn.red-btn .btn-label{color:var(--red);}
-.pip-btn-inner .corner {
-  position:absolute;width:6px;height:6px;border-color:rgba(74,255,106,.25);border-style:solid;
-}
-.corner.tl{top:3px;left:3px;border-width:1px 0 0 1px;}
-.corner.tr{top:3px;right:3px;border-width:1px 1px 0 0;}
-.corner.bl{bottom:3px;left:3px;border-width:0 0 1px 1px;}
-.corner.br{bottom:3px;right:3px;border-width:0 1px 1px 0;}
+      /* ── PIP BUTTONS (same style as pip_interface) ── */
+      .pip-btn {
+        position: relative;
+        width: clamp(120px, 13vw, 154px);
+        padding: 0;
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-family: var(--ui);
+        outline: none;
+        transition: transform 0.1s;
+      }
+      .pip-btn:active {
+        transform: scale(0.97);
+      }
+      .pip-btn-inner {
+        position: relative;
+        background: linear-gradient(
+          180deg,
+          rgba(6, 14, 4, 0.88) 0%,
+          rgba(4, 10, 2, 0.92) 100%
+        );
+        border: 1px solid var(--border);
+        border-radius: 3px;
+        padding: 9px 14px 8px;
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        overflow: hidden;
+        transition:
+          border-color 0.2s,
+          background 0.15s;
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.04),
+          inset 0 -1px 0 rgba(0, 0, 0, 0.4),
+          0 2px 12px rgba(0, 0, 0, 0.65),
+          0 0 0 1px rgba(0, 0, 0, 0.3);
+      }
+      .pip-btn-inner::before {
+        content: "";
+        position: absolute;
+        top: 8px;
+        right: 10px;
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: var(--green-dim);
+        box-shadow: 0 0 4px var(--green-dim);
+        transition: all 0.2s;
+      }
+      .pip-btn:hover .pip-btn-inner {
+        border-color: rgba(74, 255, 106, 0.35);
+        background: linear-gradient(
+          180deg,
+          rgba(16, 28, 10, 0.92) 0%,
+          rgba(10, 18, 6, 0.95) 100%
+        );
+      }
+      .pip-btn:hover .pip-btn-inner::before {
+        background: var(--green);
+        box-shadow:
+          0 0 8px var(--green),
+          0 0 16px rgba(74, 255, 106, 0.3);
+      }
+      .pip-btn.amber:hover .pip-btn-inner::before {
+        background: var(--amber);
+        box-shadow:
+          0 0 8px var(--amber),
+          0 0 16px rgba(255, 184, 48, 0.3);
+      }
+      .pip-btn.red-btn:hover .pip-btn-inner::before {
+        background: var(--red);
+        box-shadow:
+          0 0 8px var(--red),
+          0 0 16px rgba(255, 68, 68, 0.3);
+      }
+      .pip-btn-inner::after {
+        content: "";
+        position: absolute;
+        top: -100%;
+        left: 0;
+        right: 0;
+        height: 40%;
+        background: linear-gradient(
+          180deg,
+          transparent,
+          rgba(74, 255, 106, 0.04),
+          transparent
+        );
+        transition: top 0s;
+      }
+      .pip-btn:hover .pip-btn-inner::after {
+        top: 150%;
+        transition: top 0.6s linear;
+      }
+      .btn-id {
+        font-family: var(--mono);
+        font-size: clamp(7px, 1.1vw, 9px);
+        letter-spacing: 3px;
+        color: var(--text-dim);
+      }
+      .btn-label {
+        font-family: var(--display);
+        font-size: clamp(10px, 1.4vw, 14px);
+        letter-spacing: 3px;
+        color: var(--green);
+        line-height: 1.1;
+      }
+      .btn-sub {
+        font-family: var(--mono);
+        font-size: clamp(6px, 0.9vw, 9px);
+        letter-spacing: 2px;
+        color: var(--text-dim);
+        text-transform: uppercase;
+      }
+      .pip-btn.amber .btn-label {
+        color: var(--amber);
+      }
+      .pip-btn.red-btn .btn-label {
+        color: var(--red);
+      }
+      .pip-btn-inner .corner {
+        position: absolute;
+        width: 6px;
+        height: 6px;
+        border-color: rgba(74, 255, 106, 0.25);
+        border-style: solid;
+      }
+      .corner.tl {
+        top: 3px;
+        left: 3px;
+        border-width: 1px 0 0 1px;
+      }
+      .corner.tr {
+        top: 3px;
+        right: 3px;
+        border-width: 1px 1px 0 0;
+      }
+      .corner.bl {
+        bottom: 3px;
+        left: 3px;
+        border-width: 0 0 1px 1px;
+      }
+      .corner.br {
+        bottom: 3px;
+        right: 3px;
+        border-width: 0 1px 1px 0;
+      }
 
-/* ── CENTRE: PIP DEVICE + MAP ── */
-.pip-centre {
-  grid-column:2;grid-row:1/3;
-  display:flex;flex-direction:column;
-  align-items:center;justify-content:center;
-  position:relative;
-}
-.pip-device-wrap {
-  position:relative;display:flex;flex-direction:column;align-items:center;
-  isolation:isolate;
-  margin-top:-30px;
-}
-.pip-device-img {
-  width:clamp(220px,38vw,480px);
-  max-height:55vh;
-  object-fit:contain;
-  position:relative;z-index:2;
-  filter:drop-shadow(0 0 24px rgba(74,255,106,.14)) drop-shadow(0 0 60px rgba(74,255,106,.06)) brightness(1.05) contrast(1.06);
-}
-/* PIP screen overlay */
-.pip-screen-overlay {
-  position:absolute;top:18%;left:18%;width:52%;height:52%;
-  z-index:3;pointer-events:none;overflow:hidden;border-radius:2px;
-}
-.screen-glow {
-  position:absolute;inset:-10px;
-  background:radial-gradient(ellipse,rgba(74,255,106,.06) 0%,transparent 65%);
-}
-.screen-content {
-  position:absolute;inset:0;
-  display:flex;flex-direction:column;
-  align-items:center;justify-content:center;gap:4px;
-  text-align:center;
-  padding:8px;
-}
-.screen-line {font-family:var(--mono);font-size:clamp(7px,1vw,10px);letter-spacing:3px;text-transform:uppercase;}
-.screen-line.dim    {color:rgba(74,255,106,.45);}
-.screen-line.bright {color:var(--green);font-size:clamp(9px,1.3vw,13px);font-weight:700;text-shadow:0 0 12px var(--green);}
-.screen-encounter   {
-  margin-top:6px;display:flex;flex-direction:column;align-items:center;gap:2px;
-}
-.screen-pokemon-img {width:56px;height:56px;image-rendering:pixelated;filter:drop-shadow(0 0 6px rgba(74,255,106,.4));}
-.screen-pokemon-name{font-family:var(--display);font-size:clamp(9px,1.2vw,13px);letter-spacing:3px;color:var(--amber);text-shadow:0 0 8px var(--amber);}
-.screen-slots {display:flex;gap:6px;margin-top:6px;}
-.screen-slot  {width:10px;height:10px;border-radius:50%;border:1px solid rgba(74,255,106,.3);background:transparent;transition:all .3s;}
-.screen-slot.active{background:var(--green);border-color:var(--green);box-shadow:0 0 6px var(--green);}
+      /* ── CENTRE: PIP DEVICE + MAP ── */
+      .pip-centre {
+        grid-column: 2;
+        grid-row: 1/3;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+      }
+      .pip-device-wrap {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        isolation: isolate;
+        margin-top: -30px;
+      }
+      .pip-device-img {
+        width: clamp(220px, 38vw, 480px);
+        max-height: 55vh;
+        object-fit: contain;
+        position: relative;
+        z-index: 2;
+        filter: drop-shadow(0 0 24px rgba(74, 255, 106, 0.14))
+          drop-shadow(0 0 60px rgba(74, 255, 106, 0.06)) brightness(1.05)
+          contrast(1.06);
+      }
+      /* PIP screen overlay */
+      .pip-screen-overlay {
+        position: absolute;
+        top: 18%;
+        left: 18%;
+        width: 52%;
+        height: 52%;
+        z-index: 3;
+        pointer-events: none;
+        overflow: hidden;
+        border-radius: 2px;
+      }
+      .screen-glow {
+        position: absolute;
+        inset: -10px;
+        background: radial-gradient(
+          ellipse,
+          rgba(74, 255, 106, 0.06) 0%,
+          transparent 65%
+        );
+      }
+      .screen-content {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        text-align: center;
+        padding: 8px;
+      }
+      .screen-line {
+        font-family: var(--mono);
+        font-size: clamp(7px, 1vw, 10px);
+        letter-spacing: 3px;
+        text-transform: uppercase;
+      }
+      .screen-line.dim {
+        color: rgba(74, 255, 106, 0.45);
+      }
+      .screen-line.bright {
+        color: var(--green);
+        font-size: clamp(9px, 1.3vw, 13px);
+        font-weight: 700;
+        text-shadow: 0 0 12px var(--green);
+      }
+      .screen-encounter {
+        margin-top: 6px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+      }
+      .screen-pokemon-img {
+        width: 56px;
+        height: 56px;
+        image-rendering: pixelated;
+        filter: drop-shadow(0 0 6px rgba(74, 255, 106, 0.4));
+      }
+      .screen-pokemon-name {
+        font-family: var(--display);
+        font-size: clamp(9px, 1.2vw, 13px);
+        letter-spacing: 3px;
+        color: var(--amber);
+        text-shadow: 0 0 8px var(--amber);
+      }
+      .screen-slots {
+        display: flex;
+        gap: 6px;
+        margin-top: 6px;
+      }
+      .screen-slot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        border: 1px solid rgba(74, 255, 106, 0.3);
+        background: transparent;
+        transition: all 0.3s;
+      }
+      .screen-slot.active {
+        background: var(--green);
+        border-color: var(--green);
+        box-shadow: 0 0 6px var(--green);
+      }
 
-/* Zone badge floating on pip screen */
-.zone-hud {
-  position:absolute;top:6%;left:50%;transform:translateX(-50%);
-  z-index:4;pointer-events:none;
-  font-family:var(--mono);font-size:9px;letter-spacing:3px;
-  color:rgba(74,255,106,.5);text-transform:uppercase;
-  white-space:nowrap;
-}
+      /* ── SCANNING ACTIVE STATE ── */
+      .pip-btn.scanning-active .pip-btn-inner {
+        border-color: rgba(74,255,106,.6);
+        background: linear-gradient(180deg,#1e2e12 0%,#141e0c 100%);
+        box-shadow: 0 0 18px rgba(74,255,106,.18), inset 0 0 12px rgba(74,255,106,.04);
+      }
+      .pip-btn.scanning-active .pip-btn-inner::before {
+        background: var(--green);
+        box-shadow: 0 0 10px var(--green), 0 0 20px rgba(74,255,106,.4);
+        animation: ledBlink .6s ease-in-out infinite;
+      }
+      .pip-btn.scanning-active .btn-label { color: var(--green); }
+      .pip-btn.scanning-active .btn-sub   { color: rgba(74,255,106,.6); }
 
-/* ── PLAYER POSITION DOT ON MAP ── */
+      /* Scan progress bar — 20s max */
+      .scan-progress-wrap {
+        display: none;
+        flex-direction: column;
+        gap: 2px;
+        width: 80%;
+        margin-top: 3px;
+      }
+      .scan-progress-wrap.visible { display: flex; }
+      .scan-progress-track {
+        width: 100%;
+        height: 3px;
+        background: rgba(74,255,106,.1);
+        overflow: hidden;
+        border: 1px solid rgba(74,255,106,.12);
+      }
+      .scan-progress-fill {
+        height: 100%;
+        width: 0%;
+        background: var(--green);
+        box-shadow: 0 0 6px var(--green);
+        transition: width .4s linear;
+      }
 
+      /* Scan timer */
+      .scan-timer-line {
+        font-family: var(--mono);
+        font-size: clamp(5px,.75vw,7px);
+        letter-spacing: 2px;
+        color: rgba(74,255,106,.4);
+        text-align: center;
+        display: none;
+      }
+      .scan-timer-line.visible { display: block; }
+      .scan-timer-line.active  { color: rgba(74,255,106,.65); }
 
-/* ── CONSOLE ── */
-.console-wrap {
-  grid-column:1/4;grid-row:2;
-  z-index:10;
-}
-.console-box {
-  background:linear-gradient(180deg,rgba(6,12,5,.95) 0%,rgba(4,8,3,.98) 100%);
-  border:1px solid var(--border);
-  border-top:1px solid rgba(74,255,106,.15);
-  border-radius:0 0 4px 4px;
-  padding:8px 14px;
-  height:148px;
-}
-.console-header {
-  display:flex;align-items:center;gap:8px;margin-bottom:8px;
-  padding-bottom:6px;border-bottom:1px solid rgba(74,255,106,.1);
-}
-.console-dot{width:6px;height:6px;border-radius:50%;animation:ledBlink 1.5s ease-in-out infinite;}
-.console-dot.g{background:var(--green);box-shadow:0 0 6px var(--green);}
-.console-dot.a{background:var(--amber);box-shadow:0 0 6px var(--amber);animation-delay:.5s;}
-.console-dot.r{background:var(--red);   box-shadow:0 0 6px var(--red);  animation-delay:1s;}
-@keyframes ledBlink{0%,100%{opacity:.4;}50%{opacity:1;}}
-.console-title {font-family:var(--mono);font-size:9px;letter-spacing:4px;color:rgba(74,255,106,.4);text-transform:uppercase;flex:1;}
-.console-timestamp{font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--text-dim);}
-.console-log{height:80px;overflow:hidden;display:flex;flex-direction:column-reverse;gap:2px;}
-.log-line{font-family:var(--mono);font-size:10px;line-height:1.4;display:flex;gap:8px;animation:logFadeIn .3s ease;}
-@keyframes logFadeIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
-.log-time{color:var(--text-dim);flex-shrink:0;}
-.log-tag{flex-shrink:0;font-weight:700;}
-.log-tag.sys{color:var(--green);}
-.log-tag.warn{color:var(--amber);}
-.log-tag.err{color:var(--red);}
-.log-tag.info{color:#4ab8ff;}
-.log-msg{color:rgba(200,230,200,.65);}
+      /* ── PLAYER POSITION DOT ON MAP ── */
 
-/* ── ENCOUNTER FLASH ── */
-.encounter-flash {
-  position:fixed;inset:0;z-index:500;pointer-events:none;
-  background:rgba(74,255,106,.08);
-  animation:flashIn .4s ease forwards;
-  display:none;
-}
-@keyframes flashIn{0%{opacity:1;}100%{opacity:0;}}
+      /* ── CONSOLE ── */
+      .console-wrap {
+        grid-column: 1/4;
+        grid-row: 2;
+        z-index: 10;
+      }
+      .console-box {
+        background: linear-gradient(
+          180deg,
+          rgba(6, 12, 5, 0.95) 0%,
+          rgba(4, 8, 3, 0.98) 100%
+        );
+        border: 1px solid var(--border);
+        border-top: 1px solid rgba(74, 255, 106, 0.15);
+        border-radius: 0 0 4px 4px;
+        padding: 8px 14px;
+        height: 148px;
+      }
+      .console-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+        padding-bottom: 6px;
+        border-bottom: 1px solid rgba(74, 255, 106, 0.1);
+      }
+      .console-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        animation: ledBlink 1.5s ease-in-out infinite;
+      }
+      .console-dot.g {
+        background: var(--green);
+        box-shadow: 0 0 6px var(--green);
+      }
+      .console-dot.a {
+        background: var(--amber);
+        box-shadow: 0 0 6px var(--amber);
+        animation-delay: 0.5s;
+      }
+      .console-dot.r {
+        background: var(--red);
+        box-shadow: 0 0 6px var(--red);
+        animation-delay: 1s;
+      }
+      @keyframes ledBlink {
+        0%,
+        100% {
+          opacity: 0.4;
+        }
+        50% {
+          opacity: 1;
+        }
+      }
+      .console-title {
+        font-family: var(--mono);
+        font-size: 9px;
+        letter-spacing: 4px;
+        color: rgba(74, 255, 106, 0.4);
+        text-transform: uppercase;
+        flex: 1;
+      }
+      .console-timestamp {
+        font-family: var(--mono);
+        font-size: 9px;
+        letter-spacing: 2px;
+        color: var(--text-dim);
+      }
+      .console-log {
+        height: 80px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column-reverse;
+        gap: 2px;
+      }
+      .log-line {
+        font-family: var(--mono);
+        font-size: 10px;
+        line-height: 1.4;
+        display: flex;
+        gap: 8px;
+        animation: logFadeIn 0.3s ease;
+      }
+      @keyframes logFadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(4px);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+      .log-time {
+        color: var(--text-dim);
+        flex-shrink: 0;
+      }
+      .log-tag {
+        flex-shrink: 0;
+        font-weight: 700;
+      }
+      .log-tag.sys {
+        color: var(--green);
+      }
+      .log-tag.warn {
+        color: var(--amber);
+      }
+      .log-tag.err {
+        color: var(--red);
+      }
+      .log-tag.info {
+        color: #4ab8ff;
+      }
+      .log-msg {
+        color: rgba(200, 230, 200, 0.65);
+      }
 
-/* ── MODAL ── */
-.modal-overlay {
-  position:fixed;inset:0;z-index:300;
-  background:rgba(0,0,0,.75);
-  backdrop-filter:blur(6px);
-  display:none;align-items:center;justify-content:center;
-}
-.modal-overlay.open{display:flex;}
-.modal-box {
-  background:linear-gradient(160deg,#0c140e,#080d09);
-  border:1px solid var(--border);
-  border-radius:4px;
-  padding:24px 28px;
-  width:min(460px,92vw);
-  box-shadow:0 0 40px rgba(74,255,106,.1);
-  position:relative;
-}
-.modal-title {
-  font-family:var(--display);font-size:20px;letter-spacing:5px;
-  color:var(--green);margin-bottom:16px;
-}
-.modal-title.amber{color:var(--amber);}
-.modal-title.red  {color:var(--red);}
-.modal-pokemon-display {
-  display:flex;align-items:center;gap:16px;margin-bottom:18px;
-  padding:12px;background:rgba(0,0,0,.3);border:1px solid var(--border-dim);border-radius:3px;
-}
-.modal-pokemon-img {width:80px;height:80px;image-rendering:pixelated;filter:drop-shadow(0 0 8px rgba(74,255,106,.3));}
-.modal-pokemon-info {flex:1;}
-.modal-pokemon-name{font-family:var(--display);font-size:18px;letter-spacing:3px;color:var(--amber);}
-.modal-pokemon-sub {font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--text-dim);margin-top:4px;}
-.modal-desc {font-family:var(--mono);font-size:10px;letter-spacing:.5px;color:rgba(200,230,200,.6);line-height:1.7;margin-bottom:16px;border-left:2px solid var(--border-dim);padding-left:10px;}
-.modal-actions {display:flex;gap:10px;}
-.modal-btn {
-  flex:1;padding:10px;border-radius:2px;
-  font-family:var(--display);font-size:14px;letter-spacing:4px;
-  cursor:pointer;transition:all .2s;border:1px solid;
-}
-.modal-btn.primary {background:rgba(74,255,106,.08);border-color:rgba(74,255,106,.35);color:var(--green);}
-.modal-btn.primary:hover{background:rgba(74,255,106,.16);border-color:var(--green);}
-.modal-btn.secondary{background:rgba(255,184,48,.06);border-color:rgba(255,184,48,.25);color:var(--amber);}
-.modal-btn.secondary:hover{background:rgba(255,184,48,.14);}
-.modal-btn.danger  {background:rgba(255,68,68,.06);border-color:rgba(255,68,68,.25);color:var(--red);}
-.modal-btn.danger:hover{background:rgba(255,68,68,.14);}
-.modal-close {
-  position:absolute;top:12px;right:14px;
-  background:none;border:none;color:var(--text-dim);cursor:pointer;
-  font-family:var(--mono);font-size:11px;letter-spacing:2px;
-  transition:color .2s;
-}
-.modal-close:hover{color:var(--text);}
+      /* ── ENCOUNTER FLASH ── */
+      .encounter-flash {
+        position: fixed;
+        inset: 0;
+        z-index: 500;
+        pointer-events: none;
+        background: rgba(74, 255, 106, 0.08);
+        animation: flashIn 0.4s ease forwards;
+        display: none;
+      }
+      @keyframes flashIn {
+        0% {
+          opacity: 1;
+        }
+        100% {
+          opacity: 0;
+        }
+      }
 
-/* ── BOOT OVERLAY ── */
-.boot-overlay {
-  position:fixed;inset:0;z-index:200;
-  background:#060908;
-  display:flex;flex-direction:column;justify-content:center;align-items:flex-start;
-  padding:40px 60px;
-  transition:opacity 1s ease;
-}
-.boot-text {
-  font-family:var(--mono);font-size:12px;letter-spacing:3px;
-  color:rgba(74,255,106,.6);margin-bottom:6px;
-  animation:bootType .3s ease forwards;opacity:0;
-}
-@keyframes bootType{from{opacity:0;transform:translateX(-8px);}to{opacity:1;transform:none;}}
+      /* ── MODAL ── */
+      .modal-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 300;
+        background: rgba(0, 0, 0, 0.75);
+        display: none;
+        align-items: center;
+        justify-content: center;
+      }
+      .modal-overlay.open {
+        display: flex;
+      }
+      .modal-box {
+        background: linear-gradient(160deg, #0c140e, #080d09);
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        padding: 24px 28px;
+        width: min(460px, 92vw);
+        box-shadow: 0 0 40px rgba(74, 255, 106, 0.1);
+        position: relative;
+      }
+      .modal-title {
+        font-family: var(--display);
+        font-size: 20px;
+        letter-spacing: 5px;
+        color: var(--green);
+        margin-bottom: 16px;
+      }
+      .modal-title.amber {
+        color: var(--amber);
+      }
+      .modal-title.red {
+        color: var(--red);
+      }
+      .modal-pokemon-display {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 18px;
+        padding: 12px;
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid var(--border-dim);
+        border-radius: 3px;
+      }
+      .modal-pokemon-img {
+        width: 80px;
+        height: 80px;
+        image-rendering: pixelated;
+        filter: drop-shadow(0 0 8px rgba(74, 255, 106, 0.3));
+      }
+      .modal-pokemon-info {
+        flex: 1;
+      }
+      .modal-pokemon-name {
+        font-family: var(--display);
+        font-size: 18px;
+        letter-spacing: 3px;
+        color: var(--amber);
+      }
+      .modal-pokemon-sub {
+        font-family: var(--mono);
+        font-size: 9px;
+        letter-spacing: 2px;
+        color: var(--text-dim);
+        margin-top: 4px;
+      }
+      .modal-desc {
+        font-family: var(--mono);
+        font-size: 10px;
+        letter-spacing: 0.5px;
+        color: rgba(200, 230, 200, 0.6);
+        line-height: 1.7;
+        margin-bottom: 16px;
+        border-left: 2px solid var(--border-dim);
+        padding-left: 10px;
+      }
+      .modal-actions {
+        display: flex;
+        gap: 10px;
+      }
+      .modal-btn {
+        flex: 1;
+        padding: 10px;
+        border-radius: 2px;
+        font-family: var(--display);
+        font-size: 14px;
+        letter-spacing: 4px;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: 1px solid;
+      }
+      .modal-btn.primary {
+        background: rgba(74, 255, 106, 0.08);
+        border-color: rgba(74, 255, 106, 0.35);
+        color: var(--green);
+      }
+      .modal-btn.primary:hover {
+        background: rgba(74, 255, 106, 0.16);
+        border-color: var(--green);
+      }
+      .modal-btn.secondary {
+        background: rgba(255, 184, 48, 0.06);
+        border-color: rgba(255, 184, 48, 0.25);
+        color: var(--amber);
+      }
+      .modal-btn.secondary:hover {
+        background: rgba(255, 184, 48, 0.14);
+      }
+      .modal-btn.danger {
+        background: rgba(255, 68, 68, 0.06);
+        border-color: rgba(255, 68, 68, 0.25);
+        color: var(--red);
+      }
+      .modal-btn.danger:hover {
+        background: rgba(255, 68, 68, 0.14);
+      }
+      .modal-close {
+        position: absolute;
+        top: 12px;
+        right: 14px;
+        background: none;
+        border: none;
+        color: var(--text-dim);
+        cursor: pointer;
+        font-family: var(--mono);
+        font-size: 11px;
+        letter-spacing: 2px;
+        transition: color 0.2s;
+      }
+      .modal-close:hover {
+        color: var(--text);
+      }
 
-/* ── RESPONSIVE ── */
-@media(max-width:640px){
-  .game-page{grid-template-columns:1fr;grid-template-rows:auto 1fr auto;}
-  .side-panel{flex-direction:row;flex-wrap:wrap;justify-content:center;padding:8px;}
-  .pip-centre{grid-column:1;order:1;}
-  .side-panel.left{order:2;}
-  .side-panel.right{order:3;}
-  .console-wrap{grid-column:1;}
-}
-</style>
-</head>
-<body>
+      /* ── BOOT OVERLAY ── */
+      .boot-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 200;
+        background: #060908;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: flex-start;
+        padding: 40px 60px;
+        transition: opacity 1s ease;
+      }
+      .boot-text {
+        font-family: var(--mono);
+        font-size: 12px;
+        letter-spacing: 3px;
+        color: rgba(74, 255, 106, 0.6);
+        margin-bottom: 6px;
+        animation: bootType 0.3s ease forwards;
+        opacity: 0;
+      }
+      @keyframes bootType {
+        from {
+          opacity: 0;
+          transform: translateX(-8px);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
 
-<!-- MAP BACKGROUND -->
-<div id="map-bg"></div>
-<div id="map-vignette"></div>
+      /* ── RESPONSIVE ── */
+      @media (max-width: 640px) {
+        .game-page {
+          grid-template-columns: 1fr;
+          grid-template-rows: auto 1fr auto;
+        }
+        .side-panel {
+          flex-direction: row;
+          flex-wrap: wrap;
+          justify-content: center;
+          padding: 8px;
+        }
+        .pip-centre {
+          grid-column: 1;
+          order: 1;
+        }
+        .side-panel.left {
+          order: 2;
+        }
+        .side-panel.right {
+          order: 3;
+        }
+        .console-wrap {
+          grid-column: 1;
+        }
+      }
 
-<!-- ENCOUNTER FLASH -->
-<div class="encounter-flash" id="encounterFlash"></div>
+      /* ── ENCOUNTER ACTION BAR (above PIP device) ── */
+      .enc-action-bar {
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 10px;
+        width: 100%;
+        animation: encBarIn .2s ease;
+      }
+      @keyframes encBarIn {
+        from { opacity:0; transform:translateY(-6px); }
+        to   { opacity:1; transform:none; }
+      }
+      .enc-action-bar.visible { display: flex; }
+      .enc-bar-label {
+        font-family: var(--mono);
+        font-size: 9px;
+        letter-spacing: 3px;
+        color: rgba(255,184,48,.5);
+        text-transform: uppercase;
+      }
+      .enc-chips {
+        display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;
+      }
+      .enc-chip {
+        font-family: var(--mono); font-size: 10px; letter-spacing: 3px;
+        text-transform: uppercase; padding: 5px 14px;
+        background: rgba(0,0,0,.5); border: 1px solid rgba(74,255,106,.2);
+        color: var(--text-dim); cursor: pointer; transition: all .15s;
+      }
+      .enc-chip:hover { border-color: var(--green); color: var(--green); box-shadow: 0 0 10px rgba(74,255,106,.12); }
+      .enc-chip.catch  { border-color: rgba(74,255,106,.4); color: var(--green); background: rgba(74,255,106,.08); }
+      .enc-chip.catch:hover  { background: rgba(74,255,106,.16); box-shadow: 0 0 14px rgba(74,255,106,.2); }
+      .enc-chip.battle { border-color: rgba(255,184,48,.3); color: var(--amber); background: rgba(255,184,48,.06); }
+      .enc-chip.battle:hover { background: rgba(255,184,48,.14); box-shadow: 0 0 10px rgba(255,184,48,.15); }
+      .enc-chip.flee   { border-color: rgba(255,68,68,.3); color: var(--red); background: rgba(255,68,68,.06); }
+      .enc-chip.flee:hover   { background: rgba(255,68,68,.14); box-shadow: 0 0 10px rgba(255,68,68,.12); }
+      .sig-bar-line {
+        font-family: var(--mono); font-size: clamp(6px,.85vw,8px); letter-spacing:1px;
+        color: rgba(74,255,106,.5); text-align:center; margin-top:2px;
+      }
+      .sig-bar-line.silent   { color: rgba(74,255,106,.2); }
+      .sig-bar-line.dead     { color: rgba(255,184,48,.4); }
+      .sig-bar-line.strong   { color: var(--green); text-shadow:0 0 6px var(--green); }
+      .sig-bar-line.encounter{ color: var(--amber); text-shadow:0 0 8px var(--amber); }
+    </style>
+  </head>
+  <body>
+    <!-- MAP BACKGROUND -->
+    <div id="map-bg"></div>
+    <div id="map-vignette"></div>
 
-<!-- NAVBAR -->
-<div id="navbar-placeholder"></div>
+    <!-- ENCOUNTER FLASH -->
+    <div class="encounter-flash" id="encounterFlash"></div>
 
-<!-- BOOT OVERLAY -->
-<div class="boot-overlay" id="bootOverlay">
-  <div class="boot-text" style="animation-delay:.1s">P.I.P OS v4.1 — FIELD OPERATIONS MODE</div>
-  <div class="boot-text" style="animation-delay:.4s">LOADING ZONE DATA...</div>
-  <div class="boot-text" style="animation-delay:.8s" id="bootZone">ZONE: UNKNOWN</div>
-  <div class="boot-text" style="animation-delay:1.2s">FRAGMENT SCANNER: ACTIVE</div>
-  <div class="boot-text" style="animation-delay:1.6s">BATTLE SYSTEMS: ONLINE</div>
-</div>
+    <!-- NAVBAR -->
+    <div id="navbar-placeholder"></div>
 
-<!-- MAIN GAME LAYOUT -->
-<div class="game-page">
+    <!-- BOOT OVERLAY -->
+    <div class="boot-overlay" id="bootOverlay">
+      <div class="boot-text" style="animation-delay: 0.1s">
+        P.I.P OS v4.1 — FIELD OPERATIONS MODE
+      </div>
+      <div class="boot-text" style="animation-delay: 0.4s">
+        LOADING ZONE DATA...
+      </div>
+      <div class="boot-text" style="animation-delay: 0.8s" id="bootZone">
+        ZONE: UNKNOWN
+      </div>
+      <div class="boot-text" style="animation-delay: 1.2s">
+        FRAGMENT SCANNER: ACTIVE
+      </div>
+      <div class="boot-text" style="animation-delay: 1.6s">
+        BATTLE SYSTEMS: ONLINE
+      </div>
+    </div>
 
-  <!-- LEFT BUTTONS -->
-  <div class="side-panel left" id="leftPanel"></div>
+    <!-- MAIN GAME LAYOUT -->
+    <div class="game-page">
+      <!-- LEFT BUTTONS -->
+      <div class="side-panel left" id="leftPanel"></div>
 
-  <!-- CENTRE: PIP DEVICE -->
-  <div class="pip-centre">
-    <div class="zone-hud" id="zoneHud">ZONE — UNKNOWN</div>
-    <div class="pip-device-wrap">
-      <img class="pip-device-img" src="../assets/img/BITPIP.png" alt="PIP Device"/>
-      <div class="pip-screen-overlay">
-        <div class="screen-glow"></div>
-        <div class="screen-content" id="screenContent">
-          <div class="screen-line dim" id="screenStatus">FIELD OPS</div>
-          <div class="screen-line bright" id="screenMain">SCANNING</div>
-          <div class="screen-line dim" id="screenSub">MOVE TO ENCOUNTER</div>
-          <div class="screen-encounter" id="screenEncounter" style="display:none">
-            <img class="screen-pokemon-img" id="screenPokemonImg" src="" alt=""/>
-            <div class="screen-pokemon-name" id="screenPokemonName"></div>
-          </div>
-          <div class="screen-slots" id="screenSlots">
-            <div class="screen-slot active"></div>
-            <div class="screen-slot active"></div>
-            <div class="screen-slot active"></div>
-            <div class="screen-slot"></div>
-            <div class="screen-slot"></div>
+      <!-- CENTRE: PIP DEVICE -->
+      <div class="pip-centre">
+        <div class="pip-device-wrap">
+          <img class="pip-device-img" src="../assets/img/BITPIP.png" alt="PIP Device"/>
+          <div class="pip-screen-overlay">
+            <div class="screen-glow"></div>
+            <div class="screen-content" id="screenContent">
+              <div class="screen-line dim" id="screenStatus">FIELD OPS</div>
+              <div class="screen-line bright" id="screenMain">SCANNING</div>
+              <div class="screen-line dim" id="screenSub">MOVE TO SCAN</div>
+              <!-- Signal bar — updated by scan engine -->
+              <div class="sig-bar-line" id="sigBarLine">SIG [░░░░░░░░░░] IDLE</div>
+              <!-- Scan progress bar — 20s max -->
+              <div class="scan-progress-wrap" id="scanProgressWrap">
+                <div class="scan-progress-track">
+                  <div class="scan-progress-fill" id="scanProgressFill"></div>
+                </div>
+                <div class="scan-timer-line" id="scanTimerLine">SCANNING 00:00</div>
+              </div>
+              <div class="screen-encounter" id="screenEncounter" style="display:none">
+                <img class="screen-pokemon-img" id="screenPokemonImg" src="" alt=""/>
+                <div class="screen-pokemon-name" id="screenPokemonName"></div>
+              </div>
+              <div class="screen-slots" id="screenSlots">
+                <div class="screen-slot active"></div>
+                <div class="screen-slot active"></div>
+                <div class="screen-slot active"></div>
+                <div class="screen-slot"></div>
+                <div class="screen-slot"></div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  </div>
 
-  <!-- RIGHT BUTTONS -->
-  <div class="side-panel right" id="rightPanel"></div>
+      <!-- RIGHT BUTTONS -->
+      <div class="side-panel right" id="rightPanel"></div>
 
-  <!-- CONSOLE -->
-  <div class="console-wrap">
-    <div class="console-box">
-      <div class="console-header">
-        <div class="console-dot g"></div>
-        <div class="console-dot a"></div>
-        <div class="console-dot r"></div>
-        <div class="console-title">PIP.SYS &mdash; FIELD CONSOLE</div>
-        <div class="console-timestamp" id="consoleTime">00:00:00</div>
-      </div>
-      <div class="console-log" id="consoleLog"></div>
-    </div>
-  </div>
-
-</div>
-
-<!-- ENCOUNTER MODAL -->
-<div class="modal-overlay" id="encounterModal">
-  <div class="modal-box">
-    <button class="modal-close" onclick="closeModal()">✕ CLOSE</button>
-    <div class="modal-title amber" id="modalTitle">WILD ENCOUNTER</div>
-    <div class="modal-pokemon-display">
-      <img class="modal-pokemon-img" id="modalPokemonImg" src="" alt=""/>
-      <div class="modal-pokemon-info">
-        <div class="modal-pokemon-name" id="modalPokemonName">—</div>
-        <div class="modal-pokemon-sub" id="modalPokemonSub">FRAGMENT TYPE: UNKNOWN</div>
+      <!-- CONSOLE -->
+      <div class="console-wrap">
+        <div class="console-box">
+          <div class="console-header">
+            <div class="console-dot g"></div>
+            <div class="console-dot a"></div>
+            <div class="console-dot r"></div>
+            <div class="console-title">PIP.SYS &mdash; FIELD CONSOLE &nbsp;|&nbsp; <span id="zoneHud" style="color:rgba(74,255,106,.5);letter-spacing:2px">ZONE — UNKNOWN</span></div>
+            <div class="console-timestamp" id="consoleTime">00:00:00</div>
+          </div>
+          <div class="console-log" id="consoleLog"></div>
+        </div>
       </div>
     </div>
-    <div class="modal-desc" id="modalDesc">A wild Pokémon has appeared. Choose your action.</div>
-    <div class="modal-actions">
-      <button class="modal-btn primary" id="catchBtn">⬡ CATCH FRAGMENT</button>
-      <button class="modal-btn secondary" id="battleBtn">⚔ BATTLE</button>
-      <button class="modal-btn danger" onclick="fleePokemon()">↩ FLEE</button>
+
+    <!-- ENCOUNTER MODAL -->
+    <div class="modal-overlay" id="encounterModal">
+      <div class="modal-box">
+        <button class="modal-close" onclick="closeModal()">✕</button>
+        <div class="modal-title amber" id="modalTitle">WILD ENCOUNTER</div>
+        <div class="modal-pokemon-display">
+          <img class="modal-pokemon-img" id="modalPokemonImg" src="" alt=""/>
+          <div class="modal-pokemon-info">
+            <div class="modal-pokemon-name" id="modalPokemonName">—</div>
+            <div class="modal-pokemon-sub" id="modalPokemonSub">FRAGMENT TYPE: UNKNOWN</div>
+          </div>
+        </div>
+        <div class="modal-desc" id="modalDesc">
+          A wild Pokémon Fragment signature has been detected. Neural lock established. Choose your engagement protocol.
+        </div>
+        <div class="modal-actions">
+          <button class="modal-btn primary"   id="catchBtn">⬡ CATCH FRAGMENT</button>
+          <button class="modal-btn secondary" id="battleBtn">⚔ BATTLE</button>
+          <button class="modal-btn danger"    onclick="doFlee()">↩ FLEE</button>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js"></script>
-<script>
-// ── SOUND ENGINE ──
-const SFX = (() => {
-  let _ctx = null;
-  function ctx() {
-    if (!_ctx) _ctx = new (window.AudioContext || window.webkitAudioContext)();
-    if (_ctx.state === 'suspended') _ctx.resume();
-    return _ctx;
-  }
-  function osc(freq, type, dur, vol, freqEnd) {
-    const c=ctx(),o=c.createOscillator(),g=c.createGain();
-    o.connect(g);g.connect(c.destination);
-    o.type=type;o.frequency.setValueAtTime(freq,c.currentTime);
-    if(freqEnd)o.frequency.linearRampToValueAtTime(freqEnd,c.currentTime+dur);
-    g.gain.setValueAtTime(vol,c.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.0001,c.currentTime+dur);
-    o.start();o.stop(c.currentTime+dur);
-  }
-  function noise(dur=.06,vol=.04){
-    const c=ctx(),buf=c.createBuffer(1,c.sampleRate*dur,c.sampleRate),d=buf.getChannelData(0);
-    for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
-    const src=c.createBufferSource(),g=c.createGain();
-    src.buffer=buf;src.connect(g);g.connect(c.destination);
-    g.gain.setValueAtTime(vol,c.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.0001,c.currentTime+dur);
-    src.start();src.stop(c.currentTime+dur);
-  }
-  return {
-    move()     { osc(600,'square',.015,.025); },
-    encounter(){ noise(.1,.06); setTimeout(()=>osc(880,'sine',.15,.07),80); },
-    catch_()   { osc(440,'sine',.1,.07); setTimeout(()=>osc(660,'sine',.1,.08),110); setTimeout(()=>osc(880,'sine',.2,.09),220); },
-    flee()     { osc(400,'sine',.06,.05); setTimeout(()=>osc(280,'sine',.1,.05),60); },
-    hover()    { osc(900,'square',.03,.04); },
-    battle()   { osc(200,'sawtooth',.08,.08); setTimeout(()=>osc(300,'square',.1,.07),90); },
-    scan()     { noise(.1,.06); setTimeout(()=>osc(1200,'sine',.08,.05),60); },
-    boot()     {
-      setTimeout(()=>osc(220,'sine',.2,.06),200);
-      setTimeout(()=>osc(440,'sine',.2,.07),600);
-      setTimeout(()=>osc(660,'square',.15,.08),1000);
-      setTimeout(()=>{osc(880,'sine',.3,.09);noise(.1,.04);},1400);
-    },
-  };
-})();
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js"></script>
+    <script>
+      // ── SOUND ENGINE ──
+      const SFX = (() => {
+        let _ctx = null;
+        function ctx() {
+          if (!_ctx)
+            _ctx = new (window.AudioContext || window.webkitAudioContext)();
+          if (_ctx.state === "suspended") _ctx.resume();
+          return _ctx;
+        }
+        function osc(freq, type, dur, vol, freqEnd) {
+          const c = ctx(),
+            o = c.createOscillator(),
+            g = c.createGain();
+          o.connect(g);
+          g.connect(c.destination);
+          o.type = type;
+          o.frequency.setValueAtTime(freq, c.currentTime);
+          if (freqEnd)
+            o.frequency.linearRampToValueAtTime(freqEnd, c.currentTime + dur);
+          g.gain.setValueAtTime(vol, c.currentTime);
+          g.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + dur);
+          o.start();
+          o.stop(c.currentTime + dur);
+        }
+        function noise(dur = 0.06, vol = 0.04) {
+          const c = ctx(),
+            buf = c.createBuffer(1, c.sampleRate * dur, c.sampleRate),
+            d = buf.getChannelData(0);
+          for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+          const src = c.createBufferSource(),
+            g = c.createGain();
+          src.buffer = buf;
+          src.connect(g);
+          g.connect(c.destination);
+          g.gain.setValueAtTime(vol, c.currentTime);
+          g.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + dur);
+          src.start();
+          src.stop(c.currentTime + dur);
+        }
+        return {
+          move() {
+            osc(600, "square", 0.015, 0.025);
+          },
+          encounter() {
+            noise(0.1, 0.06);
+            setTimeout(() => osc(880, "sine", 0.15, 0.07), 80);
+          },
+          catch_() {
+            osc(440, "sine", 0.1, 0.07);
+            setTimeout(() => osc(660, "sine", 0.1, 0.08), 110);
+            setTimeout(() => osc(880, "sine", 0.2, 0.09), 220);
+          },
+          flee() {
+            osc(400, "sine", 0.06, 0.05);
+            setTimeout(() => osc(280, "sine", 0.1, 0.05), 60);
+          },
+          hover() {
+            osc(900, "square", 0.03, 0.04);
+          },
+          battle() {
+            osc(200, "sawtooth", 0.08, 0.08);
+            setTimeout(() => osc(300, "square", 0.1, 0.07), 90);
+          },
+          scan() {
+            noise(0.1, 0.06);
+            setTimeout(() => osc(1200, "sine", 0.08, 0.05), 60);
+          },
+          boot() {
+            setTimeout(() => osc(220, "sine", 0.2, 0.06), 200);
+            setTimeout(() => osc(440, "sine", 0.2, 0.07), 600);
+            setTimeout(() => osc(660, "square", 0.15, 0.08), 1000);
+            setTimeout(() => {
+              osc(880, "sine", 0.3, 0.09);
+              noise(0.1, 0.04);
+            }, 1400);
+          },
+        };
+      })();
 
-// ── MAP DATA ──
-const MAP_DATA = {
-  1:  { name:'Grassland Expanse',  zone:'Z-01', type:'GRASS',     bg:'map1.jpg',  habitat:'grass'    },
-  2:  { name:'Flooded Lowlands',   zone:'Z-02', type:'WATER',     bg:'map2.jpg',  habitat:'water'    },
-  3:  { name:'Scorched Caldera',   zone:'Z-03', type:'FIRE',      bg:'map3.jpg',  habitat:'fire'     },
-  4:  { name:'Ashfields',          zone:'Z-04', type:'FIRE',      bg:'map4.jpg',  habitat:'fire'     },
-  5:  { name:'Verdant Ruins',      zone:'Z-05', type:'GRASS',     bg:'map5.jpg',  habitat:'grass'    },
-  6:  { name:'Fractured Ridge',    zone:'Z-06', type:'ROCK',      bg:'map6.jpg',  habitat:'rock'     },
-  7:  { name:'Shrouded Necropolis',zone:'Z-07', type:'GHOST',     bg:'map7.jpg',  habitat:'ghost'    },
-  8:  { name:'Frozen Tundra',      zone:'Z-08', type:'ICE',       bg:'map8.jpg',  habitat:'ice'      },
-  9:  { name:'Storm Grid',         zone:'Z-09', type:'ELECTRIC',  bg:'map9.jpg',  habitat:'electric' },
-  10: { name:'Dragon Lair',        zone:'Z-10', type:'DRAGON',    bg:'map10.jpg', habitat:'dragon'   },
-  11: { name:'Overgrown Canopy',   zone:'Z-11', type:'BUG',       bg:'map11.jpg', habitat:'bug'      },
-  12: { name:'Mind Rift',          zone:'Z-12', type:'PSYCHIC',   bg:'map12.jpg', habitat:'psychic'  },
-  13: { name:'Toxic Wastes',       zone:'Z-13', type:'POISON',    bg:'map13.jpg', habitat:'poison'   },
-  14: { name:'Survivor Outpost',   zone:'Z-14', type:'FIGHTING',  bg:'map14.jpg', habitat:'fighting' },
-  15: { name:'Sky Corridor',       zone:'Z-15', type:'FLYING',    bg:'map15.jpg', habitat:'flying'   },
-  16: { name:'Dust Flats',         zone:'Z-16', type:'GROUND',    bg:'map16.jpg', habitat:'ground'   },
-  17: { name:'Survivor City',      zone:'Z-17', type:'NORMAL',    bg:'map17.jpg', habitat:'normal'   },
-};
+      // ── MAP DATA ──
+      const MAP_DATA = {
+        1: {
+          name: "Grassland Expanse",
+          zone: "Z-01",
+          type: "GRASS",
+          bg: "z01.jpg",
+          habitat: "grass",
+        },
+        2: {
+          name: "Flooded Lowlands",
+          zone: "Z-02",
+          type: "WATER",
+          bg: "z02.jpg",
+          habitat: "water",
+        },
+        3: {
+          name: "Scorched Caldera",
+          zone: "Z-03",
+          type: "FIRE",
+          bg: "z03.jpg",
+          habitat: "fire",
+        },
+        4: {
+          name: "Ashfields",
+          zone: "Z-04",
+          type: "FIRE",
+          bg: "z04.jpg",
+          habitat: "fire",
+        },
+        5: {
+          name: "Verdant Ruins",
+          zone: "Z-05",
+          type: "GRASS",
+          bg: "z05.jpg",
+          habitat: "grass",
+        },
+        6: {
+          name: "Fractured Ridge",
+          zone: "Z-06",
+          type: "ROCK",
+          bg: "z06.jpg",
+          habitat: "rock",
+        },
+        7: {
+          name: "Shrouded Necropolis",
+          zone: "Z-07",
+          type: "GHOST",
+          bg: "z07.jpg",
+          habitat: "ghost",
+        },
+        8: {
+          name: "Frozen Tundra",
+          zone: "Z-08",
+          type: "ICE",
+          bg: "z08.jpg",
+          habitat: "ice",
+        },
+        9: {
+          name: "Storm Grid",
+          zone: "Z-09",
+          type: "ELECTRIC",
+          bg: "z09.jpg",
+          habitat: "electric",
+        },
+        10: {
+          name: "Dragon Lair",
+          zone: "Z-10",
+          type: "DRAGON",
+          bg: "z10.jpg",
+          habitat: "dragon",
+        },
+        11: {
+          name: "Overgrown Canopy",
+          zone: "Z-11",
+          type: "BUG",
+          bg: "z11.jpg",
+          habitat: "bug",
+        },
+        12: {
+          name: "Mind Rift",
+          zone: "Z-12",
+          type: "PSYCHIC",
+          bg: "z12.jpg",
+          habitat: "psychic",
+        },
+        13: {
+          name: "Toxic Wastes",
+          zone: "Z-13",
+          type: "POISON",
+          bg: "z13.jpg",
+          habitat: "poison",
+        },
+        14: {
+          name: "Survivor Outpost",
+          zone: "Z-14",
+          type: "FIGHTING",
+          bg: "z14.jpg",
+          habitat: "fighting",
+        },
+        15: {
+          name: "Sky Corridor",
+          zone: "Z-15",
+          type: "FLYING",
+          bg: "z15.jpg",
+          habitat: "flying",
+        },
+        16: {
+          name: "Dust Flats",
+          zone: "Z-16",
+          type: "GROUND",
+          bg: "z16.jpg",
+          habitat: "ground",
+        },
+        17: {
+          name: "Survivor City",
+          zone: "Z-17",
+          type: "NORMAL",
+          bg: "z17.jpg",
+          habitat: "normal",
+        },
+      };
 
-// All Gen 1 pokemon by habitat
-const POKEMON_BY_HABITAT = {
-  grass:    [1,2,3,43,44,45,46,47,69,70,71,102,103,114,1],
-  water:    [54,60,72,98,116,118,120,129,131,7,8,9,86,87,90,91],
-  fire:     [4,5,6,37,38,58,59,77,78,126,136,146],
-  rock:     [74,75,76,95,111,112,138,139,140,141,142],
-  ghost:    [92,93,94],
-  ice:      [87,91,124,131,144],
-  electric: [25,26,81,82,100,101,125,135,145],
-  dragon:   [147,148,149,130,150],
-  bug:      [10,11,12,13,14,15,41,42,46,47,48,49],
-  psychic:  [63,64,65,79,80,96,97,121,150,151],
-  poison:   [23,24,29,32,41,88,89,109,110],
-  fighting: [56,57,62,66,67,68,106,107],
-  flying:   [16,17,18,21,22,83,84,85,142],
-  ground:   [27,28,50,51,74,95,104,105,111],
-  normal:   [19,20,35,36,39,40,52,53,113,132],
-};
+      // All Gen 1 pokemon by habitat
+      const POKEMON_BY_HABITAT = {
+        grass: [1, 2, 3, 43, 44, 45, 46, 47, 69, 70, 71, 102, 103, 114, 1],
+        water: [
+          54, 60, 72, 98, 116, 118, 120, 129, 131, 7, 8, 9, 86, 87, 90, 91,
+        ],
+        fire: [4, 5, 6, 37, 38, 58, 59, 77, 78, 126, 136, 146],
+        rock: [74, 75, 76, 95, 111, 112, 138, 139, 140, 141, 142],
+        ghost: [92, 93, 94],
+        ice: [87, 91, 124, 131, 144],
+        electric: [25, 26, 81, 82, 100, 101, 125, 135, 145],
+        dragon: [147, 148, 149, 130, 150],
+        bug: [10, 11, 12, 13, 14, 15, 41, 42, 46, 47, 48, 49],
+        psychic: [63, 64, 65, 79, 80, 96, 97, 121, 150, 151],
+        poison: [23, 24, 29, 32, 41, 88, 89, 109, 110],
+        fighting: [56, 57, 62, 66, 67, 68, 106, 107],
+        flying: [16, 17, 18, 21, 22, 83, 84, 85, 142],
+        ground: [27, 28, 50, 51, 74, 95, 104, 105, 111],
+        normal: [19, 20, 35, 36, 39, 40, 52, 53, 113, 132],
+      };
 
-const ART = id => `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
+      const ART = (id) =>
+        `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
 
-// ── STATE ──
-const urlParams   = new URLSearchParams(window.location.search);
-const mapId       = parseInt(urlParams.get('map')) || 1;
-const mapInfo     = MAP_DATA[mapId] || MAP_DATA[1];
-let currentWild   = null;
-let playerX = 50, playerY = 50; // percentage position on screen
-let scanning      = false;
-let moveCount     = 0;
+      // ── STATE ──
+      const urlParams = new URLSearchParams(window.location.search);
+      const mapId  = parseInt(urlParams.get("map")) || 1;
+      const mapInfo = MAP_DATA[mapId] || MAP_DATA[1];
+      window._gameHabitat = mapInfo.habitat;
+      let currentWild = null;
+      let playerX = 50, playerY = 50;
+      let scanning      = false;
+      let moveCount     = 0;
+      let _scanStopTime = 0; // timestamp of last scan stop for 5s debounce
 
-// ── SET MAP BACKGROUND ──
-document.getElementById('map-bg').style.backgroundImage = `url('../assets/img/${mapInfo.bg}')`;
-document.getElementById('zoneHud').textContent = `${mapInfo.zone} — ${mapInfo.name.toUpperCase()}`;
-document.getElementById('bootZone').textContent = `ZONE: ${mapInfo.zone} — ${mapInfo.name.toUpperCase()}`;
-document.title = `BIT-POKEMON — ${mapInfo.name}`;
+      // Called by the module's onEncounter to bypass the scanning gate
+      window._forceEncounter = function() {
+        scanning = false; // clear the gate
+        if (typeof triggerEncounter === 'function') triggerEncounter();
+      };
 
-// ── CONSOLE LOG ──
-const logLines = [];
-function log(tag, type, msg) {
-  const t = new Date().toTimeString().slice(0,8);
-  logLines.unshift({time:t,tag,type,msg});
-  if(logLines.length>50)logLines.pop();
-  renderLog();
-}
-function renderLog() {
-  document.getElementById('consoleLog').innerHTML = logLines.slice(0,8).map(l=>
-    `<div class="log-line"><span class="log-time">${l.time}</span><span class="log-tag ${l.type}">[${l.tag.toUpperCase()}]</span><span class="log-msg">${l.msg}</span></div>`
-  ).join('');
-}
+      // ── SCAN ENGINE (from encounter-scan.js) ──────────────────────
+      // Imported as module below — exposed via window._scanEngine
+      // All probability logic lives in encounter-scan.js
 
-// ── CLOCK ──
-setInterval(()=>{ document.getElementById('consoleTime').textContent = new Date().toTimeString().slice(0,8); },1000);
+      function getScanEngine() { return window._scanEngine; }
 
-// ── SCREEN UPDATE ──
-function screenUpdate(status, main, sub) {
-  document.getElementById('screenStatus').textContent = status;
-  document.getElementById('screenMain').textContent   = main.toUpperCase();
-  document.getElementById('screenSub').textContent    = sub;
-}
+      function updateSignalHUD(result) {
+        if (currentWild) return;
+        const bar  = document.getElementById('sigBarLine');
+        const sub  = document.getElementById('screenSub');
+        if (!result || !bar) return;
 
-// ── ENCOUNTER POKEMON ──
-async function triggerEncounter() {
-  if (currentWild || scanning) return;
-  scanning = true;
-  const pool = POKEMON_BY_HABITAT[mapInfo.habitat] || POKEMON_BY_HABITAT.normal;
-  const id   = pool[Math.floor(Math.random() * pool.length)];
+        const eng   = getScanEngine();
+        const barStr= eng ? eng.signalBar(10) : '░░░░░░░░░░';
 
-  screenUpdate('SCANNING','SIGNAL DETECTED','RETRIEVING DATA...');
-  log('SYS','sys','Fragment signal detected — retrieving neural data...');
+        switch(result.outcome) {
+          case 'SILENT':
+            bar.className = 'sig-bar-line silent';
+            bar.textContent = `SIG [${barStr}] SIGNAL SILENT`;
+            if (sub) sub.textContent = result.timeLabel || 'COOLDOWN';
+            break;
+          case 'DEAD_ZONE':
+            bar.className = 'sig-bar-line dead';
+            bar.textContent = `SIG [${barStr}] INTERFERENCE`;
+            if (sub) sub.textContent = result.flavor || 'NO CONTACT';
+            break;
+          case 'WEAK':
+            bar.className = 'sig-bar-line';
+            bar.textContent = `SIG [${barStr}] WEAK`;
+            if (sub) sub.textContent = result.flavor || 'FAINT TRACE';
+            break;
+          case 'BUILDING':
+            bar.className = 'sig-bar-line';
+            bar.textContent = `SIG [${barStr}] BUILDING`;
+            if (sub) sub.textContent = result.flavor || 'SIGNAL RISING';
+            break;
+          case 'STRONG':
+            bar.className = 'sig-bar-line strong';
+            bar.textContent = `SIG [${barStr}] STRONG`;
+            if (sub) sub.textContent = 'NEURAL LOCK CLOSE';
+            break;
+          case 'ENCOUNTER':
+            bar.className = 'sig-bar-line encounter';
+            bar.textContent = `SIG [██████████] LOCKED`;
+            if (sub) sub.textContent = 'FRAGMENT FOUND';
+            break;
+        }
 
-  try {
-    const res  = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`);
-    const data = await res.json();
+        // Log interesting flavor text
+        // NOTE: logging is handled by onResult in the module script only
+        // Removed from here to prevent duplicate console entries
+      }
 
-    currentWild = {
-      id:     data.id,
-      name:   data.name,
-      sprite: data.sprites.front_default,
-      types:  data.types.map(t=>t.type.name).join('/'),
-      exp:    data.base_experience || 50,
-    };
+      // ── SET MAP BACKGROUND ──
+      document.getElementById("map-bg").style.backgroundImage =
+        `url('../assets/img/${mapInfo.bg}')`;
+      document.getElementById("zoneHud").textContent =
+        `${mapInfo.zone} — ${mapInfo.name.toUpperCase()}`;
+      document.getElementById("bootZone").textContent =
+        `ZONE: ${mapInfo.zone} — ${mapInfo.name.toUpperCase()}`;
+      document.title = `BIT-POKEMON — ${mapInfo.name}`;
 
-    // Show on PIP screen
-    document.getElementById('screenEncounter').style.display = 'flex';
-    document.getElementById('screenPokemonImg').src  = currentWild.sprite;
-    document.getElementById('screenPokemonName').textContent = currentWild.name.toUpperCase();
-    screenUpdate('FRAGMENT FOUND', currentWild.name, 'NEURAL LOCK ACQUIRED');
+      // ── CONSOLE LOG ──
+      const logLines = [];
+      function log(tag, type, msg) {
+        const t = new Date().toTimeString().slice(0, 8);
+        logLines.unshift({ time: t, tag, type, msg });
+        if (logLines.length > 50) logLines.pop();
+        renderLog();
+      }
+      function renderLog() {
+        document.getElementById("consoleLog").innerHTML = logLines
+          .slice(0, 8)
+          .map(
+            (l) =>
+              `<div class="log-line"><span class="log-time">${l.time}</span><span class="log-tag ${l.type}">[${l.tag.toUpperCase()}]</span><span class="log-msg">${l.msg}</span></div>`,
+          )
+          .join("");
+      }
 
-    // Flash
-    const flash = document.getElementById('encounterFlash');
-    flash.style.display = 'block';
-    setTimeout(()=>{ flash.style.display='none'; },400);
+      // ── CLOCK ──
+      setInterval(() => {
+        document.getElementById("consoleTime").textContent = new Date()
+          .toTimeString()
+          .slice(0, 8);
+      }, 1000);
 
-    // Sound
-    SFX.encounter();
-    log('DAT','warn',`Wild ${currentWild.name} — Type: ${currentWild.types}`);
+      // ── SCREEN UPDATE ──
+      function screenUpdate(status, main, sub) {
+        document.getElementById("screenStatus").textContent = status;
+        document.getElementById("screenMain").textContent = main.toUpperCase();
+        document.getElementById("screenSub").textContent = sub;
+      }
 
-    // Show modal
-    setTimeout(()=>{ openEncounterModal(); }, 600);
+      // ── ENCOUNTER POKEMON ──
+      async function triggerEncounter() {
+        if (currentWild || scanning) return;
+        scanning = true;
 
-  } catch(err) {
-    log('ERR','err','Fragment retrieval failed — signal lost');
-    screenUpdate('FIELD OPS','SCANNING','MOVE TO ENCOUNTER');
-    scanning = false;
-  }
-}
+        // Pull rarity from last scan engine result
+        const eng      = getScanEngine();
+        const rarityObj= eng?.lastResult?.rarity || null;
 
-function openEncounterModal() {
-  if (!currentWild) return;
-  document.getElementById('modalPokemonImg').src = currentWild.sprite;
-  document.getElementById('modalPokemonName').textContent = currentWild.name.toUpperCase();
-  document.getElementById('modalPokemonSub').textContent  = `FRAGMENT TYPE: ${currentWild.types.toUpperCase()} · ID: #${String(currentWild.id).padStart(3,'0')}`;
-  document.getElementById('modalDesc').textContent = `A wild ${currentWild.name} Fragment signature has been detected in the area. Neural lock established. Choose your engagement protocol.`;
-  document.getElementById('encounterModal').classList.add('open');
-}
+        const pool = POKEMON_BY_HABITAT[mapInfo.habitat] || POKEMON_BY_HABITAT.normal;
 
-function closeModal() {
-  document.getElementById('encounterModal').classList.remove('open');
-}
+        // Rarity affects which pokemon in pool we pick:
+        // legendary/epic → pick from end of pool (rarer species), common → start
+        let id;
+        if (rarityObj && (rarityObj.label === 'LEGENDARY' || rarityObj.label === 'EPIC')) {
+          id = pool[pool.length - 1 - Math.floor(Math.random() * Math.min(3, pool.length))];
+        } else if (rarityObj && rarityObj.label === 'RARE') {
+          id = pool[Math.floor(pool.length * 0.6 + Math.random() * pool.length * 0.4)];
+        } else {
+          id = pool[Math.floor(Math.random() * pool.length)];
+        }
 
-function fleePokemon() {
-  SFX.flee();
-  log('SYS','warn',`Fled from ${currentWild?.name || 'encounter'}`);
-  currentWild = null;
-  scanning    = false;
-  document.getElementById('screenEncounter').style.display = 'none';
-  screenUpdate('FIELD OPS','SCANNING','MOVE TO ENCOUNTER');
-  closeModal();
-}
+        screenUpdate("SCANNING", "SIGNAL DETECTED", "RETRIEVING DATA...");
+        log("SYS", "sys", `Fragment signal detected — retrieving neural data...`);
+        if (rarityObj) log("DAT", rarityObj.label === 'LEGENDARY' ? 'warn' : 'info',
+          `// rarity tier: ${rarityObj.label}`);
 
-// ── MOVE PLAYER ──
-function movePlayer(dx, dy) {
-  playerX = Math.max(5, Math.min(95, playerX + dx));
-  playerY = Math.max(5, Math.min(95, playerY + dy));
+        try {
+          const res  = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`);
+          const data = await res.json();
 
-  SFX.move();
-  moveCount++;
+          currentWild = {
+            id:     data.id,
+            name:   data.name,
+            sprite: data.sprites.front_default,
+            types:  data.types.map(t => t.type.name).join("/"),
+            exp:    data.base_experience || 50,
+            rarity: rarityObj?.label || 'COMMON',
+          };
 
-  if (!currentWild && !scanning) {
-    screenUpdate('FIELD OPS','MOVING','SCANNING AREA...');
-    // 30% chance encounter per move
-    if (Math.random() < 0.3) {
-      setTimeout(triggerEncounter, 400);
-    } else {
-      setTimeout(()=>{
-        if(!currentWild) screenUpdate('FIELD OPS','SCANNING','NO SIGNAL');
-      },400);
-    }
-  }
-}
+          // Show on PIP screen
+          document.getElementById("screenEncounter").style.display = "flex";
+          document.getElementById("screenPokemonImg").src = currentWild.sprite;
+          document.getElementById("screenPokemonName").textContent =
+            currentWild.name.toUpperCase();
+          screenUpdate("FRAGMENT FOUND", currentWild.name, "NEURAL LOCK");
 
-// ── CATCH BUTTON ──
-document.getElementById('catchBtn').addEventListener('click', async () => {
-  if (!currentWild) return;
-  SFX.catch_();
-  log('SYS','sys',`Catching ${currentWild.name} — Fragment chip encoding...`);
-  closeModal();
+          // Flash
+          const flash = document.getElementById("encounterFlash");
+          flash.style.display = "block";
+          setTimeout(() => { flash.style.display = "none"; }, 400);
 
-  // Save to localStorage
-  localStorage.setItem('caughtPokemon', JSON.stringify(currentWild));
+          // Sound
+          SFX.encounter();
+          log("DAT", "warn", `Wild ${currentWild.name} — Type: ${currentWild.types}`);
 
-  const user_id = localStorage.getItem('user_id');
-  const token   = localStorage.getItem('token');
-  if (user_id && token) {
-    try {
-      const mod = await import('../assets/js/pokemon-api.js');
-      const res = await mod.getUserPokemon(user_id, token);
-      if (res.success && res.data) localStorage.setItem('userPokemon', JSON.stringify(res.data));
-    } catch(e) {}
-  }
+          // Show modal
+          setTimeout(() => { openEncounterModal(currentWild, rarityObj); }, 600);
 
-  setTimeout(()=>{
-    log('SYS','sys',`${currentWild.name} Fragment captured successfully`);
-    currentWild = null;
-    scanning    = false;
-    document.getElementById('screenEncounter').style.display = 'none';
-    screenUpdate('FRAGMENT CAPTURED','SUCCESS','CHIP ENCODED');
-  },800);
-});
+        } catch (err) {
+          log("ERR", "err", "Fragment retrieval failed — signal lost");
+          screenUpdate("FIELD OPS", "SCANNING", "MOVE TO SCAN");
+          scanning = false;
+        }
+      }
 
-// ── BATTLE BUTTON ──
-document.getElementById('battleBtn').addEventListener('click', () => {
-  if (!currentWild) return;
-  SFX.battle();
-  log('SYS','warn',`Initiating battle protocol — ${currentWild.name}`);
-  localStorage.setItem('caughtPokemon', JSON.stringify(currentWild));
-  closeModal();
-  window.location.href = 'battle.html';
-});
+      // ── ENCOUNTER MODAL ──────────────────────────────────────────
+      function openEncounterModal(wild, rarityObj) {
+        if (!wild) return;
+        const rLabel = rarityObj ? ` · ${rarityObj.label}` : '';
+        document.getElementById('modalTitle').textContent    = 'WILD ENCOUNTER';
+        document.getElementById('modalPokemonImg').src       = wild.sprite;
+        document.getElementById('modalPokemonName').textContent = wild.name.toUpperCase();
+        document.getElementById('modalPokemonSub').textContent  =
+          `FRAGMENT TYPE: ${wild.types.toUpperCase()} · ID: #${String(wild.id).padStart(3,'0')}${rLabel}`;
+        document.getElementById('modalDesc').textContent =
+          `A wild ${wild.name} fragment signature detected. Neural lock established. Choose your engagement protocol.`;
+        document.getElementById('encounterModal').classList.add('open');
+      }
 
-// ── KEYBOARD CONTROLS ──
-document.addEventListener('keydown', e => {
-  const s = 5;
-  switch(e.key.toLowerCase()) {
-    case 'arrowup':    case 'w': movePlayer(0,-s);  break;
-    case 'arrowdown':  case 's': movePlayer(0, s);  break;
-    case 'arrowleft':  case 'a': movePlayer(-s,0);  break;
-    case 'arrowright': case 'd': movePlayer( s,0);  break;
-    case 'q': movePlayer(-s,-s); break;
-    case 'e': movePlayer( s,-s); break;
-    case 'z': movePlayer(-s, s); break;
-    case 'c': movePlayer( s, s); break;
-  }
-});
+      function closeModal() {
+        document.getElementById('encounterModal').classList.remove('open');
+      }
 
-// ── BUILD BUTTONS ──
-const leftButtons = [
-  { id:'L1', label:'SCAN\nFRAGMENTS',  sub:'NEURAL SCAN',     color:'',      action:'scan'    },
-  { id:'L2', label:'SLOT IN',          sub:'LOAD FRAGMENT',   color:'',      action:'slotIn'  },
-  { id:'L3', label:'RECALL',           sub:'DISMISS ACTIVE',  color:'',      action:'recall'  },
-  { id:'L4', label:'FRAGMENT\nVAULT',  sub:'VIEW CHIPS',      color:'amber', action:'vault'   },
-  { id:'L5', label:'HUNTER\nPROFILE',  sub:'FIELD STATS',     color:'amber', action:'profile' },
-];
-const rightButtons = [
-  { id:'R1', label:'BATTLE\nMODE',     sub:'ENGAGE ENEMY',    color:'',      action:'battle'  },
-  { id:'R2', label:'FACTION\nCOMMS',   sub:'ENCRYPTED LINK',  color:'',      action:'comms'   },
-  { id:'R3', label:'STEALTH\nMODE',    sub:'REDUCE SIGNAL',   color:'amber', action:'stealth' },
-  { id:'R4', label:'FAST\nTRAVEL',     sub:'WARP TO ZONE',    color:'amber', action:'travel'  },
-  { id:'R5', label:'EMERGENCY\nEXIT',  sub:'LEAVE ZONE',      color:'red',   action:'exit'    },
-];
+      // Catch button
+      document.getElementById('catchBtn').addEventListener('click', async () => {
+        if (!currentWild) return;
+        SFX.catch_();
+        closeModal();
+        log('SYS', 'sys', `Catching ${currentWild.name} — Fragment chip encoding...`);
+        localStorage.setItem('caughtPokemon', JSON.stringify(currentWild));
+        const user_id = localStorage.getItem('user_id');
+        const token   = localStorage.getItem('token');
+        if (user_id && token) {
+          try {
+            const mod = await import('../assets/js/pokemon-api.js');
+            const res = await mod.getUserPokemon(user_id, token);
+            if (res.success && res.data)
+              localStorage.setItem('userPokemon', JSON.stringify(res.data));
+          } catch(e) {}
+        }
+        setTimeout(() => {
+          log('SYS', 'sys', `${currentWild.name} Fragment captured successfully`);
+          getScanEngine()?.resolveEncounter();
+          currentWild = null;
+          scanning    = false;
+          document.getElementById('screenEncounter').style.display = 'none';
+          screenUpdate('FRAGMENT CAPTURED', 'SUCCESS', 'CHIP ENCODED');
+          const sigBar = document.getElementById('sigBarLine');
+          if (sigBar) { sigBar.className = 'sig-bar-line'; sigBar.textContent = 'SIG [░░░░░░░░░░] IDLE'; }
+        }, 800);
+      });
 
-function buildBtn(def) {
-  const btn = document.createElement('button');
-  btn.className = `pip-btn ${def.color === 'amber' ? 'amber' : def.color === 'red' ? 'red-btn' : ''}`;
-  btn.innerHTML = `
+      // Battle button
+      document.getElementById('battleBtn').addEventListener('click', () => {
+        if (!currentWild) return;
+        SFX.battle();
+        closeModal();
+        log('SYS', 'warn', `Initiating battle protocol — ${currentWild.name}`);
+        localStorage.setItem('caughtPokemon', JSON.stringify(currentWild));
+        window.location.href = 'battle.html';
+      });
+
+      // Flee
+      window.doFlee = function() {
+        SFX.flee();
+        closeModal();
+        log('SYS', 'warn', `Fled from ${currentWild?.name || 'encounter'}`);
+        getScanEngine()?.resolveEncounter();
+        currentWild = null;
+        scanning    = false;
+        document.getElementById('screenEncounter').style.display = 'none';
+        screenUpdate('FIELD OPS', 'SCANNING', 'SIGNAL SILENT');
+        const sigBar = document.getElementById('sigBarLine');
+        if (sigBar) { sigBar.className = 'sig-bar-line silent'; sigBar.textContent = 'SIG [░░░░░░░░░░] SILENT'; }
+      };
+
+      // ── MOVE PLAYER ──────────────────────────────────────────────
+      function movePlayer(dx, dy) {
+        playerX = Math.max(5, Math.min(95, playerX + dx));
+        playerY = Math.max(5, Math.min(95, playerY + dy));
+        SFX.move();
+        moveCount++;
+
+        if (!currentWild && !scanning) {
+          const eng    = getScanEngine();
+          if (!eng) return;
+          const result = eng.press();
+          updateSignalHUD(result);
+
+          if (result.outcome === 'ENCOUNTER') {
+            log('SYS', 'warn', '// signal peaked — neural lock imminent');
+            screenUpdate("FIELD OPS", "LOCKED", "FRAGMENT FOUND");
+            setTimeout(triggerEncounter, 400);
+          }
+        }
+      }
+
+      // ── KEYBOARD CONTROLS ──
+      document.addEventListener("keydown", (e) => {
+        const s = 5;
+        switch (e.key.toLowerCase()) {
+          case "arrowup":
+          case "w":
+            movePlayer(0, -s);
+            break;
+          case "arrowdown":
+          case "s":
+            movePlayer(0, s);
+            break;
+          case "arrowleft":
+          case "a":
+            movePlayer(-s, 0);
+            break;
+          case "arrowright":
+          case "d":
+            movePlayer(s, 0);
+            break;
+          case "q":
+            movePlayer(-s, -s);
+            break;
+          case "e":
+            movePlayer(s, -s);
+            break;
+          case "z":
+            movePlayer(-s, s);
+            break;
+          case "c":
+            movePlayer(s, s);
+            break;
+        }
+      });
+
+      // ── BUILD BUTTONS ──
+      const leftButtons = [
+        {
+          id: "L1",
+          label: "SCAN\nFRAGMENTS",
+          sub: "NEURAL SCAN",
+          color: "",
+          action: "scan",
+        },
+        {
+          id: "L2",
+          label: "SLOT IN",
+          sub: "LOAD FRAGMENT",
+          color: "",
+          action: "slotIn",
+        },
+        {
+          id: "L3",
+          label: "RECALL",
+          sub: "DISMISS ACTIVE",
+          color: "",
+          action: "recall",
+        },
+        {
+          id: "L4",
+          label: "FRAGMENT\nVAULT",
+          sub: "VIEW CHIPS",
+          color: "amber",
+          action: "vault",
+        },
+        {
+          id: "L5",
+          label: "HUNTER\nPROFILE",
+          sub: "FIELD STATS",
+          color: "amber",
+          action: "profile",
+        },
+      ];
+      const rightButtons = [
+        {
+          id: "R1",
+          label: "BATTLE\nMODE",
+          sub: "ENGAGE ENEMY",
+          color: "",
+          action: "battle",
+        },
+        {
+          id: "R2",
+          label: "FACTION\nCOMMS",
+          sub: "ENCRYPTED LINK",
+          color: "",
+          action: "comms",
+        },
+        {
+          id: "R3",
+          label: "STEALTH\nMODE",
+          sub: "REDUCE SIGNAL",
+          color: "amber",
+          action: "stealth",
+        },
+        {
+          id: "R4",
+          label: "FAST\nTRAVEL",
+          sub: "WARP TO ZONE",
+          color: "amber",
+          action: "travel",
+        },
+        {
+          id: "R5",
+          label: "EMERGENCY\nEXIT",
+          sub: "LEAVE ZONE",
+          color: "red",
+          action: "exit",
+        },
+      ];
+
+      function buildBtn(def) {
+        const btn = document.createElement("button");
+        btn.className = `pip-btn ${def.color === "amber" ? "amber" : def.color === "red" ? "red-btn" : ""}`;
+        btn.innerHTML = `
     <div class="pip-btn-inner">
       <span class="corner tl"></span><span class="corner tr"></span>
       <span class="corner bl"></span><span class="corner br"></span>
       <div class="btn-id">${def.id}</div>
-      <div class="btn-label">${def.label.replace('\n','<br>')}</div>
+      <div class="btn-label">${def.label.replace("\n", "<br>")}</div>
       <div class="btn-sub">${def.sub}</div>
     </div>`;
-  btn.addEventListener('mouseenter', ()=>SFX.hover());
-  btn.addEventListener('click', ()=>handleAction(def));
-  return btn;
-}
-document.getElementById('leftPanel').append(...leftButtons.map(buildBtn));
-document.getElementById('rightPanel').append(...rightButtons.map(buildBtn));
-
-function handleAction(def) {
-  log(def.id, def.color==='red'?'err':def.color==='amber'?'warn':'sys', `${def.label.replace('\n',' ')} — ${def.sub}`);
-  screenUpdate(def.sub, def.label.replace('\n',' '), def.id);
-
-  switch(def.action) {
-    case 'scan':
-      SFX.scan();
-      if (!currentWild && !scanning) triggerEncounter();
-      else log('SYS','warn','Scan interrupted — encounter already active');
-      break;
-    case 'battle':
-      SFX.battle();
-      if (currentWild) { openEncounterModal(); }
-      else log('SYS','warn','No active encounter — scan for fragments first');
-      break;
-    case 'exit':
-      log('SYS','warn','Leaving zone — returning to map...');
-      setTimeout(()=>{ window.location.href = 'map.html'; }, 800);
-      break;
-    case 'travel':
-      log('SYS','sys','Fast travel protocol — opening zone map...');
-      setTimeout(()=>{ window.location.href = 'map.html'; }, 600);
-      break;
-    case 'vault':
-      log('SYS','sys','Fragment vault access — opening inventory...');
-      setTimeout(()=>{ window.location.href = 'inventory.html'; }, 600);
-      break;
-    case 'profile':
-      log('SYS','sys','Loading hunter field stats...');
-      setTimeout(()=>{ window.location.href = 'profile.html'; }, 600);
-      break;
-    case 'recall':
-      if (currentWild) {
-        fleePokemon();
-      } else {
-        log('SYS','warn','No active fragment to recall');
+        btn.addEventListener("mouseenter", () => SFX.hover());
+        btn.addEventListener("click", () => handleAction(def));
+        return btn;
       }
-      break;
-    case 'stealth':
-      log('SYS','sys','Stealth mode toggled — encounter rate reduced');
-      break;
-    case 'comms':
-      log('SYS','sys','Faction comms — encrypted channel open');
-      break;
-    case 'slotIn':
-      log('SYS','sys','Fragment slot reader active');
-      break;
-  }
-}
+      document.getElementById("leftPanel").append(...leftButtons.map(buildBtn));
+      document
+        .getElementById("rightPanel")
+        .append(...rightButtons.map(buildBtn));
 
-// D-PAD buttons (mobile)
-const dpad = [
-  {dir:'up-left',label:'↖'},{dir:'up',label:'↑'},{dir:'up-right',label:'↗'},
-  {dir:'left',label:'←'},{dir:'',label:'·'},{dir:'right',label:'→'},
-  {dir:'down-left',label:'↙'},{dir:'down',label:'↓'},{dir:'down-right',label:'↘'},
-];
+      function handleAction(def) {
+        // Don't log the button press for scan — the auto-scanner logs its own state
+        if (def.action !== 'scan') {
+          log(
+            def.id,
+            def.color === "red" ? "err" : def.color === "amber" ? "warn" : "sys",
+            `${def.label.replace("\n", " ")} — ${def.sub}`,
+          );
+          screenUpdate(def.sub, def.label.replace("\n", " "), def.id);
+        }
 
-// ── BOOT SEQUENCE ──
-SFX.boot();
-log('SYS','sys',`P.I.P OS — Field Operations Mode`);
-log('SYS','sys',`Zone loaded: ${mapInfo.zone} — ${mapInfo.name}`);
-log('SYS','sys','Fragment scanner: ACTIVE');
-log('SYS','warn','Hunter authentication: PENDING');
-log('DAT','info',`Zone type: ${mapInfo.type} | Habitat: ${mapInfo.habitat.toUpperCase()}`);
+        switch (def.action) {
+          case "scan": {
+            SFX.scan();
+            if (currentWild) {
+              log("SYS", "warn", "Encounter active — resolve it before scanning");
+              break;
+            }
+            const scanner = window._autoScanner;
+            if (!scanner) break;
 
-setTimeout(()=>{
-  const bo = document.getElementById('bootOverlay');
-  bo.style.opacity = '0';
-  bo.style.pointerEvents = 'none';
-  setTimeout(()=>bo.remove(), 1000);
-  screenUpdate('FIELD OPS','SCANNING','MOVE TO ENCOUNTER');
-  // Bump map bg opacity slightly after boot
-  document.getElementById('map-bg').style.opacity = '0.28';
-}, 3000);
-
-// Load inventory
-async function loadInventory() {
-  const user_id = localStorage.getItem('user_id');
-  if (!user_id) return;
-  try {
-    const res    = await fetch(`http://localhost:4000/items/inventory/${user_id}`);
-    const result = await res.json();
-    if (result.success && result.data) {
-      log('DAT','info',`Inventory: Poké×${result.data.pokeball} Great×${result.data.greatball} Ultra×${result.data.ultraball}`);
-    }
-  } catch {}
-}
-loadInventory();
-</script>
-
-<!-- NAVBAR -->
-<script>
-fetch('navbar.html')
-  .then(r=>r.text())
-  .then(data=>{
-    document.getElementById('navbar-placeholder').innerHTML = data;
-    if(typeof window.attachLogoutHandler==='function') window.attachLogoutHandler();
-    if(typeof window.loadProfileName==='function')     window.loadProfileName();
-    if(typeof window.updateWPCBalance==='function')    window.updateWPCBalance();
-  });
-</script>
-
-<!-- CHECK USER POKEMON -->
-<script type="module">
-  import { API_BASE_URL } from '../api.js';
-  const user_id = localStorage.getItem('user_id');
-  const token   = localStorage.getItem('token');
-  if (user_id && token) {
-    fetch(`${API_BASE_URL}/users/${user_id}/pokemon`, {
-      method:'GET',
-      headers:{ Authorization:`Bearer ${token}`, 'Content-Type':'application/json' },
-    })
-    .then(r=>r.json())
-    .then(data=>{
-      if (!data.success || !data.data || data.data.length === 0) {
-        window.location.href = 'firstpokemon.html';
+            if (scanner.active) {
+              // Enforce 5 second minimum before allowing stop
+              const secondsActive = scanner._elapsed || 0;
+              if (secondsActive < 5) {
+                log("SYS", "warn", `// scanner locked — minimum 5 seconds required (${secondsActive}s elapsed)`);
+                break;
+              }
+              // Stop scanning
+              scanner.stop();
+              const l1btn = document.querySelector('[data-id="L1"]');
+              if (l1btn) l1btn.classList.remove('scanning-active');
+              window._stopProgressBar?.();
+              const sigBar = document.getElementById('sigBarLine');
+              if (sigBar) { sigBar.className = 'sig-bar-line silent'; sigBar.textContent = 'SIG [░░░░░░░░░░] IDLE'; }
+              screenUpdate("FIELD OPS", "SCANNING", "MOVE TO SCAN");
+              log('SYS', 'warn', '// auto-scan stopped');
+            } else {
+              // Start scanning
+              scanner.start();
+              const l1btn = document.querySelector('[data-id="L1"]');
+              if (l1btn) l1btn.classList.add('scanning-active');
+              window._startProgressBar?.();
+              screenUpdate("SCANNER", "ACTIVE", "AUTO-SCANNING...");
+              log('SYS', 'sys', '// auto-scan initiated — searching for fragments');
+            }
+            break;
+          }
+          case "battle":
+            SFX.battle();
+            if (currentWild) {
+              openEncounterModal(currentWild, null);
+            } else {
+              log("SYS", "warn", "No active encounter — scan for fragments first");
+            }
+            break;
+          case "exit":
+            log("SYS", "warn", "Leaving zone — returning to map...");
+            setTimeout(() => {
+              window.location.href = "map.html";
+            }, 800);
+            break;
+          case "travel":
+            log("SYS", "sys", "Fast travel protocol — opening zone map...");
+            setTimeout(() => {
+              window.location.href = "map.html";
+            }, 600);
+            break;
+          case "vault":
+            log("SYS", "sys", "Fragment vault access — opening inventory...");
+            setTimeout(() => {
+              window.location.href = "inventory.html";
+            }, 600);
+            break;
+          case "profile":
+            log("SYS", "sys", "Loading hunter field stats...");
+            setTimeout(() => {
+              window.location.href = "profile.html";
+            }, 600);
+            break;
+          case "recall":
+            if (currentWild) {
+              fleePokemon();
+            } else {
+              log("SYS", "warn", "No active fragment to recall");
+            }
+            break;
+          case "stealth":
+            log("SYS", "sys", "Stealth mode toggled — encounter rate reduced");
+            break;
+          case "comms":
+            log("SYS", "sys", "Faction comms — encrypted channel open");
+            break;
+          case "slotIn":
+            log("SYS", "sys", "Fragment slot reader active");
+            break;
+        }
       }
-    })
-    .catch(()=>{});
-  }
-</script>
-</body>
+
+      // D-PAD buttons (mobile)
+      const dpad = [
+        { dir: "up-left", label: "↖" },
+        { dir: "up", label: "↑" },
+        { dir: "up-right", label: "↗" },
+        { dir: "left", label: "←" },
+        { dir: "", label: "·" },
+        { dir: "right", label: "→" },
+        { dir: "down-left", label: "↙" },
+        { dir: "down", label: "↓" },
+        { dir: "down-right", label: "↘" },
+      ];
+
+      // ── BOOT SEQUENCE ──
+      SFX.boot();
+      log("SYS", "sys", `P.I.P OS — Field Operations Mode`);
+      log("SYS", "sys", `Zone loaded: ${mapInfo.zone} — ${mapInfo.name}`);
+      log("SYS", "sys", "Fragment scanner: ACTIVE");
+      log("SYS", "warn", "Hunter authentication: PENDING");
+      log("DAT", "info", `Zone type: ${mapInfo.type} | Habitat: ${mapInfo.habitat.toUpperCase()}`);
+
+      setTimeout(() => {
+        const bo = document.getElementById("bootOverlay");
+        bo.style.opacity = "0";
+        bo.style.pointerEvents = "none";
+        setTimeout(() => bo.remove(), 1000);
+        screenUpdate("FIELD OPS", "SCANNING", "MOVE TO SCAN");
+        document.getElementById("map-bg").style.opacity = "0.6";
+      }, 3000);
+
+      // Load inventory
+      async function loadInventory() {
+        const user_id = localStorage.getItem("user_id");
+        if (!user_id) return;
+        try {
+          const res = await fetch(
+            `http://localhost:4000/items/inventory/${user_id}`,
+          );
+          const result = await res.json();
+          if (result.success && result.data) {
+            log(
+              "DAT",
+              "info",
+              `Inventory: Poké×${result.data.pokeball} Great×${result.data.greatball} Ultra×${result.data.ultraball}`,
+            );
+          }
+        } catch {}
+      }
+      loadInventory();
+    </script>
+
+    <!-- ENCOUNTER SCAN ENGINE -->
+    <script type="module">
+      import { getEngine, HABITAT_PROFILES, AutoScanner } from "../assets/js/encounter-scan.js";
+
+      const habitat      = window._gameHabitat || 'normal';
+      const engine       = getEngine(habitat);
+      window._scanEngine = engine;
+
+      const profile = HABITAT_PROFILES[habitat];
+      if (profile) {
+        setTimeout(() => {
+          if (typeof log === 'function') {
+            log('DAT', 'info', `// scan profile: ${profile.label}`);
+            log('DAT', 'info', `// dead zone: ${Math.round(profile.dead_zone*100)}% | cooldown: ${profile.cooldown_min}–${profile.cooldown_max} steps`);
+          }
+        }, 3600);
+      }
+
+      // ── PROGRESS BAR — indefinite running timer, no timeout ──────
+      let _progressTimer = null;
+      let _scanStart     = null;
+
+      function startProgressBar() {
+        _scanStart = Date.now();
+        const fill  = document.getElementById('scanProgressFill');
+        const timer = document.getElementById('scanTimerLine');
+        const wrap  = document.getElementById('scanProgressWrap');
+        if (fill)  { fill.style.width = '0%'; fill.className = 'scan-progress-fill'; }
+        if (wrap)  wrap.classList.add('visible');
+        if (timer) timer.classList.add('visible', 'active');
+
+        _progressTimer = setInterval(() => {
+          if (!_scanStart) return;
+          const elapsed = Date.now() - _scanStart;
+          const secs    = Math.floor(elapsed / 1000);
+          const mm      = Math.floor(secs / 60).toString().padStart(2,'0');
+          const ss      = (secs % 60).toString().padStart(2,'0');
+
+          // Bar fills every 60s then resets — acts as a pulse indicator
+          const pct = (secs % 60) / 60 * 100;
+          if (fill) fill.style.width = pct + '%';
+          if (timer) timer.textContent = `SCANNING ${mm}:${ss}`;
+        }, 500);
+      }
+
+      function stopProgressBar() {
+        if (_progressTimer) { clearInterval(_progressTimer); _progressTimer = null; }
+        _scanStart = null;
+        const fill  = document.getElementById('scanProgressFill');
+        const timer = document.getElementById('scanTimerLine');
+        const wrap  = document.getElementById('scanProgressWrap');
+        if (fill)  { fill.style.width = '0%'; fill.className = 'scan-progress-fill'; }
+        if (timer) { timer.textContent = 'SCANNING 00:00'; timer.className = 'scan-timer-line'; }
+        if (wrap)  wrap.classList.remove('visible');
+      }
+
+      // ── AUTO SCANNER ─────────────────────────────────────────────
+      window._autoScanner = new AutoScanner(engine, {
+        interval: 2400,
+
+        onResult(result, elapsed) {
+          if (typeof updateSignalHUD === 'function') updateSignalHUD(result);
+          if (typeof log === 'function') {
+            if (result.outcome === 'DEAD_ZONE') log('SYS', 'warn', result.flavor || '// no contact');
+            if (result.outcome === 'STRONG')    log('SYS', 'sys',  '// signal strong — neural lock imminent');
+          }
+        },
+
+        onEncounter(result) {
+          stopProgressBar();
+          if (typeof log === 'function') log('SYS', 'warn', '// neural lock acquired — scan paused');
+          // CRITICAL: reset scanning flag so triggerEncounter doesn't get blocked
+          if (typeof window !== 'undefined') window._scannerEncounterReady = true;
+          setTimeout(() => {
+            // Force scanning = false then call triggerEncounter
+            if (typeof window._forceEncounter === 'function') window._forceEncounter();
+          }, 400);
+        },
+
+        onStop() {
+          stopProgressBar();
+          const l1 = document.querySelector('[data-id="L1"]');
+          if (l1) l1.classList.remove('scanning-active');
+        }
+      });
+
+      window._startProgressBar = startProgressBar;
+      window._stopProgressBar  = stopProgressBar;
+
+      // Resume after flee
+      const _origFlee = window.doFlee;
+      window.doFlee = function() {
+        _origFlee?.();
+        setTimeout(() => {
+          if (window._autoScanner?.active) {
+            window._autoScanner.resume();
+            startProgressBar();
+            if (typeof log === 'function') log('SYS', 'sys', '// encounter resolved — auto-scan resumed');
+          }
+        }, 1000);
+      };
+    </script>
+
+    <!-- NAVBAR -->
+    <script>
+      fetch("navbar.html")
+        .then((r) => r.text())
+        .then((data) => {
+          document.getElementById("navbar-placeholder").innerHTML = data;
+          if (typeof window.attachLogoutHandler === "function")
+            window.attachLogoutHandler();
+          if (typeof window.loadProfileName === "function")
+            window.loadProfileName();
+          if (typeof window.updateWPCBalance === "function")
+            window.updateWPCBalance();
+        });
+    </script>
+
+    <!-- CHECK USER POKEMON -->
+    <script type="module">
+      import { API_BASE_URL } from "../api.js";
+      const user_id = localStorage.getItem("user_id");
+      const token = localStorage.getItem("token");
+      if (user_id && token) {
+        fetch(`${API_BASE_URL}/users/${user_id}/pokemon`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        })
+          .then((r) => r.json())
+          .then((data) => {
+            if (!data.success || !data.data || data.data.length === 0) {
+              window.location.href = "firstpokemon.html";
+            }
+          })
+          .catch(() => {});
+      }
+    </script>
+  </body>
 </html>

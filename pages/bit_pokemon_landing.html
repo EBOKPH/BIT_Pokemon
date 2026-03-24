@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>BIT Pokémon – Battle Intelligence Trainers</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet"/>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { width:100%; height:100%; background:#000; font-family:'Rajdhani',sans-serif; overflow:hidden; }
+
+.page {
+  position:relative; width:100%; height:100vh; overflow:hidden;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+}
+
+/* ── SKY ── */
+.sky {
+  position:absolute; inset:0;
+  background:
+    radial-gradient(ellipse 120% 60% at 50% 100%, #0a0015 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 15% 70%, rgba(255,60,0,.18) 0%, transparent 55%),
+    radial-gradient(ellipse 60% 40% at 85% 70%, rgba(0,80,255,.18) 0%, transparent 55%),
+    linear-gradient(180deg, #03000a 0%, #0e0025 18%, #1e0045 35%, #2a0060 50%, #150830 68%, #060415 85%, #000 100%);
+}
+
+/* ── LIGHT SHAFTS ── */
+.shaft {
+  position:absolute; top:0; width:180px; height:100%;
+  filter:blur(40px); pointer-events:none; z-index:1;
+  animation:shaftPulse 6s ease-in-out infinite;
+}
+.shaft.left  { left:10%; background:linear-gradient(180deg,rgba(255,100,0,.12) 0%,transparent 70%); }
+.shaft.right { right:10%; background:linear-gradient(180deg,rgba(0,120,255,.12) 0%,transparent 70%); animation-delay:3s; }
+.shaft.mid   { left:50%; transform:translateX(-50%); width:300px; background:linear-gradient(180deg,rgba(160,80,255,.08) 0%,transparent 60%); animation-delay:1.5s; }
+@keyframes shaftPulse { 0%,100%{opacity:.6;} 50%{opacity:1;} }
+
+/* ── LORE GROUND: Post-Fracture Wasteland ── */
+.ground-wrap {
+  position:absolute; bottom:0; left:0; right:0; height:35%; z-index:4;
+}
+
+/* Scorched wasteland base — dark ash, burnt earth */
+.ground-base {
+  position:absolute; inset:0;
+  background: linear-gradient(180deg,
+    #1a1006 0%,
+    #120c04 20%,
+    #0c0802 45%,
+    #080502 70%,
+    #040301 100%
+  );
+}
+
+/* Scorched patches — burnt orange and dark grey zones */
+.grass-mid {
+  position:absolute; top:0; left:0; right:0; height:70%;
+  background:
+    radial-gradient(ellipse 20% 50% at 5%   30%, rgba(80,35,5,.55) 0%, transparent 100%),
+    radial-gradient(ellipse 15% 40% at 18%  20%, rgba(40,20,4,.5) 0%, transparent 100%),
+    radial-gradient(ellipse 18% 45% at 32%  35%, rgba(100,45,8,.45) 0%, transparent 100%),
+    radial-gradient(ellipse 22% 50% at 50%  25%, rgba(60,28,5,.5) 0%, transparent 100%),
+    radial-gradient(ellipse 16% 42% at 65%  30%, rgba(85,38,6,.48) 0%, transparent 100%),
+    radial-gradient(ellipse 20% 48% at 80%  20%, rgba(45,22,4,.52) 0%, transparent 100%),
+    radial-gradient(ellipse 14% 38% at 93%  35%, rgba(90,40,7,.46) 0%, transparent 100%),
+    /* Dead grey ash patches */
+    radial-gradient(ellipse 12% 30% at 25%  50%, rgba(50,45,40,.3) 0%, transparent 100%),
+    radial-gradient(ellipse 10% 28% at 72%  45%, rgba(45,40,36,.28) 0%, transparent 100%);
+}
+
+/* Fine individual grass blades via SVG data URI — tiling */
+.grass-blades {
+  /* Dead/burnt grass stubs + small rocks — wasteland edge */
+  position:absolute; top:-18px; left:0; right:0; height:36px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='36'%3E%3C!-- Dead stub 1 --%3E%3Cpath d='M3 36 Q2 26 4 18 Q5 25 6 36' fill='%23443318' opacity='0.7'/%3E%3C!-- Dead stub 2 leaning --%3E%3Cpath d='M9 36 Q6 24 10 14 Q12 24 12 36' fill='%23382c12' opacity='0.65'/%3E%3C!-- Cracked earth chunk --%3E%3Cpath d='M16 36 L14 28 L18 24 L22 28 L20 36 Z' fill='%23302010' opacity='0.55'/%3E%3C!-- Dead stub 3 --%3E%3Cpath d='M26 36 Q25 22 27 12 Q29 22 30 36' fill='%234a3a18' opacity='0.72'/%3E%3C!-- Rubble piece --%3E%3Cpath d='M34 36 L32 30 L36 26 L40 30 L38 36 Z' fill='%23281a0c' opacity='0.5'/%3E%3C!-- Scorched stub --%3E%3Cpath d='M44 36 Q43 24 45 16 Q46 23 48 36' fill='%233c2c10' opacity='0.68'/%3E%3C!-- Dead stub leaning right --%3E%3Cpath d='M52 36 Q54 22 55 13 Q57 22 56 36' fill='%23402e14' opacity='0.7'/%3E%3C!-- Small rock --%3E%3Cpath d='M60 36 Q58 32 60 29 Q63 29 65 32 Q65 36 60 36 Z' fill='%23201810' opacity='0.45'/%3E%3C!-- Broken stub --%3E%3Cpath d='M70 36 Q69 26 70 18 Q71 26 73 36' fill='%23382810' opacity='0.65'/%3E%3C!-- Cracked earth --%3E%3Cpath d='M78 36 L76 28 L80 24 L84 28 L83 36 Z' fill='%23241808' opacity='0.5'/%3E%3C!-- Ash stub --%3E%3Cpath d='M88 36 Q87 24 89 15 Q91 24 92 36' fill='%23443c28' opacity='0.6'/%3E%3C/svg%3E");
+  background-repeat: repeat-x;
+  background-size: 96px 36px;
+}
+
+/* Second row of blades slightly behind for depth */
+.grass-blades-back {
+  /* Cracked earth fissure lines behind the stubs */
+  position:absolute; top:-4px; left:0; right:0; height:20px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='20'%3E%3Cpath d='M0 14 Q10 12 20 15 Q30 18 40 14 Q50 10 60 13 Q70 16 80 14' fill='none' stroke='%23281808' stroke-width='1.5' opacity='0.5'/%3E%3Cpath d='M5 16 L8 10 L12 16' fill='none' stroke='%23201408' stroke-width='1' opacity='0.35'/%3E%3Cpath d='M35 15 L38 8 L42 15' fill='none' stroke='%23201408' stroke-width='1' opacity='0.3'/%3E%3Cpath d='M62 14 L65 7 L69 13' fill='none' stroke='%23201408' stroke-width='1' opacity='0.32'/%3E%3C/svg%3E");
+  background-repeat: repeat-x;
+  background-size: 80px 20px;
+  opacity: 0.8;
+}
+
+/* Subtle dew/moisture sheen on grass */
+.grass-sheen {
+  /* Ash dust haze floating over wasteland */
+  position:absolute; top:0; left:0; right:0; height:50%;
+  background: linear-gradient(180deg,
+    rgba(80,55,20,.08) 0%,
+    rgba(60,40,15,.05) 40%,
+    transparent 100%
+  );
+}
+/* Heat shimmer cracks in the ground */
+.ground-cracks {
+  position:absolute; top:2px; left:0; right:0; height:70%;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='80'%3E%3Cpath d='M20 40 Q30 35 35 20 Q40 35 50 38 Q60 40 70 30' fill='none' stroke='%23180e04' stroke-width='1' opacity='0.4'/%3E%3Cpath d='M80 50 Q90 42 100 55 Q108 48 115 35' fill='none' stroke='%23180e04' stroke-width='1' opacity='0.35'/%3E%3Cpath d='M130 45 Q142 38 150 50 Q158 42 170 48' fill='none' stroke='%23180e04' stroke-width='1' opacity='0.38'/%3E%3Cpath d='M35 60 L42 45 L48 58' fill='none' stroke='%23200e04' stroke-width='.8' opacity='0.3'/%3E%3Cpath d='M110 65 L118 50 L125 62' fill='none' stroke='%23200e04' stroke-width='.8' opacity='0.28'/%3E%3Cpath d='M160 55 L166 42 L173 54' fill='none' stroke='%23200e04' stroke-width='.8' opacity='0.3'/%3E%3C/svg%3E");
+  background-repeat: repeat-x;
+  background-size: 200px 80px;
+}
+
+/* Battle energy glow line at ground edge — fire left, water right */
+.ground-glow-line {
+  position:absolute; top:0; left:0; right:0; height:3px; z-index:10;
+  background:linear-gradient(90deg,
+    transparent 0%,
+    rgba(255,80,0,.7) 12%,
+    rgba(200,80,255,.9) 35%,
+    rgba(255,255,255,1) 50%,
+    rgba(80,160,255,.9) 65%,
+    rgba(0,120,255,.7) 88%,
+    transparent 100%
+  );
+  box-shadow:
+    0 0 10px rgba(200,80,255,.8),
+    0 0 28px rgba(120,80,255,.5),
+    0 0 55px rgba(80,120,255,.3);
+}
+
+/* Faction territory glow — Ironclad fire-orange left, Echo blue right */
+.grass-glow-left {
+  position:absolute; top:0; left:0; width:50%; height:60%;
+  background:radial-gradient(ellipse at 15% 0%, rgba(200,70,0,.28) 0%, transparent 65%);
+  pointer-events:none; z-index:5;
+}
+.grass-glow-right {
+  position:absolute; top:0; right:0; width:50%; height:60%;
+  background:radial-gradient(ellipse at 85% 0%, rgba(0,100,220,.28) 0%, transparent 65%);
+  pointer-events:none; z-index:5;
+}
+
+/* ── FOG AT BOUNDARY ── */
+.fog {
+  position:absolute; bottom:33%; left:0; right:0; height:80px;
+  background:linear-gradient(0deg, rgba(15,10,4,.55) 0%, rgba(8,8,20,.25) 50%, transparent 100%);
+  filter:blur(12px); z-index:5; pointer-events:none;
+}
+
+
+/* ── LORE STRIP at bottom edge ── */
+.lore-strip {
+  position:absolute; bottom:0; left:0; right:0; height:26px;
+  z-index:6; overflow:hidden; pointer-events:none;
+  background:linear-gradient(180deg,transparent,rgba(0,0,0,.4));
+}
+.lore-ticker {
+  position:absolute; bottom:4px; left:0;
+  display:flex; gap:0; white-space:nowrap;
+  animation:tickerScroll 60s linear infinite;
+}
+.lore-ticker span {
+  font-family:'Rajdhani',sans-serif; font-size:9px; font-weight:600;
+  letter-spacing:3px; text-transform:uppercase;
+  color:rgba(200,160,60,.35); padding:0 30px;
+}
+.lore-ticker span.sep {
+  color:rgba(200,160,60,.2); padding:0 10px;
+}
+@keyframes tickerScroll {
+  0%   { transform:translateX(0); }
+  100% { transform:translateX(-50%); }
+}
+
+
+/* ── AMBIENT ORBS ── */
+.glow-orb {
+  position:absolute; border-radius:50%; filter:blur(55px);
+  pointer-events:none; z-index:2;
+  animation:glowPulse 5s ease-in-out infinite;
+}
+@keyframes glowPulse { 0%,100%{transform:scale(1);opacity:.5;} 50%{transform:scale(1.2);opacity:.85;} }
+
+/* ── POKEMON STAGE ── */
+.pokemon-stage {
+  position:absolute; bottom:33%; left:0; right:0;
+  display:flex; align-items:flex-end; justify-content:space-between;
+  padding:0 0; z-index:10; pointer-events:none;
+}
+.poke-side { display:flex; align-items:flex-end; }
+.poke-side.right { transform:scaleX(-1); }
+
+.poke-wrap {
+  display:flex; align-items:flex-end;
+  animation:pokeFloat 3.5s ease-in-out infinite;
+}
+@keyframes pokeFloat {
+  0%,100% { transform:translateY(0); }
+  50%      { transform:translateY(-12px); }
+}
+.poke-wrap img {
+  display:block; image-rendering:auto;
+  opacity:0; transition:opacity .6s ease;
+}
+.poke-wrap img.loaded { opacity:1; }
+.poke-side.left  .poke-wrap img {
+  filter:drop-shadow(0 0 22px rgba(255,100,0,.65)) drop-shadow(0 6px 18px rgba(0,0,0,.95));
+}
+.poke-side.right .poke-wrap img {
+  filter:drop-shadow(0 0 22px rgba(0,150,255,.65)) drop-shadow(0 6px 18px rgba(0,0,0,.95));
+}
+
+/* ── FLYING POKEMON CANVAS ── */
+#flyCanvas {
+  position:absolute; top:0; left:0; width:100%; height:68%;
+  z-index:12; pointer-events:none;
+}
+
+/* ── ENERGY CLASH ── */
+.clash {
+  position:absolute; bottom:35%; left:50%; transform:translateX(-50%);
+  z-index:20; pointer-events:none;
+}
+.cring { animation:cRing 2s ease-in-out infinite; transform-origin:center; }
+@keyframes cRing { 0%,100%{opacity:.3;transform:scale(.88);} 50%{opacity:1;transform:scale(1.12);} }
+
+/* ── CENTER TITLE UI ── */
+.center-ui {
+  position:relative; z-index:30;
+  display:flex; flex-direction:column; align-items:center; gap:8px;
+  text-align:center; pointer-events:none;
+}
+.label-top {
+  font-family:'Rajdhani',sans-serif;
+  font-size:12px; font-weight:600;
+  letter-spacing:8px; color:rgba(200,220,255,.6); text-transform:uppercase;
+}
+.title-main {
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(54px,9vw,108px);
+  line-height:.82; letter-spacing:6px;
+}
+.t-bit {
+  display:block;
+  background:linear-gradient(135deg,#ffee00 0%,#ff9900 45%,#ff3300 100%);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  animation:titlePulse 3s ease-in-out infinite;
+}
+@keyframes titlePulse {
+  0%,100%{ filter:drop-shadow(0 0 18px rgba(255,140,0,.5)); }
+  50%    { filter:drop-shadow(0 0 48px rgba(255,220,0,1)); }
+}
+.t-poke {
+  display:block;
+  background:linear-gradient(135deg,#ffffff 0%,#c8e0ff 45%,#5599ff 100%);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  filter:drop-shadow(0 0 20px rgba(80,150,255,.65));
+}
+.vs-wrap { display:flex; align-items:center; gap:14px; }
+.vs-line { width:60px; height:1px; background:linear-gradient(90deg,transparent,rgba(255,255,255,.22)); }
+.vs-line.r { background:linear-gradient(90deg,rgba(255,255,255,.22),transparent); }
+.vs-text {
+  font-family:'Bebas Neue',sans-serif; font-size:22px; letter-spacing:8px;
+  color:rgba(255,255,255,.45); animation:vsPulse 2s ease-in-out infinite;
+}
+@keyframes vsPulse { 0%,100%{opacity:.4;} 50%{opacity:1;text-shadow:0 0 18px rgba(255,255,255,.5);} }
+.tagline {
+  font-family:'Rajdhani',sans-serif;
+  font-size:11px; font-weight:600; letter-spacing:5px; color:rgba(180,200,255,.5); text-transform:uppercase;
+}
+.start-btn {
+  pointer-events:all; margin-top:6px;
+  padding:16px 58px;
+  font-family:'Bebas Neue',sans-serif; font-size:28px; letter-spacing:7px; color:#fff;
+  background:linear-gradient(135deg,#aa1800,#dd4400,#ff8800);
+  border:none; border-radius:3px; cursor:pointer; position:relative; overflow:hidden;
+  box-shadow:0 4px 30px rgba(255,80,0,.6), inset 0 1px 0 rgba(255,255,255,.15);
+  transition:all .15s;
+}
+.start-btn::before { content:''; position:absolute; inset:0; background:linear-gradient(180deg,rgba(255,255,255,.1) 0%,transparent 50%); }
+.start-btn::after {
+  content:''; position:absolute; top:-50%; left:-60%; width:35%; height:200%;
+  background:rgba(255,255,255,.12); transform:skewX(-18deg);
+  animation:btnShine 3.5s ease-in-out infinite;
+}
+@keyframes btnShine { 0%,65%,100%{left:-60%;opacity:0;} 35%{left:130%;opacity:1;} }
+.start-btn:hover { transform:translateY(-3px) scale(1.05); box-shadow:0 10px 40px rgba(255,120,0,.9); }
+.start-btn:active { transform:translateY(1px) scale(.98); }
+
+/* particles */
+.ptcl { position:absolute; border-radius:50%; animation:ptclRise linear infinite; pointer-events:none; z-index:3; }
+@keyframes ptclRise { 0%{transform:translateY(0) scale(1);opacity:.9;} 100%{transform:translateY(-95vh) scale(0);opacity:0;} }
+
+/* Modal for login */
+#loginModal {
+  display:none; position:fixed; z-index:9999; left:0; top:0;
+  width:100vw; height:100vh; background:rgba(0,0,0,.9);
+  align-items:center; justify-content:center;
+}
+#loginModal.shown { display:flex; }
+
+.login-modal-content {
+  background:linear-gradient(135deg, #1a1f2e 0%, #16202a 100%);
+  padding:36px 32px; border-radius:16px;
+  box-shadow:0 16px 48px rgba(0,0,0,.95), 0 0 60px rgba(100,150,255,.3);
+  max-width:380px; width:90vw; position:relative;
+  border:1px solid rgba(100,150,255,.2);
+}
+
+.login-modal-content h3 {
+  font-family:'Bebas Neue',sans-serif; font-size:28px; letter-spacing:4px;
+  background:linear-gradient(135deg, #ffee00 0%, #5599ff 100%);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  margin-bottom:12px; text-align:center;
+}
+
+.login-modal-content p {
+  color:#aaa; font-size:12px; text-align:center; margin-bottom:24px; letter-spacing:2px;
+}
+
+.form-group-login {
+  margin-bottom:16px;
+}
+
+.form-group-login label {
+  display:block; color:#fff; font-size:13px; font-weight:600; margin-bottom:6px; letter-spacing:1px;
+}
+
+.form-group-login input {
+  width:100%; background:#0f1422; color:#fff; border:1px solid #333;
+  padding:12px 14px; border-radius:6px; font-size:14px;
+  transition:all .2s;
+}
+
+.form-group-login input:focus {
+  outline:none; border-color:#4caf50; box-shadow:0 0 10px rgba(76,175,80,.3);
+}
+
+.form-group-login input::placeholder { color:#666; }
+
+.login-checkbox {
+  display:flex; align-items:center; margin-bottom:18px;
+  font-size:12px; color:#aaa;
+}
+
+.login-checkbox input { margin-right:8px; cursor:pointer; width:16px; height:16px; }
+
+.login-btn {
+  width:100%; padding:14px; background:linear-gradient(135deg, #4caf50, #43a047);
+  color:#000; font-weight:bold; font-size:14px; border:none; border-radius:6px;
+  cursor:pointer; transition:all .2s; letter-spacing:2px; text-transform:uppercase;
+}
+
+.login-btn:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(76,175,80,.5); }
+.login-btn:active { transform:translateY(0); }
+.login-btn:disabled {
+  animation: authPulse 0.8s ease-in-out infinite;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+@keyframes authPulse {
+  0%, 100% { opacity: 0.5; }
+  50%       { opacity: 0.95; }
+}
+
+.login-footer {
+  text-align:center; margin-top:18px; font-size:12px; color:#aaa;
+}
+
+.login-footer a {
+  color:#4caf50; text-decoration:none; font-weight:600;
+  transition:color .2s;
+}
+
+.login-footer a:hover { color:#fff; }
+
+.login-close-btn {
+  position:absolute; top:16px; right:16px; background:none; border:none;
+  color:#888; font-size:24px; cursor:pointer; transition:color .2s;
+}
+
+.login-close-btn:hover { color:#fff; }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="sky"></div>
+  <div class="shaft left"></div>
+  <div class="shaft right"></div>
+  <div class="shaft mid"></div>
+
+  <div class="glow-orb" style="width:440px;height:440px;background:radial-gradient(circle,rgba(255,60,0,.26),transparent);top:4%;left:-7%;animation-delay:0s;"></div>
+  <div class="glow-orb" style="width:440px;height:440px;background:radial-gradient(circle,rgba(0,80,255,.26),transparent);top:4%;right:-7%;animation-delay:2.5s;"></div>
+  <div class="glow-orb" style="width:620px;height:280px;background:radial-gradient(circle,rgba(130,0,255,.14),transparent);top:42%;left:12%;animation-delay:1.2s;"></div>
+
+  <div id="ptcls" style="position:absolute;inset:0;pointer-events:none;z-index:3;"></div>
+
+  <!-- Real grass ground -->
+  <div class="ground-wrap">
+    <div class="ground-base"></div>
+    <div class="grass-mid"></div>
+    <div class="grass-blades-back"></div>
+    <div class="grass-blades"></div>
+    <div class="grass-sheen"></div>
+    <div class="ground-cracks"></div>
+    <div class="grass-glow-left"></div>
+    <div class="grass-glow-right"></div>
+    <div class="ground-glow-line"></div>
+  </div>
+  <div class="fog"></div>
+    <div class="faction-flag-wrap right">
+      <svg width="90" height="60" viewBox="0 0 180 120" xmlns="http://www.w3.org/2000/svg">
+        <defs><linearGradient id="ecB2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#02082a"/><stop offset="100%" stop-color="#010418"/></linearGradient><radialGradient id="ecG2" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#4488ff" stop-opacity=".28"/><stop offset="100%" stop-color="transparent"/></radialGradient></defs>
+        <rect width="180" height="120" fill="url(#ecB2)" rx="2"/>
+        <rect x="3" y="3" width="174" height="114" fill="none" stroke="#1a3a8b" stroke-width="1.5" rx="1"/>
+        <circle cx="90" cy="60" r="40" fill="url(#ecG2)"/>
+        <circle cx="90" cy="60" r="28" fill="none" stroke="#2255cc" stroke-width="1.5"/>
+        <circle cx="90" cy="60" r="18" fill="none" stroke="#3366dd" stroke-width=".8" opacity=".5"/>
+        <circle cx="90" cy="60" r="6" fill="#2255cc" opacity=".8"/>
+        <circle cx="90" cy="60" r="3.5" fill="#88aaff"/>
+        <circle cx="90" cy="32" r="3" fill="#4488ff" opacity=".8"/><circle cx="90" cy="88" r="3" fill="#4488ff" opacity=".8"/><circle cx="62" cy="60" r="3" fill="#4488ff" opacity=".8"/><circle cx="118" cy="60" r="3" fill="#4488ff" opacity=".8"/>
+        <line x1="90" y1="35" x2="90" y2="54" stroke="#4488ff" stroke-width="1" opacity=".5"/><line x1="90" y1="66" x2="90" y2="85" stroke="#4488ff" stroke-width="1" opacity=".5"/><line x1="65" y1="60" x2="84" y2="60" stroke="#4488ff" stroke-width="1" opacity=".5"/><line x1="96" y1="60" x2="115" y2="60" stroke="#4488ff" stroke-width="1" opacity=".5"/>
+        <text x="90" y="114" font-size="6" fill="#4488ff" opacity=".6" text-anchor="middle" font-family="Georgia,serif" letter-spacing="3">ECHO SYNDICATE</text>
+      </svg>
+
+  <!-- Lore Ticker -->
+  <div class="lore-strip">
+    <div class="lore-ticker">
+      <span>The Fracture changed everything</span><span class="sep">&#10022;</span>
+      <span>200 fragments per chip</span><span class="sep">&#10022;</span>
+      <span>5 slots active in your PIP</span><span class="sep">&#10022;</span>
+      <span>Ironclad controls the eastern routes</span><span class="sep">&#10022;</span>
+      <span>The Echo Syndicate seeks Project Genesis</span><span class="sep">&#10022;</span>
+      <span>The Hollow releases corrupted fragments</span><span class="sep">&#10022;</span>
+      <span>Slot in your first fragment</span><span class="sep">&#10022;</span>
+      <span>Are you worth fighting for?</span><span class="sep">&#10022;</span>
+      <span>The Fracture changed everything</span><span class="sep">&#10022;</span>
+      <span>200 fragments per chip</span><span class="sep">&#10022;</span>
+      <span>5 slots active in your PIP</span><span class="sep">&#10022;</span>
+      <span>Ironclad controls the eastern routes</span><span class="sep">&#10022;</span>
+      <span>The Echo Syndicate seeks Project Genesis</span><span class="sep">&#10022;</span>
+      <span>The Hollow releases corrupted fragments</span><span class="sep">&#10022;</span>
+      <span>Slot in your first fragment</span><span class="sep">&#10022;</span>
+      <span>Are you worth fighting for?</span><span class="sep">&#10022;</span>
+    </div>
+  </div>
+
+  <!-- Flying pokemon canvas -->
+  <canvas id="flyCanvas"></canvas>
+
+  <!-- Energy clash -->
+  <div class="clash">
+    <svg width="130" height="130" viewBox="0 0 130 130">
+      <defs>
+        <radialGradient id="cg"><stop offset="0%" stop-color="rgba(255,255,200,.4)"/><stop offset="100%" stop-color="transparent"/></radialGradient>
+      </defs>
+      <circle cx="65" cy="65" r="60" fill="none" stroke="rgba(255,220,100,.18)" stroke-width="1.5" class="cring"/>
+      <circle cx="65" cy="65" r="38" fill="none" stroke="rgba(255,200,80,.26)" stroke-width="2" class="cring" style="animation-delay:.6s"/>
+      <circle cx="65" cy="65" r="20" fill="url(#cg)" stroke="rgba(255,255,200,.42)" stroke-width="1.5" class="cring" style="animation-delay:1.1s"/>
+      <g stroke-linecap="round" opacity=".6">
+        <line x1="65" y1="4"   x2="65" y2="36"  stroke="#ffff88" stroke-width="1.8"/>
+        <line x1="65" y1="94"  x2="65" y2="126" stroke="#88aaff" stroke-width="1.8"/>
+        <line x1="4"  y1="65"  x2="36" y2="65"  stroke="#ff8844" stroke-width="1.8"/>
+        <line x1="94" y1="65"  x2="126" y2="65" stroke="#4488ff" stroke-width="1.8"/>
+        <line x1="18" y1="18"  x2="42" y2="42"  stroke="#ffcc44" stroke-width="1.3"/>
+        <line x1="88" y1="88"  x2="112" y2="112" stroke="#88ccff" stroke-width="1.3"/>
+        <line x1="112" y1="18" x2="88" y2="42"   stroke="#ffaa44" stroke-width="1.3"/>
+        <line x1="18"  y1="112" x2="42" y2="88"  stroke="#66aaff" stroke-width="1.3"/>
+      </g>
+    </svg>
+  </div>
+
+  <!-- Pokemon battle stage -->
+  <div class="pokemon-stage">
+    <div class="poke-side left"  id="leftPokes"></div>
+    <div class="poke-side right" id="rightPokes"></div>
+  </div>
+
+  <!-- Center UI -->
+  <div class="center-ui">
+    <div class="label-top">Battle Intelligence Trainers</div>
+    <div class="vs-wrap">
+      <div class="vs-line"></div>
+      <div class="vs-text">VS</div>
+      <div class="vs-line r"></div>
+    </div>
+    <div class="title-main">
+      <span class="t-bit">BIT</span>
+      <span class="t-poke">POKÉMON</span>
+    </div>
+    <div class="tagline">Choose your side. Prove your intelligence.</div>
+    <button class="start-btn" id="startBtn">▶ &nbsp;START</button>
+  </div>
+</div>
+
+<!-- Login Modal -->
+<div id="loginModal">
+  <div class="login-modal-content">
+    <button class="login-close-btn" id="modalCloseBtn">&times;</button>
+    <h3>SIGN IN</h3>
+    <p>Battle Intelligence Trainers</p>
+    <form id="loginForm">
+      <div class="form-group-login">
+        <label for="email">Email</label>
+        <input type="email" id="email" placeholder="your@email.com" required />
+      </div>
+      <div class="form-group-login">
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="Enter your password" required />
+      </div>
+      <div class="login-checkbox">
+        <input type="checkbox" id="rememberMe" />
+        <label for="rememberMe" style="margin:0; color:#aaa;">Remember me</label>
+      </div>
+      <button type="submit" class="login-btn">Sign In</button>
+    </form>
+    <div class="login-footer">
+      Don't have an account? <a href="/pages/sign-up.html">Sign up here</a>
+    </div>
+  </div>
+</div>
+
+<script>
+const ART = id => `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
+
+// ── GROUND TEAMS ──
+// Left: Fire / Fighting / Dragon — heavy hitters
+const leftTeam = [
+  { id: 6,   w: 210 },  // Charizard       (Gen 1)
+  { id: 59,  w: 155 },  // Arcanine        (Gen 1)
+  { id: 34,  w: 138 },  // Nidoking        (Gen 1)
+  { id: 68,  w: 128 },  // Machamp         (Gen 1)
+  { id: 38,  w: 118 },  // Ninetales       (Gen 1)
+  { id: 78,  w: 112 },  // Rapidash        (Gen 1)
+  { id: 257, w: 105 },  // Blaziken
+  { id: 448, w:  98 },  // Lucario
+  { id: 445, w:  90 },  // Garchomp
+];
+
+// Right: Water / Psychic / Ice
+const rightTeam = [
+  { id: 9,   w: 200 },  // Blastoise       (Gen 1)
+  { id: 150, w: 158 },  // Mewtwo          (Gen 1)
+  { id: 149, w: 145 },  // Dragonite       (Gen 1)
+  { id: 131, w: 135 },  // Lapras          (Gen 1)
+  { id: 143, w: 128 },  // Snorlax         (Gen 1)
+  { id: 65,  w: 115 },  // Alakazam        (Gen 1)
+  { id: 130, w: 108 },  // Gyarados        (Gen 1)
+  { id: 121, w:  98 },  // Starmie         (Gen 1)
+  { id: 380, w:  90 },  // Latias
+];
+
+function buildTeam(el, team) {
+  team.forEach((p, i) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'poke-wrap';
+    const depthScale = i === 0 ? 1 : Math.max(0.48, 0.84 - i * 0.09);
+    const overlap    = i === 0 ? 0 : -(22 + i * 16);
+    const rise       = i === 0 ? 0 : i * 20;
+    wrap.style.cssText = `
+      transform-origin:bottom center;
+      transform:scale(${depthScale});
+      margin-left:${overlap}px;
+      margin-bottom:${rise}px;
+      z-index:${20 - i};
+      animation:pokeFloat ${3.0 + i*0.45}s ease-in-out infinite;
+      animation-delay:${i*0.6}s;
+    `;
+    const img = document.createElement('img');
+    img.src = ART(p.id);
+    img.width = img.height = p.w;
+    img.style.objectFit = 'contain';
+    img.onload  = () => img.classList.add('loaded');
+    img.onerror = () => img.style.display = 'none';
+    wrap.appendChild(img);
+    el.appendChild(wrap);
+  });
+}
+
+buildTeam(document.getElementById('leftPokes'),  leftTeam);
+buildTeam(document.getElementById('rightPokes'), rightTeam);
+
+// ── FLYING POKEMON via Canvas (sinusoidal paths) ──
+// Just 3 — clean, not crowded
+const flyerDefs = [
+  { id: 18,  size: 110, speed: 0.9, amp: 32, freq: 0.013, yBase: 0.07, dir:  1, delay: 0  },  // Pidgeot
+  { id: 22,  size: 90,  speed: 0.7, amp: 26, freq: 0.016, yBase: 0.18, dir: -1, delay: 8  },  // Fearow
+  { id: 142, size: 130, speed: 1.1, amp: 42, freq: 0.010, yBase: 0.04, dir:  1, delay: 16 },  // Aerodactyl
+];
+
+const canvas = document.getElementById('flyCanvas');
+const ctx    = canvas.getContext('2d');
+
+// Preload flyer images
+const flyerImgs = flyerDefs.map(f => {
+  const img = new Image();
+  img.src = ART(f.id);
+  return { ...f, img, x: null, loaded: false };
+});
+flyerImgs.forEach(f => {
+  f.img.onload = () => { f.loaded = true; };
+});
+
+function resizeCanvas() {
+  canvas.width  = window.innerWidth;
+  canvas.height = window.innerHeight * 0.68;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+let t = 0;
+function animateFlyers() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const W = canvas.width;
+  const H = canvas.height;
+
+  flyerImgs.forEach(f => {
+    if (!f.loaded) return;
+
+    // Total period: time to cross screen depends on speed (pixels/frame)
+    const pxPerFrame = f.speed;
+    const totalDist  = W + f.size * 2;
+    // Phase offset from delay (convert seconds to equivalent frame offset at 60fps)
+    const frameOffset = f.delay * 60 * pxPerFrame;
+
+    // Current horizontal position (loops)
+    let rawX;
+    if (f.dir === 1) {
+      rawX = ((t * pxPerFrame + frameOffset) % totalDist) - f.size;
+    } else {
+      rawX = W - (((t * pxPerFrame + frameOffset) % totalDist) - f.size);
+    }
+
+    // Sinusoidal vertical path — smooth wave as it crosses
+    const baseY = H * f.yBase + f.size * 0.5;
+    const y = baseY + Math.sin(rawX * f.freq) * f.amp;
+
+    const x = rawX;
+    const s = f.size;
+
+    ctx.save();
+    // Flip horizontally if going right-to-left so pokemon faces direction of travel
+    if (f.dir === -1) {
+      ctx.translate(x + s, y);
+      ctx.scale(-1, 1);
+      ctx.translate(-s * 0.5, -s * 0.5);
+    } else {
+      ctx.translate(x - s * 0.5, y - s * 0.5);
+    }
+
+    // Subtle shadow beneath flyer for realism
+    ctx.shadowColor = 'rgba(0,0,0,0.55)';
+    ctx.shadowBlur  = 12;
+    ctx.shadowOffsetY = 6;
+
+    ctx.drawImage(f.img, 0, 0, s, s);
+    ctx.restore();
+  });
+
+  t++;
+  requestAnimationFrame(animateFlyers);
+}
+animateFlyers();
+
+// ── PARTICLES ──
+const ptclEl = document.getElementById('ptcls');
+const pCols  = ['#ff8800','#ffcc00','#4488ff','#bb44ff','#ffffff','#55dd88','#ff4455'];
+for (let i = 0; i < 50; i++) {
+  const p = document.createElement('div');
+  p.className = 'ptcl';
+  const s = Math.random() * 4 + 1.5;
+  p.style.cssText = `
+    width:${s}px; height:${s}px;
+    background:${pCols[i % pCols.length]};
+    left:${Math.random()*100}%;
+    bottom:${Math.random()*50}%;
+    animation-duration:${6 + Math.random()*12}s;
+    animation-delay:-${Math.random()*10}s;
+    opacity:${.15 + Math.random()*.5};
+  `;
+  ptclEl.appendChild(p);
+}
+
+// ── START BUTTON & LOGIN MODAL ──
+const startBtn = document.getElementById('startBtn');
+const loginModal = document.getElementById('loginModal');
+const modalCloseBtn = document.getElementById('modalCloseBtn');
+const loginForm = document.getElementById('loginForm');
+
+// Import API_BASE_URL
+const API_BASE_URL = window.API_BASE_URL || 'http://localhost:4000';
+
+// Open modal on START button click
+startBtn.addEventListener('click', () => {
+  loginModal.classList.add('shown');
+});
+
+// Close modal on close button click
+modalCloseBtn.addEventListener('click', () => {
+  loginModal.classList.remove('shown');
+});
+
+// Close modal when clicking outside the modal content
+loginModal.addEventListener('click', (e) => {
+  if (e.target === loginModal) {
+    loginModal.classList.remove('shown');
+  }
+});
+
+// Handle login form submission
+loginForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value.trim();
+
+  // Show loading state
+  const loginBtn = loginForm.querySelector('.login-btn');
+  loginBtn.disabled = true;
+  loginBtn.textContent = 'AUTHENTICATING...';
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/users/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+    const result = await res.json();
+    
+    if (res.ok && result.success) {
+      // Save credentials
+      if (result.data.user.user_id !== undefined && result.data.user.user_id !== null) {
+        localStorage.setItem('user_id', result.data.user.user_id);
+      }
+      localStorage.setItem('ign', result.data.user.ign);
+      localStorage.setItem('token', result.data.token);
+      
+      // Auto-save wallet address after login
+      if (window.ethereum) {
+        try {
+          const accounts = await window.ethereum.request({
+            method: 'eth_requestAccounts',
+          });
+          const walletAddress = accounts[0];
+          await fetch(`${API_BASE_URL}/users/wallet`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ walletAddress, user_id: result.data.user.user_id }),
+          });
+        } catch (err) {
+          console.error('MetaMask error:', err);
+        }
+      }
+      
+      // Show success then redirect
+      loginBtn.textContent = 'ACCESS GRANTED ✓';
+      loginBtn.style.background = 'linear-gradient(135deg, #1a5c1a, #2d8a2d)';
+      setTimeout(() => {
+        window.location.href = '/pages/pip_interface.html';
+      }, 1200);
+    } else {
+      loginBtn.disabled = false;
+      loginBtn.textContent = 'Sign In';
+      alert(result.message || 'Invalid login credentials');
+    }
+  } catch (err) {
+    console.error(err);
+    loginBtn.disabled = false;
+    loginBtn.textContent = 'Sign In';
+    alert('Server error. Please try again.');
+  }
+});
+</script>
+</body>
+</html>
