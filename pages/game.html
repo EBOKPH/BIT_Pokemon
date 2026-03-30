@@ -517,17 +517,25 @@
 
       /* ── SCANNING ACTIVE STATE ── */
       .pip-btn.scanning-active .pip-btn-inner {
-        border-color: rgba(74,255,106,.6);
-        background: linear-gradient(180deg,#1e2e12 0%,#141e0c 100%);
-        box-shadow: 0 0 18px rgba(74,255,106,.18), inset 0 0 12px rgba(74,255,106,.04);
+        border-color: rgba(74, 255, 106, 0.6);
+        background: linear-gradient(180deg, #1e2e12 0%, #141e0c 100%);
+        box-shadow:
+          0 0 18px rgba(74, 255, 106, 0.18),
+          inset 0 0 12px rgba(74, 255, 106, 0.04);
       }
       .pip-btn.scanning-active .pip-btn-inner::before {
         background: var(--green);
-        box-shadow: 0 0 10px var(--green), 0 0 20px rgba(74,255,106,.4);
-        animation: ledBlink .6s ease-in-out infinite;
+        box-shadow:
+          0 0 10px var(--green),
+          0 0 20px rgba(74, 255, 106, 0.4);
+        animation: ledBlink 0.6s ease-in-out infinite;
       }
-      .pip-btn.scanning-active .btn-label { color: var(--green); }
-      .pip-btn.scanning-active .btn-sub   { color: rgba(74,255,106,.6); }
+      .pip-btn.scanning-active .btn-label {
+        color: var(--green);
+      }
+      .pip-btn.scanning-active .btn-sub {
+        color: rgba(74, 255, 106, 0.6);
+      }
 
       /* Scan progress bar — 20s max */
       .scan-progress-wrap {
@@ -537,33 +545,39 @@
         width: 80%;
         margin-top: 3px;
       }
-      .scan-progress-wrap.visible { display: flex; }
+      .scan-progress-wrap.visible {
+        display: flex;
+      }
       .scan-progress-track {
         width: 100%;
         height: 3px;
-        background: rgba(74,255,106,.1);
+        background: rgba(74, 255, 106, 0.1);
         overflow: hidden;
-        border: 1px solid rgba(74,255,106,.12);
+        border: 1px solid rgba(74, 255, 106, 0.12);
       }
       .scan-progress-fill {
         height: 100%;
         width: 0%;
         background: var(--green);
         box-shadow: 0 0 6px var(--green);
-        transition: width .4s linear;
+        transition: width 0.4s linear;
       }
 
       /* Scan timer */
       .scan-timer-line {
         font-family: var(--mono);
-        font-size: clamp(5px,.75vw,7px);
+        font-size: clamp(5px, 0.75vw, 7px);
         letter-spacing: 2px;
-        color: rgba(74,255,106,.4);
+        color: rgba(74, 255, 106, 0.4);
         text-align: center;
         display: none;
       }
-      .scan-timer-line.visible { display: block; }
-      .scan-timer-line.active  { color: rgba(74,255,106,.65); }
+      .scan-timer-line.visible {
+        display: block;
+      }
+      .scan-timer-line.active {
+        color: rgba(74, 255, 106, 0.65);
+      }
 
       /* ── PLAYER POSITION DOT ON MAP ── */
 
@@ -906,44 +920,100 @@
         gap: 6px;
         margin-bottom: 10px;
         width: 100%;
-        animation: encBarIn .2s ease;
+        animation: encBarIn 0.2s ease;
       }
       @keyframes encBarIn {
-        from { opacity:0; transform:translateY(-6px); }
-        to   { opacity:1; transform:none; }
+        from {
+          opacity: 0;
+          transform: translateY(-6px);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
       }
-      .enc-action-bar.visible { display: flex; }
+      .enc-action-bar.visible {
+        display: flex;
+      }
       .enc-bar-label {
         font-family: var(--mono);
         font-size: 9px;
         letter-spacing: 3px;
-        color: rgba(255,184,48,.5);
+        color: rgba(255, 184, 48, 0.5);
         text-transform: uppercase;
       }
       .enc-chips {
-        display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: center;
       }
       .enc-chip {
-        font-family: var(--mono); font-size: 10px; letter-spacing: 3px;
-        text-transform: uppercase; padding: 5px 14px;
-        background: rgba(0,0,0,.5); border: 1px solid rgba(74,255,106,.2);
-        color: var(--text-dim); cursor: pointer; transition: all .15s;
+        font-family: var(--mono);
+        font-size: 10px;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        padding: 5px 14px;
+        background: rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(74, 255, 106, 0.2);
+        color: var(--text-dim);
+        cursor: pointer;
+        transition: all 0.15s;
       }
-      .enc-chip:hover { border-color: var(--green); color: var(--green); box-shadow: 0 0 10px rgba(74,255,106,.12); }
-      .enc-chip.catch  { border-color: rgba(74,255,106,.4); color: var(--green); background: rgba(74,255,106,.08); }
-      .enc-chip.catch:hover  { background: rgba(74,255,106,.16); box-shadow: 0 0 14px rgba(74,255,106,.2); }
-      .enc-chip.battle { border-color: rgba(255,184,48,.3); color: var(--amber); background: rgba(255,184,48,.06); }
-      .enc-chip.battle:hover { background: rgba(255,184,48,.14); box-shadow: 0 0 10px rgba(255,184,48,.15); }
-      .enc-chip.flee   { border-color: rgba(255,68,68,.3); color: var(--red); background: rgba(255,68,68,.06); }
-      .enc-chip.flee:hover   { background: rgba(255,68,68,.14); box-shadow: 0 0 10px rgba(255,68,68,.12); }
+      .enc-chip:hover {
+        border-color: var(--green);
+        color: var(--green);
+        box-shadow: 0 0 10px rgba(74, 255, 106, 0.12);
+      }
+      .enc-chip.catch {
+        border-color: rgba(74, 255, 106, 0.4);
+        color: var(--green);
+        background: rgba(74, 255, 106, 0.08);
+      }
+      .enc-chip.catch:hover {
+        background: rgba(74, 255, 106, 0.16);
+        box-shadow: 0 0 14px rgba(74, 255, 106, 0.2);
+      }
+      .enc-chip.battle {
+        border-color: rgba(255, 184, 48, 0.3);
+        color: var(--amber);
+        background: rgba(255, 184, 48, 0.06);
+      }
+      .enc-chip.battle:hover {
+        background: rgba(255, 184, 48, 0.14);
+        box-shadow: 0 0 10px rgba(255, 184, 48, 0.15);
+      }
+      .enc-chip.flee {
+        border-color: rgba(255, 68, 68, 0.3);
+        color: var(--red);
+        background: rgba(255, 68, 68, 0.06);
+      }
+      .enc-chip.flee:hover {
+        background: rgba(255, 68, 68, 0.14);
+        box-shadow: 0 0 10px rgba(255, 68, 68, 0.12);
+      }
       .sig-bar-line {
-        font-family: var(--mono); font-size: clamp(6px,.85vw,8px); letter-spacing:1px;
-        color: rgba(74,255,106,.5); text-align:center; margin-top:2px;
+        font-family: var(--mono);
+        font-size: clamp(6px, 0.85vw, 8px);
+        letter-spacing: 1px;
+        color: rgba(74, 255, 106, 0.5);
+        text-align: center;
+        margin-top: 2px;
       }
-      .sig-bar-line.silent   { color: rgba(74,255,106,.2); }
-      .sig-bar-line.dead     { color: rgba(255,184,48,.4); }
-      .sig-bar-line.strong   { color: var(--green); text-shadow:0 0 6px var(--green); }
-      .sig-bar-line.encounter{ color: var(--amber); text-shadow:0 0 8px var(--amber); }
+      .sig-bar-line.silent {
+        color: rgba(74, 255, 106, 0.2);
+      }
+      .sig-bar-line.dead {
+        color: rgba(255, 184, 48, 0.4);
+      }
+      .sig-bar-line.strong {
+        color: var(--green);
+        text-shadow: 0 0 6px var(--green);
+      }
+      .sig-bar-line.encounter {
+        color: var(--amber);
+        text-shadow: 0 0 8px var(--amber);
+      }
     </style>
   </head>
   <body>
@@ -984,7 +1054,11 @@
       <!-- CENTRE: PIP DEVICE -->
       <div class="pip-centre">
         <div class="pip-device-wrap">
-          <img class="pip-device-img" src="../assets/img/BITPIP.png" alt="PIP Device"/>
+          <img
+            class="pip-device-img"
+            src="../assets/img/BITPIP.png"
+            alt="PIP Device"
+          />
           <div class="pip-screen-overlay">
             <div class="screen-glow"></div>
             <div class="screen-content" id="screenContent">
@@ -992,16 +1066,29 @@
               <div class="screen-line bright" id="screenMain">SCANNING</div>
               <div class="screen-line dim" id="screenSub">MOVE TO SCAN</div>
               <!-- Signal bar — updated by scan engine -->
-              <div class="sig-bar-line" id="sigBarLine">SIG [░░░░░░░░░░] IDLE</div>
+              <div class="sig-bar-line" id="sigBarLine">
+                SIG [░░░░░░░░░░] IDLE
+              </div>
               <!-- Scan progress bar — 20s max -->
               <div class="scan-progress-wrap" id="scanProgressWrap">
                 <div class="scan-progress-track">
                   <div class="scan-progress-fill" id="scanProgressFill"></div>
                 </div>
-                <div class="scan-timer-line" id="scanTimerLine">SCANNING 00:00</div>
+                <div class="scan-timer-line" id="scanTimerLine">
+                  SCANNING 00:00
+                </div>
               </div>
-              <div class="screen-encounter" id="screenEncounter" style="display:none">
-                <img class="screen-pokemon-img" id="screenPokemonImg" src="" alt=""/>
+              <div
+                class="screen-encounter"
+                id="screenEncounter"
+                style="display: none"
+              >
+                <img
+                  class="screen-pokemon-img"
+                  id="screenPokemonImg"
+                  src=""
+                  alt=""
+                />
                 <div class="screen-pokemon-name" id="screenPokemonName"></div>
               </div>
               <div class="screen-slots" id="screenSlots">
@@ -1026,7 +1113,14 @@
             <div class="console-dot g"></div>
             <div class="console-dot a"></div>
             <div class="console-dot r"></div>
-            <div class="console-title">PIP.SYS &mdash; FIELD CONSOLE &nbsp;|&nbsp; <span id="zoneHud" style="color:rgba(74,255,106,.5);letter-spacing:2px">ZONE — UNKNOWN</span></div>
+            <div class="console-title">
+              PIP.SYS &mdash; FIELD CONSOLE &nbsp;|&nbsp;
+              <span
+                id="zoneHud"
+                style="color: rgba(74, 255, 106, 0.5); letter-spacing: 2px"
+                >ZONE — UNKNOWN</span
+              >
+            </div>
             <div class="console-timestamp" id="consoleTime">00:00:00</div>
           </div>
           <div class="console-log" id="consoleLog"></div>
@@ -1040,19 +1134,24 @@
         <button class="modal-close" onclick="closeModal()">✕</button>
         <div class="modal-title amber" id="modalTitle">WILD ENCOUNTER</div>
         <div class="modal-pokemon-display">
-          <img class="modal-pokemon-img" id="modalPokemonImg" src="" alt=""/>
+          <img class="modal-pokemon-img" id="modalPokemonImg" src="" alt="" />
           <div class="modal-pokemon-info">
             <div class="modal-pokemon-name" id="modalPokemonName">—</div>
-            <div class="modal-pokemon-sub" id="modalPokemonSub">FRAGMENT TYPE: UNKNOWN</div>
+            <div class="modal-pokemon-sub" id="modalPokemonSub">
+              FRAGMENT TYPE: UNKNOWN
+            </div>
           </div>
         </div>
         <div class="modal-desc" id="modalDesc">
-          A wild Pokémon Fragment signature has been detected. Neural lock established. Choose your engagement protocol.
+          A wild Pokémon Fragment signature has been detected. Neural lock
+          established. Choose your engagement protocol.
         </div>
         <div class="modal-actions">
-          <button class="modal-btn primary"   id="catchBtn">⬡ CATCH FRAGMENT</button>
+          <button class="modal-btn primary" id="catchBtn">
+            ⬡ CATCH FRAGMENT
+          </button>
           <button class="modal-btn secondary" id="battleBtn">⚔ BATTLE</button>
-          <button class="modal-btn danger"    onclick="doFlee()">↩ FLEE</button>
+          <button class="modal-btn danger" onclick="doFlee()">↩ FLEE</button>
         </div>
       </div>
     </div>
@@ -1287,66 +1386,69 @@
 
       // ── STATE ──
       const urlParams = new URLSearchParams(window.location.search);
-      const mapId  = parseInt(urlParams.get("map")) || 1;
+      const mapId = parseInt(urlParams.get("map")) || 1;
       const mapInfo = MAP_DATA[mapId] || MAP_DATA[1];
       window._gameHabitat = mapInfo.habitat;
       let currentWild = null;
-      let playerX = 50, playerY = 50;
-      let scanning      = false;
-      let moveCount     = 0;
+      let playerX = 50,
+        playerY = 50;
+      let scanning = false;
+      let moveCount = 0;
       let _scanStopTime = 0; // timestamp of last scan stop for 5s debounce
 
       // Called by the module's onEncounter to bypass the scanning gate
-      window._forceEncounter = function() {
+      window._forceEncounter = function () {
         scanning = false; // clear the gate
-        if (typeof triggerEncounter === 'function') triggerEncounter();
+        if (typeof triggerEncounter === "function") triggerEncounter();
       };
 
       // ── SCAN ENGINE (from encounter-scan.js) ──────────────────────
       // Imported as module below — exposed via window._scanEngine
       // All probability logic lives in encounter-scan.js
 
-      function getScanEngine() { return window._scanEngine; }
+      function getScanEngine() {
+        return window._scanEngine;
+      }
 
       function updateSignalHUD(result) {
         if (currentWild) return;
-        const bar  = document.getElementById('sigBarLine');
-        const sub  = document.getElementById('screenSub');
+        const bar = document.getElementById("sigBarLine");
+        const sub = document.getElementById("screenSub");
         if (!result || !bar) return;
 
-        const eng   = getScanEngine();
-        const barStr= eng ? eng.signalBar(10) : '░░░░░░░░░░';
+        const eng = getScanEngine();
+        const barStr = eng ? eng.signalBar(10) : "░░░░░░░░░░";
 
-        switch(result.outcome) {
-          case 'SILENT':
-            bar.className = 'sig-bar-line silent';
+        switch (result.outcome) {
+          case "SILENT":
+            bar.className = "sig-bar-line silent";
             bar.textContent = `SIG [${barStr}] SIGNAL SILENT`;
-            if (sub) sub.textContent = result.timeLabel || 'COOLDOWN';
+            if (sub) sub.textContent = result.timeLabel || "COOLDOWN";
             break;
-          case 'DEAD_ZONE':
-            bar.className = 'sig-bar-line dead';
+          case "DEAD_ZONE":
+            bar.className = "sig-bar-line dead";
             bar.textContent = `SIG [${barStr}] INTERFERENCE`;
-            if (sub) sub.textContent = result.flavor || 'NO CONTACT';
+            if (sub) sub.textContent = result.flavor || "NO CONTACT";
             break;
-          case 'WEAK':
-            bar.className = 'sig-bar-line';
+          case "WEAK":
+            bar.className = "sig-bar-line";
             bar.textContent = `SIG [${barStr}] WEAK`;
-            if (sub) sub.textContent = result.flavor || 'FAINT TRACE';
+            if (sub) sub.textContent = result.flavor || "FAINT TRACE";
             break;
-          case 'BUILDING':
-            bar.className = 'sig-bar-line';
+          case "BUILDING":
+            bar.className = "sig-bar-line";
             bar.textContent = `SIG [${barStr}] BUILDING`;
-            if (sub) sub.textContent = result.flavor || 'SIGNAL RISING';
+            if (sub) sub.textContent = result.flavor || "SIGNAL RISING";
             break;
-          case 'STRONG':
-            bar.className = 'sig-bar-line strong';
+          case "STRONG":
+            bar.className = "sig-bar-line strong";
             bar.textContent = `SIG [${barStr}] STRONG`;
-            if (sub) sub.textContent = 'NEURAL LOCK CLOSE';
+            if (sub) sub.textContent = "NEURAL LOCK CLOSE";
             break;
-          case 'ENCOUNTER':
-            bar.className = 'sig-bar-line encounter';
+          case "ENCOUNTER":
+            bar.className = "sig-bar-line encounter";
             bar.textContent = `SIG [██████████] LOCKED`;
-            if (sub) sub.textContent = 'FRAGMENT FOUND';
+            if (sub) sub.textContent = "FRAGMENT FOUND";
             break;
         }
 
@@ -1402,38 +1504,58 @@
         scanning = true;
 
         // Pull rarity from last scan engine result
-        const eng      = getScanEngine();
-        const rarityObj= eng?.lastResult?.rarity || null;
+        const eng = getScanEngine();
+        const rarityObj = eng?.lastResult?.rarity || null;
 
-        const pool = POKEMON_BY_HABITAT[mapInfo.habitat] || POKEMON_BY_HABITAT.normal;
+        const pool =
+          POKEMON_BY_HABITAT[mapInfo.habitat] || POKEMON_BY_HABITAT.normal;
 
         // Rarity affects which pokemon in pool we pick:
         // legendary/epic → pick from end of pool (rarer species), common → start
         let id;
-        if (rarityObj && (rarityObj.label === 'LEGENDARY' || rarityObj.label === 'EPIC')) {
-          id = pool[pool.length - 1 - Math.floor(Math.random() * Math.min(3, pool.length))];
-        } else if (rarityObj && rarityObj.label === 'RARE') {
-          id = pool[Math.floor(pool.length * 0.6 + Math.random() * pool.length * 0.4)];
+        if (
+          rarityObj &&
+          (rarityObj.label === "LEGENDARY" || rarityObj.label === "EPIC")
+        ) {
+          id =
+            pool[
+              pool.length -
+                1 -
+                Math.floor(Math.random() * Math.min(3, pool.length))
+            ];
+        } else if (rarityObj && rarityObj.label === "RARE") {
+          id =
+            pool[
+              Math.floor(pool.length * 0.6 + Math.random() * pool.length * 0.4)
+            ];
         } else {
           id = pool[Math.floor(Math.random() * pool.length)];
         }
 
         screenUpdate("SCANNING", "SIGNAL DETECTED", "RETRIEVING DATA...");
-        log("SYS", "sys", `Fragment signal detected — retrieving neural data...`);
-        if (rarityObj) log("DAT", rarityObj.label === 'LEGENDARY' ? 'warn' : 'info',
-          `// rarity tier: ${rarityObj.label}`);
+        log(
+          "SYS",
+          "sys",
+          `Fragment signal detected — retrieving neural data...`,
+        );
+        if (rarityObj)
+          log(
+            "DAT",
+            rarityObj.label === "LEGENDARY" ? "warn" : "info",
+            `// rarity tier: ${rarityObj.label}`,
+          );
 
         try {
-          const res  = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`);
+          const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`);
           const data = await res.json();
 
           currentWild = {
-            id:     data.id,
-            name:   data.name,
+            id: data.id,
+            name: data.name,
             sprite: data.sprites.front_default,
-            types:  data.types.map(t => t.type.name).join("/"),
-            exp:    data.base_experience || 50,
-            rarity: rarityObj?.label || 'COMMON',
+            types: data.types.map((t) => t.type.name).join("/"),
+            exp: data.base_experience || 50,
+            rarity: rarityObj?.label || "COMMON",
           };
 
           // Show on PIP screen
@@ -1446,15 +1568,22 @@
           // Flash
           const flash = document.getElementById("encounterFlash");
           flash.style.display = "block";
-          setTimeout(() => { flash.style.display = "none"; }, 400);
+          setTimeout(() => {
+            flash.style.display = "none";
+          }, 400);
 
           // Sound
           SFX.encounter();
-          log("DAT", "warn", `Wild ${currentWild.name} — Type: ${currentWild.types}`);
+          log(
+            "DAT",
+            "warn",
+            `Wild ${currentWild.name} — Type: ${currentWild.types}`,
+          );
 
           // Show modal
-          setTimeout(() => { openEncounterModal(currentWild, rarityObj); }, 600);
-
+          setTimeout(() => {
+            openEncounterModal(currentWild, rarityObj);
+          }, 600);
         } catch (err) {
           log("ERR", "err", "Fragment retrieval failed — signal lost");
           screenUpdate("FIELD OPS", "SCANNING", "MOVE TO SCAN");
@@ -1465,72 +1594,101 @@
       // ── ENCOUNTER MODAL ──────────────────────────────────────────
       function openEncounterModal(wild, rarityObj) {
         if (!wild) return;
-        const rLabel = rarityObj ? ` · ${rarityObj.label}` : '';
-        document.getElementById('modalTitle').textContent    = 'WILD ENCOUNTER';
-        document.getElementById('modalPokemonImg').src       = wild.sprite;
-        document.getElementById('modalPokemonName').textContent = wild.name.toUpperCase();
-        document.getElementById('modalPokemonSub').textContent  =
-          `FRAGMENT TYPE: ${wild.types.toUpperCase()} · ID: #${String(wild.id).padStart(3,'0')}${rLabel}`;
-        document.getElementById('modalDesc').textContent =
+        const rLabel = rarityObj ? ` · ${rarityObj.label}` : "";
+        document.getElementById("modalTitle").textContent = "WILD ENCOUNTER";
+        document.getElementById("modalPokemonImg").src = wild.sprite;
+        document.getElementById("modalPokemonName").textContent =
+          wild.name.toUpperCase();
+        document.getElementById("modalPokemonSub").textContent =
+          `FRAGMENT TYPE: ${wild.types.toUpperCase()} · ID: #${String(wild.id).padStart(3, "0")}${rLabel}`;
+        document.getElementById("modalDesc").textContent =
           `A wild ${wild.name} fragment signature detected. Neural lock established. Choose your engagement protocol.`;
-        document.getElementById('encounterModal').classList.add('open');
+        document.getElementById("encounterModal").classList.add("open");
       }
 
       function closeModal() {
-        document.getElementById('encounterModal').classList.remove('open');
+        document.getElementById("encounterModal").classList.remove("open");
       }
 
       // Catch button
-      document.getElementById('catchBtn').addEventListener('click', async () => {
-        if (!currentWild) return;
-        SFX.catch_();
-        closeModal();
-        log('SYS', 'sys', `Catching ${currentWild.name} — Fragment chip encoding...`);
-        localStorage.setItem('caughtPokemon', JSON.stringify(currentWild));
-        const user_id = localStorage.getItem('user_id');
-        const token   = localStorage.getItem('token');
-        if (user_id && token) {
-          try {
-            const mod = await import('../assets/js/pokemon-api.js');
-            const res = await mod.getUserPokemon(user_id, token);
-            if (res.success && res.data)
-              localStorage.setItem('userPokemon', JSON.stringify(res.data));
-          } catch(e) {}
-        }
-        setTimeout(() => {
-          log('SYS', 'sys', `${currentWild.name} Fragment captured successfully`);
-          getScanEngine()?.resolveEncounter();
-          currentWild = null;
-          scanning    = false;
-          document.getElementById('screenEncounter').style.display = 'none';
-          screenUpdate('FRAGMENT CAPTURED', 'SUCCESS', 'CHIP ENCODED');
-          const sigBar = document.getElementById('sigBarLine');
-          if (sigBar) { sigBar.className = 'sig-bar-line'; sigBar.textContent = 'SIG [░░░░░░░░░░] IDLE'; }
-        }, 800);
-      });
+      document
+        .getElementById("catchBtn")
+        .addEventListener("click", async () => {
+          if (!currentWild) return;
+          SFX.catch_();
+          closeModal();
+          log(
+            "SYS",
+            "sys",
+            `Catching ${currentWild.name} — Fragment chip encoding...`,
+          );
+          localStorage.setItem("caughtPokemon", JSON.stringify(currentWild));
+          const user_id = localStorage.getItem("user_id");
+          const token = localStorage.getItem("token");
+          if (user_id && token) {
+            try {
+              const mod = await import("../assets/js/pokemon-api.js");
+              const res = await mod.getUserPokemon(user_id, token);
+              if (res.success && res.data)
+                localStorage.setItem("userPokemon", JSON.stringify(res.data));
+            } catch (e) {}
+          }
+          setTimeout(() => {
+            log(
+              "SYS",
+              "sys",
+              `${currentWild.name} Fragment captured successfully`,
+            );
+            getScanEngine()?.resolveEncounter();
+            currentWild = null;
+            scanning = false;
+            document.getElementById("screenEncounter").style.display = "none";
+            screenUpdate("FRAGMENT CAPTURED", "SUCCESS", "CHIP ENCODED");
+            const sigBar = document.getElementById("sigBarLine");
+            if (sigBar) {
+              sigBar.className = "sig-bar-line";
+              sigBar.textContent = "SIG [░░░░░░░░░░] IDLE";
+            }
+          }, 800);
+        });
 
       // Battle button
-      document.getElementById('battleBtn').addEventListener('click', () => {
+      document.getElementById("battleBtn").addEventListener("click", () => {
         if (!currentWild) return;
         SFX.battle();
         closeModal();
-        log('SYS', 'warn', `Initiating battle protocol — ${currentWild.name}`);
-        localStorage.setItem('caughtPokemon', JSON.stringify(currentWild));
-        window.location.href = 'battle.html';
+        log("SYS", "warn", `Initiating battle protocol — ${currentWild.name}`);
+        localStorage.setItem("caughtPokemon", JSON.stringify(currentWild));
+        // Pass full map info to battle.html
+        sessionStorage.setItem(
+          "battleMapInfo",
+          JSON.stringify({
+            mapId: mapId,
+            zone: mapInfo.zone,
+            name: mapInfo.name,
+            bg: mapInfo.bg,
+            habitat: mapInfo.habitat,
+            bgUrl: `../assets/img/${mapInfo.bg}`,
+          }),
+        );
+        window.location.href = "battle.html";
       });
 
       // Flee
-      window.doFlee = function() {
+      window.doFlee = function () {
         SFX.flee();
         closeModal();
-        log('SYS', 'warn', `Fled from ${currentWild?.name || 'encounter'}`);
+        log("SYS", "warn", `Fled from ${currentWild?.name || "encounter"}`);
         getScanEngine()?.resolveEncounter();
         currentWild = null;
-        scanning    = false;
-        document.getElementById('screenEncounter').style.display = 'none';
-        screenUpdate('FIELD OPS', 'SCANNING', 'SIGNAL SILENT');
-        const sigBar = document.getElementById('sigBarLine');
-        if (sigBar) { sigBar.className = 'sig-bar-line silent'; sigBar.textContent = 'SIG [░░░░░░░░░░] SILENT'; }
+        scanning = false;
+        document.getElementById("screenEncounter").style.display = "none";
+        screenUpdate("FIELD OPS", "SCANNING", "SIGNAL SILENT");
+        const sigBar = document.getElementById("sigBarLine");
+        if (sigBar) {
+          sigBar.className = "sig-bar-line silent";
+          sigBar.textContent = "SIG [░░░░░░░░░░] SILENT";
+        }
       };
 
       // ── MOVE PLAYER ──────────────────────────────────────────────
@@ -1541,13 +1699,13 @@
         moveCount++;
 
         if (!currentWild && !scanning) {
-          const eng    = getScanEngine();
+          const eng = getScanEngine();
           if (!eng) return;
           const result = eng.press();
           updateSignalHUD(result);
 
-          if (result.outcome === 'ENCOUNTER') {
-            log('SYS', 'warn', '// signal peaked — neural lock imminent');
+          if (result.outcome === "ENCOUNTER") {
+            log("SYS", "warn", "// signal peaked — neural lock imminent");
             screenUpdate("FIELD OPS", "LOCKED", "FRAGMENT FOUND");
             setTimeout(triggerEncounter, 400);
           }
@@ -1687,10 +1845,14 @@
 
       function handleAction(def) {
         // Don't log the button press for scan — the auto-scanner logs its own state
-        if (def.action !== 'scan') {
+        if (def.action !== "scan") {
           log(
             def.id,
-            def.color === "red" ? "err" : def.color === "amber" ? "warn" : "sys",
+            def.color === "red"
+              ? "err"
+              : def.color === "amber"
+                ? "warn"
+                : "sys",
             `${def.label.replace("\n", " ")} — ${def.sub}`,
           );
           screenUpdate(def.sub, def.label.replace("\n", " "), def.id);
@@ -1700,7 +1862,11 @@
           case "scan": {
             SFX.scan();
             if (currentWild) {
-              log("SYS", "warn", "Encounter active — resolve it before scanning");
+              log(
+                "SYS",
+                "warn",
+                "Encounter active — resolve it before scanning",
+              );
               break;
             }
             const scanner = window._autoScanner;
@@ -1710,26 +1876,37 @@
               // Enforce 5 second minimum before allowing stop
               const secondsActive = scanner._elapsed || 0;
               if (secondsActive < 5) {
-                log("SYS", "warn", `// scanner locked — minimum 5 seconds required (${secondsActive}s elapsed)`);
+                log(
+                  "SYS",
+                  "warn",
+                  `// scanner locked — minimum 5 seconds required (${secondsActive}s elapsed)`,
+                );
                 break;
               }
               // Stop scanning
               scanner.stop();
               const l1btn = document.querySelector('[data-id="L1"]');
-              if (l1btn) l1btn.classList.remove('scanning-active');
+              if (l1btn) l1btn.classList.remove("scanning-active");
               window._stopProgressBar?.();
-              const sigBar = document.getElementById('sigBarLine');
-              if (sigBar) { sigBar.className = 'sig-bar-line silent'; sigBar.textContent = 'SIG [░░░░░░░░░░] IDLE'; }
+              const sigBar = document.getElementById("sigBarLine");
+              if (sigBar) {
+                sigBar.className = "sig-bar-line silent";
+                sigBar.textContent = "SIG [░░░░░░░░░░] IDLE";
+              }
               screenUpdate("FIELD OPS", "SCANNING", "MOVE TO SCAN");
-              log('SYS', 'warn', '// auto-scan stopped');
+              log("SYS", "warn", "// auto-scan stopped");
             } else {
               // Start scanning
               scanner.start();
               const l1btn = document.querySelector('[data-id="L1"]');
-              if (l1btn) l1btn.classList.add('scanning-active');
+              if (l1btn) l1btn.classList.add("scanning-active");
               window._startProgressBar?.();
               screenUpdate("SCANNER", "ACTIVE", "AUTO-SCANNING...");
-              log('SYS', 'sys', '// auto-scan initiated — searching for fragments');
+              log(
+                "SYS",
+                "sys",
+                "// auto-scan initiated — searching for fragments",
+              );
             }
             break;
           }
@@ -1738,7 +1915,11 @@
             if (currentWild) {
               openEncounterModal(currentWild, null);
             } else {
-              log("SYS", "warn", "No active encounter — scan for fragments first");
+              log(
+                "SYS",
+                "warn",
+                "No active encounter — scan for fragments first",
+              );
             }
             break;
           case "exit":
@@ -1803,7 +1984,11 @@
       log("SYS", "sys", `Zone loaded: ${mapInfo.zone} — ${mapInfo.name}`);
       log("SYS", "sys", "Fragment scanner: ACTIVE");
       log("SYS", "warn", "Hunter authentication: PENDING");
-      log("DAT", "info", `Zone type: ${mapInfo.type} | Habitat: ${mapInfo.habitat.toUpperCase()}`);
+      log(
+        "DAT",
+        "info",
+        `Zone type: ${mapInfo.type} | Habitat: ${mapInfo.habitat.toUpperCase()}`,
+      );
 
       setTimeout(() => {
         const bo = document.getElementById("bootOverlay");
@@ -1819,10 +2004,8 @@
         const user_id = localStorage.getItem("user_id");
         if (!user_id) return;
         try {
-          const { API_BASE_URL } = await import('../api.js');
-          const res = await fetch(
-            `${API_BASE_URL}/items/inventory/${user_id}`,
-          );
+          const { API_BASE_URL } = await import("../api.js");
+          const res = await fetch(`${API_BASE_URL}/items/inventory/${user_id}`);
           const result = await res.json();
           if (result.success && result.data) {
             log(
@@ -1838,102 +2021,130 @@
 
     <!-- ENCOUNTER SCAN ENGINE -->
     <script type="module">
-      import { getEngine, HABITAT_PROFILES, AutoScanner } from "../assets/js/encounter-scan.js";
+      import {
+        getEngine,
+        HABITAT_PROFILES,
+        AutoScanner,
+      } from "../assets/js/encounter-scan.js";
 
-      const habitat      = window._gameHabitat || 'normal';
-      const engine       = getEngine(habitat);
+      const habitat = window._gameHabitat || "normal";
+      const engine = getEngine(habitat);
       window._scanEngine = engine;
 
       const profile = HABITAT_PROFILES[habitat];
       if (profile) {
         setTimeout(() => {
-          if (typeof log === 'function') {
-            log('DAT', 'info', `// scan profile: ${profile.label}`);
-            log('DAT', 'info', `// dead zone: ${Math.round(profile.dead_zone*100)}% | cooldown: ${profile.cooldown_min}–${profile.cooldown_max} steps`);
+          if (typeof log === "function") {
+            log("DAT", "info", `// scan profile: ${profile.label}`);
+            log(
+              "DAT",
+              "info",
+              `// dead zone: ${Math.round(profile.dead_zone * 100)}% | cooldown: ${profile.cooldown_min}–${profile.cooldown_max} steps`,
+            );
           }
         }, 3600);
       }
 
       // ── PROGRESS BAR — indefinite running timer, no timeout ──────
       let _progressTimer = null;
-      let _scanStart     = null;
+      let _scanStart = null;
 
       function startProgressBar() {
         _scanStart = Date.now();
-        const fill  = document.getElementById('scanProgressFill');
-        const timer = document.getElementById('scanTimerLine');
-        const wrap  = document.getElementById('scanProgressWrap');
-        if (fill)  { fill.style.width = '0%'; fill.className = 'scan-progress-fill'; }
-        if (wrap)  wrap.classList.add('visible');
-        if (timer) timer.classList.add('visible', 'active');
+        const fill = document.getElementById("scanProgressFill");
+        const timer = document.getElementById("scanTimerLine");
+        const wrap = document.getElementById("scanProgressWrap");
+        if (fill) {
+          fill.style.width = "0%";
+          fill.className = "scan-progress-fill";
+        }
+        if (wrap) wrap.classList.add("visible");
+        if (timer) timer.classList.add("visible", "active");
 
         _progressTimer = setInterval(() => {
           if (!_scanStart) return;
           const elapsed = Date.now() - _scanStart;
-          const secs    = Math.floor(elapsed / 1000);
-          const mm      = Math.floor(secs / 60).toString().padStart(2,'0');
-          const ss      = (secs % 60).toString().padStart(2,'0');
+          const secs = Math.floor(elapsed / 1000);
+          const mm = Math.floor(secs / 60)
+            .toString()
+            .padStart(2, "0");
+          const ss = (secs % 60).toString().padStart(2, "0");
 
           // Bar fills every 60s then resets — acts as a pulse indicator
-          const pct = (secs % 60) / 60 * 100;
-          if (fill) fill.style.width = pct + '%';
+          const pct = ((secs % 60) / 60) * 100;
+          if (fill) fill.style.width = pct + "%";
           if (timer) timer.textContent = `SCANNING ${mm}:${ss}`;
         }, 500);
       }
 
       function stopProgressBar() {
-        if (_progressTimer) { clearInterval(_progressTimer); _progressTimer = null; }
+        if (_progressTimer) {
+          clearInterval(_progressTimer);
+          _progressTimer = null;
+        }
         _scanStart = null;
-        const fill  = document.getElementById('scanProgressFill');
-        const timer = document.getElementById('scanTimerLine');
-        const wrap  = document.getElementById('scanProgressWrap');
-        if (fill)  { fill.style.width = '0%'; fill.className = 'scan-progress-fill'; }
-        if (timer) { timer.textContent = 'SCANNING 00:00'; timer.className = 'scan-timer-line'; }
-        if (wrap)  wrap.classList.remove('visible');
+        const fill = document.getElementById("scanProgressFill");
+        const timer = document.getElementById("scanTimerLine");
+        const wrap = document.getElementById("scanProgressWrap");
+        if (fill) {
+          fill.style.width = "0%";
+          fill.className = "scan-progress-fill";
+        }
+        if (timer) {
+          timer.textContent = "SCANNING 00:00";
+          timer.className = "scan-timer-line";
+        }
+        if (wrap) wrap.classList.remove("visible");
       }
 
       // ── AUTO SCANNER ─────────────────────────────────────────────
       window._autoScanner = new AutoScanner(engine, {
-        interval: 2400,
+        interval: 1200,
 
         onResult(result, elapsed) {
-          if (typeof updateSignalHUD === 'function') updateSignalHUD(result);
-          if (typeof log === 'function') {
-            if (result.outcome === 'DEAD_ZONE') log('SYS', 'warn', result.flavor || '// no contact');
-            if (result.outcome === 'STRONG')    log('SYS', 'sys',  '// signal strong — neural lock imminent');
+          if (typeof updateSignalHUD === "function") updateSignalHUD(result);
+          if (typeof log === "function") {
+            if (result.outcome === "DEAD_ZONE")
+              log("SYS", "warn", result.flavor || "// no contact");
+            if (result.outcome === "STRONG")
+              log("SYS", "sys", "// signal strong — neural lock imminent");
           }
         },
 
         onEncounter(result) {
           stopProgressBar();
-          if (typeof log === 'function') log('SYS', 'warn', '// neural lock acquired — scan paused');
+          if (typeof log === "function")
+            log("SYS", "warn", "// neural lock acquired — scan paused");
           // CRITICAL: reset scanning flag so triggerEncounter doesn't get blocked
-          if (typeof window !== 'undefined') window._scannerEncounterReady = true;
+          if (typeof window !== "undefined")
+            window._scannerEncounterReady = true;
           setTimeout(() => {
             // Force scanning = false then call triggerEncounter
-            if (typeof window._forceEncounter === 'function') window._forceEncounter();
+            if (typeof window._forceEncounter === "function")
+              window._forceEncounter();
           }, 400);
         },
 
         onStop() {
           stopProgressBar();
           const l1 = document.querySelector('[data-id="L1"]');
-          if (l1) l1.classList.remove('scanning-active');
-        }
+          if (l1) l1.classList.remove("scanning-active");
+        },
       });
 
       window._startProgressBar = startProgressBar;
-      window._stopProgressBar  = stopProgressBar;
+      window._stopProgressBar = stopProgressBar;
 
       // Resume after flee
       const _origFlee = window.doFlee;
-      window.doFlee = function() {
+      window.doFlee = function () {
         _origFlee?.();
         setTimeout(() => {
           if (window._autoScanner?.active) {
             window._autoScanner.resume();
             startProgressBar();
-            if (typeof log === 'function') log('SYS', 'sys', '// encounter resolved — auto-scan resumed');
+            if (typeof log === "function")
+              log("SYS", "sys", "// encounter resolved — auto-scan resumed");
           }
         }, 1000);
       };
