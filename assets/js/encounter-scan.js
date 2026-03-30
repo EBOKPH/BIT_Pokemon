@@ -15,7 +15,7 @@
 
 export const HABITAT_PROFILES = {
   grass: {
-    label:         'Verdant Ruins — dense undergrowth',
+    label:         'Corolla Ruins — dense undergrowth',
     base_rate:     22,
     density:       'high',
     dead_zone:     0.18,
@@ -66,7 +66,7 @@ export const HABITAT_PROFILES = {
     ],
   },
   rock: {
-    label:         'Fractured Ridge — mineral scatter',
+    label:         'Fractured Ridge Valley — mineral scatter',
     base_rate:     18,
     density:       'low',
     dead_zone:     0.28,
@@ -117,7 +117,7 @@ export const HABITAT_PROFILES = {
     ],
   },
   electric: {
-    label:         'Storm Grid — high interference',
+    label:         'Surging Grid — high interference',
     base_rate:     24,
     density:       'high',
     dead_zone:     0.15, // electric zone rarely goes quiet
@@ -134,7 +134,7 @@ export const HABITAT_PROFILES = {
     ],
   },
   dragon: {
-    label:         'Dragon Lair — extreme danger zone',
+    label:         'Dragon's Den — extreme danger zone',
     base_rate:     12,
     density:       'very_low',
     dead_zone:     0.35, // dragons hide well
@@ -151,7 +151,7 @@ export const HABITAT_PROFILES = {
     ],
   },
   bug: {
-    label:         'Overgrown Canopy — swarm activity',
+    label:         'Bug Hollow — swarm activity',
     base_rate:     26, // highest base rate — bugs are everywhere
     density:       'very_high',
     dead_zone:     0.10,
@@ -168,7 +168,7 @@ export const HABITAT_PROFILES = {
     ],
   },
   psychic: {
-    label:         'Mind Rift — cognitohazard zone',
+    label:         'Kinetic Rift — cognitohazard zone',
     base_rate:     20,
     density:       'medium',
     dead_zone:     0.25,
@@ -185,7 +185,7 @@ export const HABITAT_PROFILES = {
     ],
   },
   poison: {
-    label:         'Toxic Wastes — corrosive interference',
+    label:         'Bio Plains — corrosive interference',
     base_rate:     21,
     density:       'medium',
     dead_zone:     0.22,
@@ -202,7 +202,7 @@ export const HABITAT_PROFILES = {
     ],
   },
   fighting: {
-    label:         'Survivor Outpost — controlled territory',
+    label:         'Dojo Outpost — controlled territory',
     base_rate:     19,
     density:       'medium',
     dead_zone:     0.20,
@@ -219,7 +219,7 @@ export const HABITAT_PROFILES = {
     ],
   },
   flying: {
-    label:         'Sky Corridor — airborne signal chase',
+    label:         'Updraft Island — airborne signal chase',
     base_rate:     17,
     density:       'low',
     dead_zone:     0.28,
@@ -236,7 +236,7 @@ export const HABITAT_PROFILES = {
     ],
   },
   ground: {
-    label:         'Dust Flats — wide open, low density',
+    label:         'Terra Wastelands — wide open, low density',
     base_rate:     13,
     density:       'very_low',
     dead_zone:     0.32,
@@ -253,7 +253,7 @@ export const HABITAT_PROFILES = {
     ],
   },
   normal: {
-    label:         'Survivor City — light fragment activity',
+    label:         'Poke City — light fragment activity',
     base_rate:     15,
     density:       'low',
     dead_zone:     0.24,
