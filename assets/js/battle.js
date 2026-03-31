@@ -2,6 +2,23 @@
 //  BIT-POKEMON — BATTLE ENGINE
 // ══════════════════════════════════════════════════════
 
+// ── IMPORT EXPERIENCE SYSTEM ──────────────────────────
+import {
+  ExperienceSystem,
+  EXP_CONFIG,
+  saveBattleResult,
+  updateUserBattleStats,
+  updatePokemonStats,
+  calculateBattleExp,
+} from "./experience-system.js";
+
+// ── IMPORT DYNAMIC MOVE SYSTEM ────────────────────────
+import {
+  selectMovesForLevel,
+  getFallbackMoves,
+  MOVE_TYPE_COLORS,
+} from "./dynamic-move-system.js";
+
 // ── SOUND ENGINE (same pattern as game.html) ──────────
 const SFX = (() => {
   let _ctx = null;
@@ -123,11 +140,12 @@ const TYPE_RGB = {
 };
 
 // ── BATTLE STATE ────────────────────────────────────────
-let playerPokemon = null; // { name, sprite, types, level, hp, maxHp, moves, exp }
-let enemyPokemon = null; // { name, sprite, types, level, hp, maxHp, moves }
+let playerPokemon = null; // { name, sprite, types, level, hp, maxHp, moves, exp, experience, user_pokemon_id }
+let enemyPokemon = null; // { name, sprite, types, level, hp, maxHp, moves, rarity }
 let playerTurn = true;
 let battleOver = false;
 let inventory = { pokeball: 0, greatball: 0, ultraball: 0 };
+let experienceSystem = null; // Will be initialized when player pokemon is loaded
 
 // ── LOG ─────────────────────────────────────────────────
 function log(msg, cls = "info") {
@@ -180,8 +198,55 @@ function flash(color = "white") {
   setTimeout(() => f.classList.remove("flash"), 120);
 }
 
-// ── GENERATE MOVES (from PokeAPI moves or fallback) ──────
-function generateMoves(types, level) {
+// ── BATTLE TIMING CONFIG ──────────────────────────────────
+const BATTLE_TIMING = {
+  attackAnimationDuration: 280,
+  damageDisplayDuration: 400,
+  turnDelayAfterAttack: 600,
+  enemyThinkingDelay: 1000,
+  moveExecutionDelay: 200,
+};
+
+// ── DAMAGE NUMBER DISPLAY ──────────────────────────────────
+function showFloatingDamage(x, y, damage, isCritical = false) {
+  const float = document.createElement("div");
+  float.style.cssText = `position:fixed;left:${x}px;top:${y}px;font-family:var(--display);font-size:${isCritical ? "28" : "24"}px;font-weight:bold;color:${isCritical ? "#ffb830" : "#ff4444"};text-shadow:${isCritical ? "0 0 10px #ffb830" : "0 0 8px rgba(255,68,68,0.6)"};pointer-events:none;z-index:100;animation:floatUp 1.2s ease-out forwards;letter-spacing:2px;`;
+  float.textContent = `-${damage}`;
+  document.body.appendChild(float);
+  setTimeout(() => float.remove(), 1200);
+}
+
+if (!document.getElementById("floatDamageStyle")) {
+  const style = document.createElement("style");
+  style.id = "floatDamageStyle";
+  style.textContent =
+    "@keyframes floatUp{0%{opacity:1;transform:translateY(0) scale(1)}50%{opacity:1}100%{opacity:0;transform:translateY(-80px) scale(0.8)}}";
+  document.head.appendChild(style);
+}
+
+// ── GENERATE MOVES (now using dynamic move system) ──────────
+async function generateMoves(types, level, pokemonNameOrId) {
+  // Try to fetch from PokéAPI first
+  try {
+    if (pokemonNameOrId) {
+      const moves = await selectMovesForLevel({
+        name: pokemonNameOrId,
+        types: types,
+        level: level,
+      });
+      if (moves && moves.length > 0) {
+        return moves;
+      }
+    }
+  } catch (err) {
+    console.warn("Failed to load moves from PokéAPI:", err);
+  }
+  // Fallback to hardcoded moves
+  return getFallbackMoves(types);
+}
+
+// Legacy function stub with hardcoded moves (for fallback reference)
+function generateMovesLegacy(types, level) {
   const typeMoves = {
     fire: [
       { name: "EMBER", type: "fire", power: 40, pp: 25, category: "special" },
@@ -558,17 +623,41 @@ function generateMoves(types, level) {
   return moves.slice(0, 4).map((m) => ({ ...m, currentPp: m.pp }));
 }
 
-// ── DAMAGE CALCULATION (USING BATTLE-LOGIC) ───────────────────
+// ── DAMAGE CALCULATION ────────────────────────────────────────
+// Gen 3 formula: floor(floor((2*level/5+2) * power * atk/def) / 50) + 2
+// This keeps damage proportional to HP so battles last 3-8 turns.
 function calcDamage(attacker, defender, move) {
-  // Use the expanded formula from battle-logic.js
-  if (typeof calculateDamage === "function") {
-    return calculateDamage(attacker, defender, move, "expanded");
-  } else {
-    // Fallback if battle-logic.js not loaded
-    const base = (((2 * attacker.level) / 5 + 2) * move.power * 1) / 50 + 2;
-    const randomFactor = 0.85 + Math.random() * 0.15;
-    return Math.max(1, Math.round(base * randomFactor));
+  const power = move.power || 40;
+
+  // Choose physical or special stat based on move category
+  const attackStat =
+    move.category === "special" ? attacker.spAtk : attacker.attack;
+  const defenseStat =
+    move.category === "special" ? defender.spDef : defender.defense;
+
+  // Gen 3 core formula
+  const base =
+    Math.floor(
+      (Math.floor((2 * attacker.level) / 5 + 2) * power * attackStat) /
+        Math.max(1, defenseStat) /
+        50,
+    ) + 2;
+
+  // Random roll 0.85–1.0 (same as mainline games)
+  const roll = 0.85 + Math.random() * 0.15;
+
+  // Type effectiveness via battle-logic if loaded, else neutral
+  let typeEff = 1.0;
+  if (typeof calculateTypeEffectiveness === "function") {
+    typeEff = calculateTypeEffectiveness(move.type, defender.types || defender.type);
   }
+
+  // Critical hit: 6.25% chance, 1.5× damage
+  const isCrit = Math.random() < 0.0625;
+  const critMult = isCrit ? 1.5 : 1.0;
+
+  const damage = Math.max(1, Math.floor(base * roll * typeEff * critMult));
+  return { damage, isCrit, typeEff };
 }
 
 // ── ENEMY AI ─────────────────────────────────────────────
@@ -577,7 +666,7 @@ function enemyMove() {
   const moves = enemyPokemon.moves.filter((m) => m.currentPp > 0);
   if (!moves.length) {
     log("Enemy has no PP left!", "warn");
-    endTurn();
+    setTimeout(() => endTurn(), BATTLE_TIMING.enemyThinkingDelay);
     return;
   }
   // AI: prefer high power moves, occasionally random
@@ -586,248 +675,404 @@ function enemyMove() {
       ? moves.reduce((a, b) => (b.power > a.power ? b : a))
       : moves[Math.floor(Math.random() * moves.length)];
 
-  setTimeout(
-    () => {
-      move.currentPp--;
-      const dmg = calcDamage(enemyPokemon, playerPokemon, move);
+  // Enemy thinking delay - makes battle less instant
+  setTimeout(() => {
+    log(`${enemyPokemon.name.toUpperCase()} is using ${move.name}!`, "warn");
+    move.currentPp--;
+
+    // Animate enemy attack
+    const eSpr = document.getElementById("enemy-sprite");
+    eSpr.classList.remove("enemy-attack");
+    void eSpr.offsetWidth;
+    eSpr.classList.add("enemy-attack");
+
+    // Apply damage after attack animation
+    setTimeout(() => {
+      const { damage: dmg, isCrit: enemyCrit, typeEff: enemyTypeEff } = calcDamage(enemyPokemon, playerPokemon, move);
       playerPokemon.hp = Math.max(0, playerPokemon.hp - dmg);
 
-      // Animate
-      document.getElementById("enemy-sprite").classList.remove("enemy-attack");
-      void document.getElementById("enemy-sprite").offsetWidth;
-      document.getElementById("enemy-sprite").classList.add("enemy-attack");
+      // Visual feedback
+      flash("rgba(255,68,68,0.4)");
+      if (enemyCrit) {
+        const critEl = document.getElementById("critOverlay");
+        critEl.classList.add("show");
+        setTimeout(() => critEl.classList.remove("show"), 900);
+      }
+      shake();
+      document.getElementById("player-sprite").classList.add("sprite-hit");
+      setTimeout(
+        () =>
+          document
+            .getElementById("player-sprite")
+            .classList.remove("sprite-hit"),
+        BATTLE_TIMING.attackAnimationDuration,
+      );
 
-      setTimeout(() => {
-        flash("rgba(255,68,68,0.4)");
-        shake();
-        document.getElementById("player-sprite").classList.add("sprite-hit");
-        setTimeout(
-          () =>
-            document
-              .getElementById("player-sprite")
-              .classList.remove("sprite-hit"),
-          400,
-        );
+      if (enemyCrit) SFX.crit(); else SFX.hit();
+      const typeMsg = enemyTypeEff === 2 ? " It's super effective!" : enemyTypeEff === 0.5 ? " It's not very effective..." : "";
+      log(`${enemyPokemon.name.toUpperCase()} dealt ${dmg} damage!${typeMsg}`, "dmg");
+      if (enemyCrit) log("CRITICAL HIT!", "crit");
 
-        SFX.hit();
-        log(`Enemy used ${move.name} — ${dmg} damage`, "dmg");
+      // Show floating damage number
+      const ps = document.getElementById("player-sprite");
+      const r = ps.getBoundingClientRect();
+      showFloatingDamage(r.left + r.width / 2, r.top, dmg, enemyCrit);
 
-        // Particle burst on player sprite
-        const ps = document.getElementById("player-sprite");
-        const r = ps.getBoundingClientRect();
-        burst(r.left + r.width / 2, r.top + r.height / 2, "#ff4444", 10);
+      // Particle burst on player sprite
+      burst(r.left + r.width / 2, r.top + r.height / 2, "#ff4444", 10);
 
-        updateHpBar("player", playerPokemon.hp, playerPokemon.maxHp);
+      updateHpBar("player", playerPokemon.hp, playerPokemon.maxHp);
 
-        if (playerPokemon.hp <= 0) {
-          setTimeout(() => endBattle(false), 600);
-        } else {
-          setTimeout(() => endTurn(), 400);
-        }
-      }, 300);
-    },
-    600 + Math.random() * 400,
-  );
+      if (playerPokemon.hp <= 0) {
+        setTimeout(() => endBattle(false), 1000);
+      } else {
+        setTimeout(() => endTurn(), BATTLE_TIMING.turnDelayAfterAttack);
+      }
+    }, BATTLE_TIMING.moveExecutionDelay);
+  }, BATTLE_TIMING.enemyThinkingDelay);
 }
 
 // ── PLAYER USES MOVE ─────────────────────────────────────
 window.useMove = function (idx) {
-  if (!playerTurn || battleOver) return;
-  const move = playerPokemon.moves[idx];
-  if (!move || move.currentPp <= 0) {
-    log("No PP remaining for this move.", "warn");
-    return;
+    if (!playerTurn || battleOver) return;
+    const move = playerPokemon.moves[idx];
+    if (!move || move.currentPp <= 0) {
+      log("No PP remaining for this move.", "warn");
+      return;
+    }
+
+    SFX.select();
+    setTurn(false);
+    move.currentPp--;
+
+    // Player attack animation
+    const pSpr = document.getElementById("player-sprite");
+    pSpr.classList.remove("sprite-attack");
+    void pSpr.offsetWidth;
+    pSpr.classList.add("sprite-attack");
+
+    log(`${playerPokemon.name.toUpperCase()} used ${move.name}!`, "info");
+
+    // Apply damage after attack animation
+    setTimeout(() => {
+      const { damage: dmg, isCrit: isCritical, typeEff } = calcDamage(playerPokemon, enemyPokemon, move);
+      enemyPokemon.hp = Math.max(0, enemyPokemon.hp - dmg);
+
+      flash("rgba(74,255,106,0.25)");
+      shake();
+      const eSpr = document.getElementById("enemy-sprite");
+      eSpr.classList.add("sprite-hit");
+      setTimeout(
+        () => eSpr.classList.remove("sprite-hit"),
+        BATTLE_TIMING.attackAnimationDuration,
+      );
+
+      // Show floating damage number
+      const r = eSpr.getBoundingClientRect();
+      showFloatingDamage(r.left + r.width / 2, r.top, dmg, isCritical);
+
+      // Particles on enemy with move color
+      const moveColor =
+        MOVE_TYPE_COLORS[move.type] || TYPE_COLORS[move.type] || "#4aff6a";
+      burst(r.left + r.width / 2, r.top + r.height / 2, moveColor, 14);
+
+      if (isCritical) {
+        const critEl = document.getElementById("critOverlay");
+        critEl.classList.add("show");
+        setTimeout(() => critEl.classList.remove("show"), 900);
+        log("CRITICAL HIT!", "crit");
+        SFX.crit();
+      } else {
+        SFX.hit();
+      }
+      const typeMsg = typeEff === 2 ? " Super effective!" : typeEff === 0.5 ? " Not very effective..." : "";
+      log(`Dealt ${dmg} damage!${typeMsg}`, "dmg");
+
+      updateHpBar("enemy", enemyPokemon.hp, enemyPokemon.maxHp);
+      renderMoves(); // update PP
+
+      if (enemyPokemon.hp <= 0) {
+        setTimeout(() => endBattle(true), 1000);
+      } else {
+        // Enemy turn with delay
+        setTimeout(() => {
+          document.getElementById("turnIndicator").textContent = "ENEMY TURN";
+          document.getElementById("turnIndicator").classList.add("enemy-turn");
+          log(`${enemyPokemon.name.toUpperCase()} is thinking...`, "sys");
+          enemyMove();
+        }, BATTLE_TIMING.turnDelayAfterAttack);
+      }
+    }, BATTLE_TIMING.moveExecutionDelay);
+  };
+
+  function endTurn() {
+    if (battleOver) return;
+    setTurn(true);
   }
 
-  SFX.select();
-  setTurn(false);
-  move.currentPp--;
+  function setTurn(isPlayer) {
+    playerTurn = isPlayer;
+    const ind = document.getElementById("turnIndicator");
+    const btns = document.querySelectorAll(".move-btn");
+    if (isPlayer) {
+      ind.textContent = "YOUR TURN";
+      ind.classList.remove("enemy-turn");
+      btns.forEach((b) => (b.disabled = false));
+    } else {
+      ind.textContent = "ENEMY TURN";
+      ind.classList.add("enemy-turn");
+      btns.forEach((b) => (b.disabled = true));
+    }
+  }
 
-  const dmg = calcDamage(playerPokemon, enemyPokemon, move);
-  enemyPokemon.hp = Math.max(0, enemyPokemon.hp - dmg);
+  // ── END BATTLE ───────────────────────────────────────────
+  function endBattle(won) {
+    battleOver = true;
+    const overlay = document.getElementById("endOverlay");
+    const title = document.getElementById("endTitle");
+    const sub = document.getElementById("endSub");
+    const xpEl = document.getElementById("endXp");
+    const catchBtn = overlay.querySelector(".end-btn.secondary");
 
-  // Player attack animation
-  const pSpr = document.getElementById("player-sprite");
-  pSpr.classList.remove("sprite-attack");
-  void pSpr.offsetWidth;
-  pSpr.classList.add("sprite-attack");
+    if (won) {
+      SFX.victory();
+      title.textContent = "VICTORY";
+      title.className = "end-title victory";
+      sub.textContent = `${enemyPokemon.name.toUpperCase()} WAS DEFEATED`;
 
-  setTimeout(() => {
-    flash("rgba(74,255,106,0.25)");
-    shake();
-    const eSpr = document.getElementById("enemy-sprite");
-    eSpr.classList.add("sprite-hit");
-    setTimeout(() => eSpr.classList.remove("sprite-hit"), 400);
+      // ── EXPERIENCE HANDLING ──────────────────────────────
+      // Calculate experience gained
+      const battleExp = calculateBattleExp(
+        true,
+        enemyPokemon.level,
+        playerPokemon.level,
+        enemyPokemon.rarity || "COMMON",
+      );
 
-    // Particles on enemy
-    const r = eSpr.getBoundingClientRect();
-    burst(
-      r.left + r.width / 2,
-      r.top + r.height / 2,
-      TYPE_COLORS[move.type] || "#4aff6a",
-      14,
+      // Add experience to player pokemon
+      if (experienceSystem) {
+        const expResult = experienceSystem.addExperience(
+          battleExp,
+          enemyPokemon.rarity || "COMMON",
+        );
+
+        // Update player pokemon with new stats
+        const updatedPokemon = experienceSystem.getPokemon();
+        playerPokemon.level = updatedPokemon.level;
+        playerPokemon.experience = updatedPokemon.experience;
+        playerPokemon.maxHp = updatedPokemon.maxHp;
+        playerPokemon.hp = updatedPokemon.currentHP;
+
+        // Display XP gained
+        xpEl.textContent = `+ ${expResult.expGained} EXP GAINED`;
+        log(`${enemyPokemon.name.toUpperCase()} fainted!`, "good");
+        log(`You gained ${expResult.expGained} EXP!`, "good");
+
+        // Handle level up
+        if (expResult.leveledUp) {
+          log(
+            `${playerPokemon.name} leveled up to Lv.${expResult.currentLevel}!`,
+            "warn",
+          );
+          SFX.levelup();
+          // Show level up details briefly
+          setTimeout(() => {
+            const details = experienceSystem.getLevelUpDetails();
+            log(
+              `Stats: HP+${EXP_CONFIG.statGrowth.hp} ATK+${EXP_CONFIG.statGrowth.attack}`,
+              "info",
+            );
+          }, 500);
+        } else {
+          SFX.levelup();
+        }
+
+        // Save to backend in background (don't block UI)
+        saveExperienceToBackend(won, expResult).catch((err) =>
+          log("Warning: Could not save battle to backend", "warn"),
+        );
+      } else {
+        // Fallback if experienceSystem not initialized
+        const xpGained = Math.round(
+          (enemyPokemon.exp * enemyPokemon.level) / 7,
+        );
+        xpEl.textContent = `+ ${xpGained} EXP GAINED`;
+        log(`${enemyPokemon.name.toUpperCase()} fainted!`, "good");
+        log(`You gained ${xpGained} EXP!`, "good");
+        SFX.levelup();
+      }
+
+      // show catch button only on win
+      catchBtn.style.display = "inline-block";
+    } else {
+      SFX.defeat();
+      title.textContent = "DEFEATED";
+      title.className = "end-title defeat";
+      sub.textContent = `${playerPokemon.name.toUpperCase()} FAINTED`;
+      xpEl.textContent = "";
+      log(`${playerPokemon.name.toUpperCase()} fainted...`, "dmg");
+      catchBtn.style.display = "none";
+
+      // Save battle loss info to backend
+      saveExperienceToBackend(won, null).catch((err) =>
+        log("Warning: Could not save battle to backend", "warn"),
+      );
+    }
+
+    setTimeout(() => overlay.classList.add("show"), 800);
+  }
+
+  // ── SAVE EXPERIENCE AND BATTLE STATS TO BACKEND ──────────────
+  async function saveExperienceToBackend(won, expResult) {
+    const user_id = localStorage.getItem("user_id");
+    const token = localStorage.getItem("token");
+
+    if (!user_id || !token || !playerPokemon) {
+      console.warn("Missing required data for backend save");
+      return;
+    }
+
+    try {
+      // 1. Update user battle stats (total_battles, battles_won, world_level)
+      const userStatsRes = await updateUserBattleStats(user_id, won, token);
+      if (!userStatsRes.success) {
+        console.warn(
+          "Failed to update user battle stats:",
+          userStatsRes.message,
+        );
+      } else {
+        log("Battle stats updated", "sys");
+      }
+
+      // 2. Save pokemon experience and level (only if we have experience result)
+      if (won && expResult && playerPokemon.user_pokemon_id) {
+        const pokemonStatsRes = await updatePokemonStats(
+          user_id,
+          playerPokemon.user_pokemon_id,
+          playerPokemon.level,
+          playerPokemon.experience,
+          token,
+        );
+        if (!pokemonStatsRes.success) {
+          console.warn(
+            "Failed to update pokemon stats:",
+            pokemonStatsRes.message,
+          );
+        } else {
+          log("Pokemon stats saved", "sys");
+        }
+
+        // 3. Record the battle result
+        const battleResultRes = await saveBattleResult(
+          user_id,
+          playerPokemon.user_pokemon_id,
+          won,
+          expResult,
+          token,
+        );
+        if (!battleResultRes.success) {
+          console.warn(
+            "Failed to save battle result:",
+            battleResultRes.message,
+          );
+        } else {
+          log("Battle result recorded", "sys");
+        }
+      }
+    } catch (err) {
+      console.error("Error saving to backend:", err);
+      log("Error saving to backend — data may be local only", "warn");
+    }
+  }
+
+  // ── RUN ──────────────────────────────────────────────────
+  window.tryRun = function () {
+    if (battleOver) return;
+    const chance = Math.random();
+    if (chance < 0.5) {
+      SFX.run();
+      log("Got away safely!", "good");
+      setTimeout(() => goBack(), 800);
+    } else {
+      log("Couldn't escape!", "warn");
+      if (playerTurn) {
+        setTurn(false);
+        document.getElementById("turnIndicator").textContent = "ENEMY TURN";
+        document.getElementById("turnIndicator").classList.add("enemy-turn");
+        enemyMove();
+      }
+    }
+  };
+
+  // ── BAG / CATCH ──────────────────────────────────────────
+  window.useBall = function (ballType) {
+    if (!playerTurn || battleOver) return;
+    if (inventory[ballType] <= 0) {
+      log(`No ${ballType}s left!`, "warn");
+      return;
+    }
+    inventory[ballType]--;
+    updateInventoryUI();
+
+    // Catch rate: lower enemy HP = higher chance; ultraball > greatball > pokeball
+    const hpRatio = enemyPokemon.hp / enemyPokemon.maxHp;
+    const ballBonus =
+      ballType === "ultraball" ? 2 : ballType === "greatball" ? 1.5 : 1;
+    const catchRate = Math.max(
+      0.05,
+      Math.min(0.95, (1 - hpRatio) * ballBonus * 0.6 + 0.2),
     );
 
-    SFX.hit();
-    log(`Used ${move.name} — ${dmg} damage`, "info");
+    SFX.catch_();
+    setTurn(false);
+    log(`Threw a ${ballType.toUpperCase()}...`, "info");
 
-    updateHpBar("enemy", enemyPokemon.hp, enemyPokemon.maxHp);
-    renderMoves(); // update PP
+    setTimeout(() => {
+      if (Math.random() < catchRate) {
+        log(`${enemyPokemon.name.toUpperCase()} was caught!`, "good");
+        saveToBackend();
+        setTimeout(() => endBattle(true), 400);
+      } else {
+        log(`${enemyPokemon.name.toUpperCase()} broke free!`, "warn");
+        enemyMove();
+      }
+    }, 1200);
+  };
 
-    if (enemyPokemon.hp <= 0) {
-      setTimeout(() => endBattle(true), 600);
-    } else {
-      // Enemy turn
-      document.getElementById("turnIndicator").textContent = "ENEMY TURN";
-      document.getElementById("turnIndicator").classList.add("enemy-turn");
-      log(`${enemyPokemon.name.toUpperCase()} is thinking...`, "sys");
-      enemyMove();
-    }
-  }, 280);
-};
-
-function endTurn() {
-  if (battleOver) return;
-  setTurn(true);
-}
-
-function setTurn(isPlayer) {
-  playerTurn = isPlayer;
-  const ind = document.getElementById("turnIndicator");
-  const btns = document.querySelectorAll(".move-btn");
-  if (isPlayer) {
-    ind.textContent = "YOUR TURN";
-    ind.classList.remove("enemy-turn");
-    btns.forEach((b) => (b.disabled = false));
-  } else {
-    ind.textContent = "ENEMY TURN";
-    ind.classList.add("enemy-turn");
-    btns.forEach((b) => (b.disabled = true));
-  }
-}
-
-// ── END BATTLE ───────────────────────────────────────────
-function endBattle(won) {
-  battleOver = true;
-  const overlay = document.getElementById("endOverlay");
-  const title = document.getElementById("endTitle");
-  const sub = document.getElementById("endSub");
-  const xpEl = document.getElementById("endXp");
-  const catchBtn = overlay.querySelector(".end-btn.secondary");
-
-  if (won) {
-    SFX.victory();
-    title.textContent = "VICTORY";
-    title.className = "end-title victory";
-    sub.textContent = `${enemyPokemon.name.toUpperCase()} WAS DEFEATED`;
-    const xpGained = Math.round((enemyPokemon.exp * enemyPokemon.level) / 7);
-    xpEl.textContent = `+ ${xpGained} EXP GAINED`;
-    log(`${enemyPokemon.name.toUpperCase()} fainted!`, "good");
-    log(`You gained ${xpGained} EXP!`, "good");
-    // show catch button only on win
-    catchBtn.style.display = "inline-block";
-    SFX.levelup();
-  } else {
-    SFX.defeat();
-    title.textContent = "DEFEATED";
-    title.className = "end-title defeat";
-    sub.textContent = `${playerPokemon.name.toUpperCase()} FAINTED`;
-    xpEl.textContent = "";
-    log(`${playerPokemon.name.toUpperCase()} fainted...`, "dmg");
-    catchBtn.style.display = "none";
+  function updateInventoryUI() {
+    document.getElementById("cnt-pokeball").textContent =
+      `×${inventory.pokeball}`;
+    document.getElementById("cnt-greatball").textContent =
+      `×${inventory.greatball}`;
+    document.getElementById("cnt-ultraball").textContent =
+      `×${inventory.ultraball}`;
   }
 
-  setTimeout(() => overlay.classList.add("show"), 800);
-}
+  // ── TAB SWITCHING ────────────────────────────────────────
+  window.switchTab = function (tab) {
+    document.getElementById("fightPanel").style.display =
+      tab === "fight" ? "grid" : "none";
+    document.getElementById("bagPanel").className =
+      "other-panel" + (tab === "bag" ? " active" : "");
+    document.getElementById("pokemonPanel").className =
+      "other-panel" + (tab === "pokemon" ? " active" : "");
+    document.getElementById("tabFight").className =
+      "menu-tab" + (tab === "fight" ? " active" : "");
+    document.getElementById("tabBag").className =
+      "menu-tab" + (tab === "bag" ? " active" : "");
+    document.getElementById("tabPoke").className =
+      "menu-tab" + (tab === "pokemon" ? " active" : "");
+  };
 
-// ── RUN ──────────────────────────────────────────────────
-window.tryRun = function () {
-  if (battleOver) return;
-  const chance = Math.random();
-  if (chance < 0.5) {
-    SFX.run();
-    log("Got away safely!", "good");
-    setTimeout(() => goBack(), 800);
-  } else {
-    log("Couldn't escape!", "warn");
-    if (playerTurn) {
-      setTurn(false);
-      document.getElementById("turnIndicator").textContent = "ENEMY TURN";
-      document.getElementById("turnIndicator").classList.add("enemy-turn");
-      enemyMove();
-    }
-  }
-};
-
-// ── BAG / CATCH ──────────────────────────────────────────
-window.useBall = function (ballType) {
-  if (!playerTurn || battleOver) return;
-  if (inventory[ballType] <= 0) {
-    log(`No ${ballType}s left!`, "warn");
-    return;
-  }
-  inventory[ballType]--;
-  updateInventoryUI();
-
-  // Catch rate: lower enemy HP = higher chance; ultraball > greatball > pokeball
-  const hpRatio = enemyPokemon.hp / enemyPokemon.maxHp;
-  const ballBonus =
-    ballType === "ultraball" ? 2 : ballType === "greatball" ? 1.5 : 1;
-  const catchRate = Math.max(
-    0.05,
-    Math.min(0.95, (1 - hpRatio) * ballBonus * 0.6 + 0.2),
-  );
-
-  SFX.catch_();
-  setTurn(false);
-  log(`Threw a ${ballType.toUpperCase()}...`, "info");
-
-  setTimeout(() => {
-    if (Math.random() < catchRate) {
-      log(`${enemyPokemon.name.toUpperCase()} was caught!`, "good");
-      saveToBackend();
-      setTimeout(() => endBattle(true), 400);
-    } else {
-      log(`${enemyPokemon.name.toUpperCase()} broke free!`, "warn");
-      enemyMove();
-    }
-  }, 1200);
-};
-
-function updateInventoryUI() {
-  document.getElementById("cnt-pokeball").textContent =
-    `×${inventory.pokeball}`;
-  document.getElementById("cnt-greatball").textContent =
-    `×${inventory.greatball}`;
-  document.getElementById("cnt-ultraball").textContent =
-    `×${inventory.ultraball}`;
-}
-
-// ── TAB SWITCHING ────────────────────────────────────────
-window.switchTab = function (tab) {
-  document.getElementById("fightPanel").style.display =
-    tab === "fight" ? "grid" : "none";
-  document.getElementById("bagPanel").className =
-    "other-panel" + (tab === "bag" ? " active" : "");
-  document.getElementById("pokemonPanel").className =
-    "other-panel" + (tab === "pokemon" ? " active" : "");
-  document.getElementById("tabFight").className =
-    "menu-tab" + (tab === "fight" ? " active" : "");
-  document.getElementById("tabBag").className =
-    "menu-tab" + (tab === "bag" ? " active" : "");
-  document.getElementById("tabPoke").className =
-    "menu-tab" + (tab === "pokemon" ? " active" : "");
-};
-
-// ── RENDER MOVES ─────────────────────────────────────────
-function renderMoves() {
-  const grid = document.getElementById("fightPanel");
-  grid.innerHTML = "";
-  (playerPokemon?.moves || []).forEach((move, i) => {
-    const color = TYPE_COLORS[move.type] || "#4aff6a";
-    const rgb = TYPE_RGB[move.type] || "74,255,106";
-    const outPp = move.currentPp <= 0;
-    grid.innerHTML += `
+  // ── RENDER MOVES ─────────────────────────────────────────
+  function renderMoves() {
+    const grid = document.getElementById("fightPanel");
+    grid.innerHTML = "";
+    (playerPokemon?.moves || []).forEach((move, i) => {
+      const color = TYPE_COLORS[move.type] || "#4aff6a";
+      const rgb = TYPE_RGB[move.type] || "74,255,106";
+      const outPp = move.currentPp <= 0;
+      grid.innerHTML += `
       <button class="move-btn" onclick="useMove(${i})" ${outPp ? "disabled" : ""}>
         <div class="move-inner" style="--move-color:${color};--move-rgb:${rgb}">
           <span class="move-name">${move.name}</span>
@@ -838,142 +1083,174 @@ function renderMoves() {
           </div>
         </div>
       </button>`;
-  });
-}
-
-// ── SAVE CAUGHT POKEMON ──────────────────────────────────
-async function saveToBackend() {
-  const user_id = localStorage.getItem("user_id");
-  const token = localStorage.getItem("token");
-  if (!user_id || !token || !enemyPokemon) return;
-  try {
-    const { API_BASE_URL } = await import("../../api.js");
-    await fetch(`${API_BASE_URL}/users/${user_id}/pokemon`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        pokemon_id: enemyPokemon.id,
-        name: enemyPokemon.name,
-        sprite: enemyPokemon.sprite,
-        types: enemyPokemon.types,
-        level: enemyPokemon.level,
-        pokedex_no: enemyPokemon.id,
-      }),
     });
-    log("Fragment chip encoded — saved to storage!", "good");
-  } catch (e) {
-    log("Could not save to backend — local only", "warn");
   }
-}
 
-// ── NAV ──────────────────────────────────────────────────
-window.goBack = function () {
-  window.location.href = "game.html";
-};
-window.catchAfterWin = function () {
-  const wild = localStorage.getItem("caughtPokemon");
-  if (!wild) {
-    goBack();
-    return;
+  // ── SAVE CAUGHT POKEMON ──────────────────────────────────
+  async function saveToBackend() {
+    const user_id = localStorage.getItem("user_id");
+    const token = localStorage.getItem("token");
+    if (!user_id || !token || !enemyPokemon) return;
+    try {
+      const { API_BASE_URL } = await import("../../api.js");
+      await fetch(`${API_BASE_URL}/users/${user_id}/pokemon`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          pokemon_id: enemyPokemon.id,
+          name: enemyPokemon.name,
+          sprite: enemyPokemon.sprite,
+          types: enemyPokemon.types,
+          level: enemyPokemon.level,
+          pokedex_no: enemyPokemon.id,
+        }),
+      });
+      log("Fragment chip encoded — saved to storage!", "good");
+    } catch (e) {
+      log("Could not save to backend — local only", "warn");
+    }
   }
-  saveToBackend().then(() => goBack());
-};
 
-// ── BUILD POKEMON FROM DATA ──────────────────────────────
-function buildPokemon(apiData, level, isPlayer = false) {
-  const types = apiData.types.map((t) => t.type.name);
-  const baseHpStat =
-    apiData.stats.find((s) => s.stat.name === "hp")?.base_stat || 45;
-  const baseAttackStat =
-    apiData.stats.find((s) => s.stat.name === "attack")?.base_stat || 49;
-  const baseDefenseStat =
-    apiData.stats.find((s) => s.stat.name === "defense")?.base_stat || 49;
-  const baseSpAtkStat =
-    apiData.stats.find((s) => s.stat.name === "sp. atk")?.base_stat || 65;
-  const baseSpDefStat =
-    apiData.stats.find((s) => s.stat.name === "sp. def")?.base_stat || 65;
-  const baseSpeedStat =
-    apiData.stats.find((s) => s.stat.name === "speed")?.base_stat || 45;
-
-  const maxHp = ((baseHpStat * 2 + 31 + 63 / 4) * level) / 100 + level + 5;
-  const moves = generateMoves(types, level);
-
-  return {
-    id: apiData.id,
-    name: apiData.name,
-    sprite: isPlayer
-      ? apiData.sprites.back_default || apiData.sprites.front_default
-      : apiData.sprites.front_default,
-    types,
-    level,
-    hp: maxHp,
-    maxHp,
-    moves,
-    exp: apiData.base_experience || 50,
-    // Base stats for battle-logic calculations
-    baseHP: baseHpStat,
-    baseAttack: baseAttackStat,
-    baseDefense: baseDefenseStat,
-    baseSpAtk: baseSpAtkStat,
-    baseSpDef: baseSpDefStat,
-    baseSpeed: baseSpeedStat,
-    // Scaled stats
-    attack: baseAttackStat + level * 2,
-    defense: baseDefenseStat + level * 2,
-    spAtk: baseSpAtkStat + level * 2,
-    spDef: baseSpDefStat + level * 2,
-    speed: baseSpeedStat + level * 1,
+  // ── NAV ──────────────────────────────────────────────────
+  window.goBack = function () {
+    window.location.href = "game.html";
   };
-}
+  window.catchAfterWin = function () {
+    const wild = localStorage.getItem("caughtPokemon");
+    if (!wild) {
+      goBack();
+      return;
+    }
+    saveToBackend().then(() => goBack());
+  };
 
-// ── POKEMON SELECTION ────────────────────────────────
-async function showPokemonSelection() {
-  const user_id = localStorage.getItem("user_id");
-  const token = localStorage.getItem("token");
+  // ── BUILD POKEMON FROM DATA ──────────────────────────────
+  // Uses authentic Gen 3 stat formulas so HP and damage stay balanced.
+  // At level 10: ~30-50 HP, damage 5-15 per hit → 3-8 hits to KO.
+  async function buildPokemon(apiData, level, isPlayer = false) {
+    const types = apiData.types.map((t) => t.type.name);
 
-  if (!user_id || !token) {
-    log("Not logged in — cannot load pokemon party", "dmg");
-    await startBattleWithPokemon(1); // fallback
-    return;
+    // Pull base stats from PokeAPI (use sensible defaults if missing)
+    const baseHpStat =
+      apiData.stats.find((s) => s.stat.name === "hp")?.base_stat || 45;
+    const baseAttackStat =
+      apiData.stats.find((s) => s.stat.name === "attack")?.base_stat || 49;
+    const baseDefenseStat =
+      apiData.stats.find((s) => s.stat.name === "defense")?.base_stat || 49;
+    const baseSpAtkStat =
+      apiData.stats.find((s) => s.stat.name === "special-attack")?.base_stat ||
+      apiData.stats.find((s) => s.stat.name === "sp. atk")?.base_stat || 45;
+    const baseSpDefStat =
+      apiData.stats.find((s) => s.stat.name === "special-defense")?.base_stat ||
+      apiData.stats.find((s) => s.stat.name === "sp. def")?.base_stat || 45;
+    const baseSpeedStat =
+      apiData.stats.find((s) => s.stat.name === "speed")?.base_stat || 45;
+
+    // ── PROPER GEN-3 STAT FORMULAS ──────────────────────────
+    // IVs fixed at 15 (mid), EVs fixed at 63 (light training) for wild pokemon.
+    // Player pokemon get slightly better IVs (20) to feel rewarding.
+    const iv = isPlayer ? 20 : 15;
+    const ev = 63;
+
+    // HP formula: floor((2*base + IV + floor(EV/4)) * level / 100) + level + 10
+    const calcMaxHp = (base) =>
+      Math.floor(((2 * base + iv + Math.floor(ev / 4)) * level) / 100) +
+      level +
+      10;
+
+    // Other stats: floor((2*base + IV + floor(EV/4)) * level / 100) + 5
+    const calcStat = (base) =>
+      Math.floor(((2 * base + iv + Math.floor(ev / 4)) * level) / 100) + 5;
+
+    const maxHp = calcMaxHp(baseHpStat);
+    const attack  = calcStat(baseAttackStat);
+    const defense = calcStat(baseDefenseStat);
+    const spAtk   = calcStat(baseSpAtkStat);
+    const spDef   = calcStat(baseSpDefStat);
+    const speed   = calcStat(baseSpeedStat);
+
+    // Use dynamic move system to fetch moves from PokéAPI
+    let moves = await generateMoves(types, level, apiData.name);
+    if (!moves || !moves.length) {
+      console.warn(`No moves for ${apiData.name}, using fallback`);
+      moves = getFallbackMoves(types);
+    }
+
+    return {
+      id: apiData.id,
+      name: apiData.name,
+      sprite: isPlayer
+        ? apiData.sprites.back_default || apiData.sprites.front_default
+        : apiData.sprites.front_default,
+      types,
+      level,
+      hp: maxHp,
+      maxHp,
+      moves,
+      exp: apiData.base_experience || 50,
+      // Properly scaled stats (used by calcDamage)
+      baseHP: baseHpStat,
+      baseAttack: baseAttackStat,
+      baseDefense: baseDefenseStat,
+      baseSpAtk: baseSpAtkStat,
+      baseSpDef: baseSpDefStat,
+      baseSpeed: baseSpeedStat,
+      attack,
+      defense,
+      spAtk,
+      spDef,
+      speed,
+    };
   }
 
-  try {
-    const { getUserPokemon } = await import("./pokemon-api.js");
-    const result = await getUserPokemon(user_id, token);
+  // ── POKEMON SELECTION ────────────────────────────────
+  async function showPokemonSelection() {
+    const user_id = localStorage.getItem("user_id");
+    const token = localStorage.getItem("token");
 
-    if (!result.success || !result.data || result.data.length === 0) {
-      log("No pokemon in your party — starting with default", "warn");
-      await startBattleWithPokemon(1); // fallback: bulbasaur
+    if (!user_id || !token) {
+      log("Not logged in — cannot load pokemon party", "dmg");
+      await startBattleWithPokemon(1); // fallback
       return;
     }
 
-    const userParty = result.data;
-    const modal = document.getElementById("pokemonSelectionModal");
-    const list = document.getElementById("pokemonSelectionList");
-    const status = document.getElementById("selectionStatus");
+    try {
+      const { getUserPokemon } = await import("./pokemon-api.js");
+      const result = await getUserPokemon(user_id, token);
 
-    list.innerHTML = "";
-    status.style.display = "none";
+      if (!result.success || !result.data || result.data.length === 0) {
+        log("No pokemon in your party — starting with default", "warn");
+        await startBattleWithPokemon(1); // fallback: bulbasaur
+        return;
+      }
 
-    // Display each pokemon as a selectable button
-    userParty.forEach((pokemon, idx) => {
-      const pokemonCard = document.createElement("div");
-      pokemonCard.className = "other-btn";
-      pokemonCard.style.cursor = "pointer";
-      pokemonCard.style.marginBottom = "8px";
-      pokemonCard.style.display = "flex";
-      pokemonCard.style.justifyContent = "space-between";
-      pokemonCard.style.alignItems = "center";
+      const userParty = result.data;
+      const modal = document.getElementById("pokemonSelectionModal");
+      const list = document.getElementById("pokemonSelectionList");
+      const status = document.getElementById("selectionStatus");
 
-      const name = pokemon.name || "Unknown";
-      const level = pokemon.level || 1;
-      const hp = pokemon.current_hp || 0;
-      const maxHp = pokemon.max_hp || level * 2 + 10;
+      list.innerHTML = "";
+      status.style.display = "none";
 
-      pokemonCard.innerHTML = `
+      // Display each pokemon as a selectable button
+      userParty.forEach((pokemon, idx) => {
+        const pokemonCard = document.createElement("div");
+        pokemonCard.className = "other-btn";
+        pokemonCard.style.cursor = "pointer";
+        pokemonCard.style.marginBottom = "8px";
+        pokemonCard.style.display = "flex";
+        pokemonCard.style.justifyContent = "space-between";
+        pokemonCard.style.alignItems = "center";
+
+        const name = pokemon.name || "Unknown";
+        const level = pokemon.level || 1;
+        const hp = pokemon.current_hp || 0;
+        const maxHp = pokemon.max_hp || level * 2 + 10;
+
+        pokemonCard.innerHTML = `
         <div>
           <div style="font-weight:bold;">${name.toUpperCase()}</div>
           <div style="font-size:11px; color:var(--text-dim);">Lv.${level} | HP: ${hp}/${maxHp}</div>
@@ -981,130 +1258,161 @@ async function showPokemonSelection() {
         <div style="color:var(--green);">→</div>
       `;
 
-      pokemonCard.onclick = () =>
-        startBattleWithPokemon(
-          pokemon.pokemon_id || pokemon.pokedex_no || pokemon.id,
-          pokemon,
-        );
-      list.appendChild(pokemonCard);
-    });
-
-    modal.classList.add("open");
-  } catch (err) {
-    console.error("Failed to load pokemon party:", err);
-    log("Failed to load your party — starting with default", "warn");
-    await startBattleWithPokemon(1); // fallback
-  }
-}
-
-async function startBattleWithPokemon(playerApiId, playerData) {
-  const modal = document.getElementById("pokemonSelectionModal");
-  if (modal.classList.contains("open")) {
-    modal.classList.remove("open");
-  }
-
-  await initBattle(playerApiId, playerData);
-}
-
-// ── INIT BATTLE (WITH BATTLE LOGIC INTEGRATION) ──────────
-async function initBattle(playerApiId = 1, playerData = null) {
-  log("BATTLE PROTOCOL INITIALIZING...", "sys");
-
-  // ── Get wild pokemon from localStorage (set by game.html) ──
-  const wildRaw = localStorage.getItem("caughtPokemon");
-  let wildData = wildRaw ? JSON.parse(wildRaw) : null;
-
-  // Get user data for world level
-  const user_id = localStorage.getItem("user_id");
-  const token = localStorage.getItem("token");
-  let playerWorldLevel = 1;
-  let playerLevel = playerData?.level || 15;
-
-  if (user_id && token) {
-    try {
-      const { API_BASE_URL } = await import("../../api.js");
-      const res = await fetch(`${API_BASE_URL}/users/${user_id}`, {
-        headers: { Authorization: `Bearer ${token}` },
+        pokemonCard.onclick = () =>
+          startBattleWithPokemon(
+            pokemon.pokemon_id || pokemon.pokedex_no || pokemon.id,
+            pokemon,
+          );
+        list.appendChild(pokemonCard);
       });
-      const data = await res.json();
-      if (data.success && data.data) {
-        playerWorldLevel = data.data.world_level || 1;
-        // Load inventory
-        inventory.pokeball = data.data.pokeball || 0;
-        inventory.greatball = data.data.greatball || 0;
-        inventory.ultraball = data.data.ultraball || 0;
-        updateInventoryUI();
+
+      modal.classList.add("open");
+    } catch (err) {
+      console.error("Failed to load pokemon party:", err);
+      log("Failed to load your party — starting with default", "warn");
+      await startBattleWithPokemon(1); // fallback
+    }
+  }
+
+  async function startBattleWithPokemon(playerApiId, playerData) {
+    const modal = document.getElementById("pokemonSelectionModal");
+    if (modal.classList.contains("open")) {
+      modal.classList.remove("open");
+    }
+
+    await initBattle(playerApiId, playerData);
+  }
+
+  // ── INIT BATTLE (WITH BATTLE LOGIC INTEGRATION) ──────────
+  async function initBattle(playerApiId = 1, playerData = null) {
+    log("BATTLE PROTOCOL INITIALIZING...", "sys");
+
+    // ── Get wild pokemon from localStorage (set by game.html) ──
+    const wildRaw = localStorage.getItem("caughtPokemon");
+    let wildData = wildRaw ? JSON.parse(wildRaw) : null;
+
+    // Get user data for world level
+    const user_id = localStorage.getItem("user_id");
+    const token = localStorage.getItem("token");
+    let playerWorldLevel = 1;
+    let playerLevel = playerData?.level || 15;
+
+    if (user_id && token) {
+      try {
+        const { API_BASE_URL } = await import("../../api.js");
+        const res = await fetch(`${API_BASE_URL}/users/${user_id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        if (data.success && data.data) {
+          playerWorldLevel = data.data.world_level || 1;
+          // Load inventory
+          inventory.pokeball = data.data.pokeball || 0;
+          inventory.greatball = data.data.greatball || 0;
+          inventory.ultraball = data.data.ultraball || 0;
+          updateInventoryUI();
+        }
+      } catch (e) {
+        console.error("Failed to load user data:", e);
       }
+    }
+
+    // Fetch enemy from PokeAPI
+    let enemyApiId = wildData?.id || Math.ceil(Math.random() * 151);
+    let areaHabitat = wildData?.habitat || "normal";
+    let rarity = wildData?.rarity
+      ? typeof wildData.rarity === "object"
+        ? wildData.rarity.label
+        : wildData.rarity
+      : "COMMON";
+
+    try {
+      const [enemyRes] = await Promise.all([
+        fetch(`https://pokeapi.co/api/v2/pokemon/${enemyApiId}`),
+      ]);
+      const enemyApi = await enemyRes.json();
+
+      // Use battle-logic to generate enemy level based on world level
+      let enemyLevel;
+      if (typeof generateEnemyLevel === "function") {
+        enemyLevel = generateEnemyLevel(playerWorldLevel, areaHabitat, rarity);
+      } else {
+        enemyLevel = wildData?.level || 10 + Math.floor(Math.random() * 30);
+      }
+
+      enemyPokemon = await buildPokemon(enemyApi, enemyLevel, false);
+      enemyPokemon.rarity = rarity; // Store rarity for exp calculation
+
+      document.getElementById("enemyName").textContent =
+        enemyPokemon.name.toUpperCase();
+      document.getElementById("enemyLevel").textContent =
+        `Lv.${enemyPokemon.level}`;
+      document.getElementById("enemy-sprite").src = enemyPokemon.sprite;
+      updateHpBar("enemy", enemyPokemon.hp, enemyPokemon.maxHp);
+      log(
+        `Wild ${enemyPokemon.name.toUpperCase()} appeared! (Lv.${enemyPokemon.level})`,
+        "warn",
+      );
     } catch (e) {
-      console.error("Failed to load user data:", e);
-    }
-  }
-
-  // Fetch enemy from PokeAPI
-  let enemyApiId = wildData?.id || Math.ceil(Math.random() * 151);
-  let areaHabitat = wildData?.habitat || "normal";
-  let rarity = wildData?.rarity || "common";
-
-  try {
-    const [enemyRes] = await Promise.all([
-      fetch(`https://pokeapi.co/api/v2/pokemon/${enemyApiId}`),
-    ]);
-    const enemyApi = await enemyRes.json();
-
-    // Use battle-logic to generate enemy level based on world level
-    let enemyLevel;
-    if (typeof generateEnemyLevel === "function") {
-      enemyLevel = generateEnemyLevel(playerWorldLevel, areaHabitat, rarity);
-    } else {
-      enemyLevel = wildData?.level || 10 + Math.floor(Math.random() * 30);
+      log("Failed to load enemy data", "dmg");
+      console.error(e);
     }
 
-    enemyPokemon = buildPokemon(enemyApi, enemyLevel, false);
+    // Fetch player pokemon from PokeAPI (use selected pokemon)
+    try {
+      const playerRes = await fetch(
+        `https://pokeapi.co/api/v2/pokemon/${playerApiId}`,
+      );
+      const playerApi = await playerRes.json();
+      playerPokemon = await buildPokemon(playerApi, playerLevel, true);
 
-    document.getElementById("enemyName").textContent =
-      enemyPokemon.name.toUpperCase();
-    document.getElementById("enemyLevel").textContent =
-      `Lv.${enemyPokemon.level}`;
-    document.getElementById("enemy-sprite").src = enemyPokemon.sprite;
-    updateHpBar("enemy", enemyPokemon.hp, enemyPokemon.maxHp);
-    log(
-      `Wild ${enemyPokemon.name.toUpperCase()} appeared! (Lv.${enemyPokemon.level})`,
-      "warn",
-    );
-  } catch (e) {
-    log("Failed to load enemy data", "dmg");
-    console.error(e);
-  }
+      // Add user_pokemon_id from player data for backend tracking
+      if (playerData?.user_pokemon_id) {
+        playerPokemon.user_pokemon_id = playerData.user_pokemon_id;
+      }
 
-  // Fetch player pokemon from PokeAPI (use selected pokemon)
-  try {
-    const playerRes = await fetch(
-      `https://pokeapi.co/api/v2/pokemon/${playerApiId}`,
-    );
-    const playerApi = await playerRes.json();
-    playerPokemon = buildPokemon(playerApi, playerLevel, true);
+      // Initialize experience with player pokemon data
+      if (!playerPokemon.experience && playerData?.experience) {
+        playerPokemon.experience = playerData.experience;
+      }
+      if (!playerPokemon.experience) {
+        playerPokemon.experience = 0;
+      }
 
-    // Use current HP from player data if available
-    if (playerData?.current_hp && playerData.current_hp > 0) {
-      playerPokemon.hp = Math.min(playerData.current_hp, playerPokemon.maxHp);
+      // Initialize experience system
+      experienceSystem = new ExperienceSystem(playerPokemon);
+
+      // Use current HP from player data if available
+      if (playerData?.current_hp && playerData.current_hp > 0) {
+        playerPokemon.hp = Math.min(playerData.current_hp, playerPokemon.maxHp);
+      }
+
+      document.getElementById("playerName").textContent =
+        playerPokemon.name.toUpperCase();
+      document.getElementById("playerLevel").textContent =
+        `Lv.${playerPokemon.level}`;
+      document.getElementById("player-sprite").src = playerPokemon.sprite;
+      updateHpBar("player", playerPokemon.hp, playerPokemon.maxHp);
+      renderMoves();
+      log(`Go, ${playerPokemon.name.toUpperCase()}!`, "good");
+    } catch (e) {
+      log("Failed to load player pokemon — using fallback", "warn");
+      console.error(e);
     }
 
-    document.getElementById("playerName").textContent =
-      playerPokemon.name.toUpperCase();
-    document.getElementById("playerLevel").textContent =
-      `Lv.${playerPokemon.level}`;
-    document.getElementById("player-sprite").src = playerPokemon.sprite;
-    updateHpBar("player", playerPokemon.hp, playerPokemon.maxHp);
-    renderMoves();
-    log(`Go, ${playerPokemon.name.toUpperCase()}!`, "good");
-  } catch (e) {
-    log("Failed to load player pokemon — using fallback", "warn");
-    console.error(e);
+    log("BATTLE START — choose your move.", "sys");
+    setTurn(true);
   }
-
-  log("BATTLE START — choose your move.", "sys");
-  setTurn(true);
-}
 
 // Initialize the battle when the page loads - show pokemon selection first
-showPokemonSelection();
+if (document.readyState === "loading") {
+  console.log("[BATTLE] DOM not ready, waiting for DOMContentLoaded...");
+  document.addEventListener("DOMContentLoaded", () => {
+    console.log("[BATTLE] DOM ready, showing pokemon selection...");
+    showPokemonSelection();
+  });
+} else {
+  // DOM is already loaded
+  console.log("[BATTLE] DOM already loaded, showing pokemon selection...");
+  showPokemonSelection();
+}

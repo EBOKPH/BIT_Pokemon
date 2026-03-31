@@ -1,7 +1,7 @@
 // api.js
 // Frontend API wrapper — talks only to your backend
 // Uses window.API_BASE_URL set from .env CLIENT_URL in deployment
-//export const API_BASE_URL = window.API_BASE_URL || "http://localhost:4000";
+// export const API_BASE_URL = window.API_BASE_URL || "http://localhost:4000";
 
 export const API_BASE_URL =
   window.API_BASE_URL || "https://bit-pokemon-backend.onrender.com";
@@ -114,9 +114,12 @@ export async function checkEmail(email) {
 // Verify email
 export async function verifyEmail(token) {
   try {
-    const res = await fetch(`${API_BASE_URL}/users/verify/${token}`, {
-      method: "GET",
-    });
+    const res = await fetch(
+      `${API_BASE_URL}/users/verify?token=${encodeURIComponent(token)}`,
+      {
+        method: "GET",
+      },
+    );
     return await res.json();
   } catch (err) {
     console.error("Email verification failed:", err);

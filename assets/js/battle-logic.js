@@ -19,10 +19,13 @@ const BATTLE_CONFIG = {
     normal: 0,
     city: 0,
   },
+  // Rarity level bonuses (matches encounter-scan.js rarity tiers)
   rarityBonuses: {
-    common: 0,
-    rare: 2,
-    elite: 5,
+    COMMON: 0,
+    UNCOMMON: 1,
+    RARE: 3,
+    EPIC: 5,
+    LEGENDARY: 8,
   },
   damageVariation: { min: 0.85, max: 1.0 },
   criticalChance: 0.0625, // 6.25% base crit rate
@@ -63,23 +66,31 @@ function generateEnemyLevel(
 // ========================================
 
 /**
- * Calculate scaled pokemon stats based on level
+ * Calculate scaled pokemon stats based on level (Gen 3 formula)
+ * HP:    floor((2*base + 15 + 15) * level / 100) + level + 10
+ * Other: floor((2*base + 15 + 15) * level / 100) + 5
+ * IVs=15, EVs=63 for wild pokemon — keeps HP & damage proportional.
  * @param {object} basePokemon - Pokemon with base stats
  * @param {number} level - Pokemon's current level
  * @returns {object} Pokemon with scaled stats
  */
 function calculateScaledStats(basePokemon, level) {
+  const iv = 15;
+  const ev = 63;
+  const calcHp   = (b) => Math.floor(((2 * b + iv + Math.floor(ev / 4)) * level) / 100) + level + 10;
+  const calcStat = (b) => Math.floor(((2 * b + iv + Math.floor(ev / 4)) * level) / 100) + 5;
+
+  const maxHp = calcHp(basePokemon.baseHP || 45);
   return {
     ...basePokemon,
-    level: level,
-    hp: basePokemon.baseHP + level * 5,
-    attack: basePokemon.baseAttack + level * 2,
-    defense: basePokemon.baseDefense + level * 2,
-    spAtk: basePokemon.baseSpAtk + level * 2,
-    spDef: basePokemon.baseSpDef + level * 2,
-    speed: basePokemon.baseSpeed + level * 1,
-    // Current HP starts at full
-    currentHP: basePokemon.baseHP + level * 5,
+    level,
+    hp:      maxHp,
+    currentHP: maxHp,
+    attack:  calcStat(basePokemon.baseAttack  || 49),
+    defense: calcStat(basePokemon.baseDefense || 49),
+    spAtk:   calcStat(basePokemon.baseSpAtk   || 45),
+    spDef:   calcStat(basePokemon.baseSpDef   || 45),
+    speed:   calcStat(basePokemon.baseSpeed   || 45),
   };
 }
 
@@ -88,57 +99,40 @@ function calculateScaledStats(basePokemon, level) {
 // ========================================
 
 /**
- * Calculate damage dealt by attacker to defender
- * Supports multiple formula variants
+ * Calculate damage dealt by attacker to defender.
+ * Uses the authentic Gen 3 formula so damage stays proportional to HP.
+ * At equal levels & stats: weak move (40 pwr) ≈ 10-15% HP per hit.
  * @param {object} attacker - Attacking pokemon
  * @param {object} defender - Defending pokemon
- * @param {object} move - Move object with basePower, type
- * @param {string} formulaType - "simple" or "expanded"
+ * @param {object} move - Move object with power, type, category
  * @returns {number} Damage dealt
  */
-function calculateDamage(attacker, defender, move, formulaType = "expanded") {
-  const basePower = move.power || 50;
+function calculateDamage(attacker, defender, move) {
+  const power = move.power || 40;
 
-  // Random variation (0.85 - 1.0)
-  const randomVariation =
-    Math.random() *
-      (BATTLE_CONFIG.damageVariation.max - BATTLE_CONFIG.damageVariation.min) +
-    BATTLE_CONFIG.damageVariation.min;
+  const attackStat  = move.category === "special" ? attacker.spAtk  : attacker.attack;
+  const defenseStat = move.category === "special" ? defender.spDef  : defender.defense;
 
-  // Type effectiveness modifier
-  const typeEffectiveness = calculateTypeEffectiveness(
-    move.type,
-    defender.type,
-  );
+  // Gen 3 core: floor(floor((2*level/5+2) * power * atk/def) / 50) + 2
+  const base =
+    Math.floor(
+      (Math.floor((2 * attacker.level) / 5 + 2) * power * attackStat) /
+        Math.max(1, defenseStat) /
+        50,
+    ) + 2;
 
-  // Critical hit check
+  // Random roll 0.85–1.0
+  const roll = BATTLE_CONFIG.damageVariation.min +
+    Math.random() * (BATTLE_CONFIG.damageVariation.max - BATTLE_CONFIG.damageVariation.min);
+
+  // Type effectiveness
+  const typeEff = calculateTypeEffectiveness(move.type, defender.type);
+
+  // Critical hit
   const isCritical = Math.random() < BATTLE_CONFIG.criticalChance;
-  const criticalMultiplier = isCritical
-    ? BATTLE_CONFIG.criticalMultiplier
-    : 1.0;
+  const critMult   = isCritical ? BATTLE_CONFIG.criticalMultiplier : 1.0;
 
-  let damage;
-
-  if (formulaType === "simple") {
-    // Simple formula: basePower * (1 + attackerLevel * 0.1)
-    damage = basePower * (1 + attacker.level * 0.1);
-  } else {
-    // Expanded formula:
-    // damage = basePower * (attackerLevel * 0.5 + 1) * (attackStat / defenseStat) * modifier
-    const attackStat =
-      move.category === "physical" ? attacker.attack : attacker.spAtk;
-    const defenseStat =
-      move.category === "physical" ? defender.defense : defender.spDef;
-
-    const levelMultiplier = attacker.level * 0.5 + 1;
-    const statRatio = attackStat / Math.max(1, defenseStat);
-    const modifier = randomVariation * typeEffectiveness * criticalMultiplier;
-
-    damage = basePower * levelMultiplier * statRatio * modifier;
-  }
-
-  // Ensure minimum damage of 1
-  return Math.max(1, Math.floor(damage));
+  return Math.max(1, Math.floor(base * roll * typeEff * critMult));
 }
 
 /**
