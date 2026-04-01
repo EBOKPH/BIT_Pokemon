@@ -3,326 +3,600 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- API Configuration from .env CLIENT_URL -->
     <meta name="api-base-url" content="http://localhost:4000" />
-    <title>Purchase WPC</title>
+    <title>Acquire Fragments — Bit-Pokémon</title>
     <script src="../config.js"></script>
     <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        font-family: Arial, Helvetica, sans-serif;
-      }
+      * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Courier New', monospace; }
+
       body {
         background: #0b0e14;
-        color: #fff;
+        color: #e8e0d0;
         min-height: 100vh;
         display: flex;
         flex-direction: column;
       }
+
       #content {
         flex: 1;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        padding: 40px 10px;
+        padding: 48px 16px;
       }
-      h1 {
-        font-size: 36px;
-        color: #4caf50;
-        margin-bottom: 20px;
+
+      .panel {
+        background: #111520;
+        border: 1px solid #2a2e3e;
+        border-radius: 4px;
+        padding: 40px 48px;
+        max-width: 520px;
+        width: 100%;
       }
-      p {
-        color: #aaa;
-        margin-bottom: 20px;
+
+      .panel-header {
+        text-align: center;
+        margin-bottom: 32px;
       }
-      button {
-        padding: 12px 20px;
-        font-size: 16px;
-        border: none;
-        border-radius: 8px;
-        background: #4caf50;
-        color: #fff;
-        cursor: pointer;
-        transition: 0.3s;
+
+      .panel-header .eyebrow {
+        font-size: 10px;
+        letter-spacing: 3px;
+        color: #5a6080;
+        text-transform: uppercase;
+        margin-bottom: 8px;
       }
-      button:hover {
-        background: #45a049;
+
+      .panel-header h1 {
+        font-size: 28px;
+        color: #c8a96e;
+        letter-spacing: 1px;
+        margin-bottom: 8px;
       }
-      input {
-        padding: 10px;
-        font-size: 16px;
-        margin-bottom: 10px;
-        border-radius: 8px;
-        border: none;
-        width: 200px;
+
+      .panel-header p {
+        font-size: 13px;
+        color: #6a7090;
+        line-height: 1.6;
       }
-      #status {
-        margin-top: 20px;
-        color: #ffcc00;
+
+      .rate-box {
+        background: #0d1018;
+        border: 1px solid #1e2535;
+        border-radius: 2px;
+        padding: 16px 20px;
+        margin-bottom: 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 12px;
+        color: #5a6080;
       }
-      #balance {
-        margin-top: 10px;
-        color: #4caf50;
+
+      .rate-box .rate-val {
+        color: #c8a96e;
+        font-size: 13px;
         font-weight: bold;
       }
+
+      .balance-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 24px;
+        gap: 12px;
+      }
+
+      .balance-card {
+        flex: 1;
+        background: #0d1018;
+        border: 1px solid #1e2535;
+        border-radius: 2px;
+        padding: 14px 16px;
+        text-align: center;
+      }
+
+      .balance-card .bc-label {
+        font-size: 10px;
+        letter-spacing: 2px;
+        color: #5a6080;
+        margin-bottom: 6px;
+        display: block;
+      }
+
+      .balance-card .bc-val {
+        font-size: 18px;
+        color: #c8a96e;
+        font-weight: bold;
+      }
+
+      .balance-card .bc-val.green { color: #5a9e6f; }
+
+      label {
+        display: block;
+        font-size: 11px;
+        letter-spacing: 2px;
+        color: #5a6080;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+      }
+
+      input[type="number"], input[type="text"] {
+        width: 100%;
+        background: #0d1018;
+        border: 1px solid #2a2e3e;
+        border-radius: 2px;
+        padding: 12px 16px;
+        font-size: 16px;
+        font-family: 'Courier New', monospace;
+        color: #e8e0d0;
+        margin-bottom: 8px;
+        transition: border-color 0.2s;
+      }
+
+      input[type="number"]:focus, input[type="text"]:focus {
+        outline: none;
+        border-color: #c8a96e;
+      }
+
+      .calc-preview {
+        font-size: 13px;
+        color: #c8a96e;
+        margin-bottom: 20px;
+        min-height: 20px;
+      }
+
+      .btn-primary {
+        width: 100%;
+        padding: 14px;
+        font-size: 14px;
+        font-family: 'Courier New', monospace;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        border: none;
+        border-radius: 2px;
+        background: #c8a96e;
+        color: #0b0e14;
+        cursor: pointer;
+        font-weight: bold;
+        transition: background 0.2s, opacity 0.2s;
+        margin-bottom: 10px;
+      }
+
+      .btn-primary:hover { background: #dfc080; }
+      .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+      .btn-secondary {
+        width: 100%;
+        padding: 12px;
+        font-size: 13px;
+        font-family: 'Courier New', monospace;
+        letter-spacing: 1px;
+        border: 1px solid #2a2e3e;
+        border-radius: 2px;
+        background: transparent;
+        color: #6a7090;
+        cursor: pointer;
+        transition: border-color 0.2s, color 0.2s;
+        margin-bottom: 10px;
+      }
+
+      .btn-secondary:hover { border-color: #c8a96e; color: #c8a96e; }
+
+      #statusMsg {
+        margin-top: 16px;
+        padding: 12px 16px;
+        border-radius: 2px;
+        font-size: 13px;
+        line-height: 1.5;
+        display: none;
+      }
+
+      #statusMsg.info    { background: #111d2e; border: 1px solid #1e3a5f; color: #6ab0e8; }
+      #statusMsg.success { background: #0f1e14; border: 1px solid #1e4a2a; color: #5a9e6f; }
+      #statusMsg.error   { background: #1e0f0f; border: 1px solid #4a1e1e; color: #c06060; }
+      #statusMsg.warn    { background: #1e1a0f; border: 1px solid #4a3a1e; color: #c8a96e; }
+
+      .divider {
+        border: none;
+        border-top: 1px solid #1e2535;
+        margin: 24px 0;
+      }
+
+      .lore-note {
+        font-size: 11px;
+        color: #3a4060;
+        line-height: 1.7;
+        text-align: center;
+        font-style: italic;
+      }
+
+      .wallet-address {
+        font-size: 11px;
+        color: #5a6080;
+        word-break: break-all;
+        margin-top: 4px;
+      }
+
+      /* Wallet form (shown when no wallet saved) */
+      #walletSection { display: none; }
+      #purchaseSection { display: none; }
+
       footer {
-        background: #11151f;
+        background: #0d1018;
         padding: 20px 24px;
         text-align: center;
-        color: #aaa;
-        margin-top: auto;
+        color: #3a4060;
+        font-size: 12px;
+        border-top: 1px solid #1e2535;
       }
-      footer a {
-        color: #4caf50;
-        margin: 0 10px;
-        text-decoration: none;
-      }
-      footer a:hover {
-        color: #fff;
-      }
+
+      footer a { color: #5a6080; margin: 0 10px; text-decoration: none; }
+      footer a:hover { color: #c8a96e; }
     </style>
   </head>
   <body>
-    <!-- NAVBAR -->
     <div id="navbar-placeholder"></div>
 
     <div id="content">
-      <h1>Purchase WPC</h1>
-      <p>Send Sepolia ETH and receive WPC tokens automatically.</p>
+      <div class="panel">
+        <div class="panel-header">
+          <div class="eyebrow">Fragment Acquisition Terminal</div>
+          <h1>◈ ACQUIRE FRG</h1>
+          <p>
+            Fragment chips are the currency of the Wasteland — encoded signatures
+            traded by hunters, merchants, and factions alike. Send Sepolia ETH
+            and receive FRG credited to your account.
+          </p>
+        </div>
 
-      <form
-        id="transactionForm"
-        style="
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 10px;
-        "
-      >
-        <input
-          type="number"
-          id="ethAmount"
-          placeholder="Enter Sepolia ETH (e.g. 0.0001)"
-          step="0.0001"
-          min="0.0001"
-          required
-        />
-        <div id="wpcCalc" style="color: #4caf50; font-weight: bold"></div>
-        <button type="submit" id="transactBtn">Transact</button>
-      </form>
-      <form
-        id="manualWalletForm"
-        style="
-          display: none;
-          flex-direction: column;
-          align-items: center;
-          gap: 10px;
-          margin-top: 20px;
-        "
-      >
-        <label for="manualWalletInput" style="color: #fff"
-          >Put your Meta Mask Wallet here:</label
-        >
-        <input
-          type="text"
-          id="manualWalletInput"
-          placeholder="0x..."
-          style="width: 250px"
-          required
-        />
-        <button type="submit">Submit Wallet</button>
-      </form>
-      <div id="status"></div>
+        <div class="rate-box">
+          <span>Exchange Rate</span>
+          <span class="rate-val">0.0001 ETH = 1 FRG</span>
+        </div>
+
+        <!-- Balances -->
+        <div class="balance-row">
+          <div class="balance-card">
+            <span class="bc-label">FRG Balance</span>
+            <span class="bc-val" id="frgBalance">—</span>
+          </div>
+          <div class="balance-card">
+            <span class="bc-label">Wallet</span>
+            <span class="bc-val green" id="walletStatus">Not connected</span>
+          </div>
+        </div>
+
+        <!-- Wallet section (shown if no wallet saved) -->
+        <div id="walletSection">
+          <label for="manualWalletInput">MetaMask Wallet Address</label>
+          <input
+            type="text"
+            id="manualWalletInput"
+            placeholder="0x..."
+          />
+          <button class="btn-primary" id="saveWalletBtn">Save Wallet Address</button>
+          <p style="font-size:12px; color:#5a6080; margin-top:8px;">
+            Or connect MetaMask directly:
+          </p>
+          <button class="btn-secondary" id="connectMetaMaskBtn">Connect MetaMask</button>
+        </div>
+
+        <!-- Purchase section (shown when wallet ready) -->
+        <div id="purchaseSection">
+          <label for="ethAmount">ETH Amount (Sepolia Testnet)</label>
+          <input
+            type="number"
+            id="ethAmount"
+            placeholder="0.0001"
+            step="0.0001"
+            min="0.0001"
+          />
+          <div class="calc-preview" id="calcPreview"></div>
+          <button class="btn-primary" id="purchaseBtn">
+            ◈ Send ETH &amp; Acquire Fragments
+          </button>
+          <button class="btn-secondary" id="changeWalletBtn">Change Wallet</button>
+        </div>
+
+        <div id="statusMsg"></div>
+
+        <hr class="divider" />
+        <p class="lore-note">
+          &ldquo;A Legendary-class Fragment on the black market would buy your village
+          three generations of protection.&rdquo;
+        </p>
+      </div>
     </div>
 
     <footer>
       <p>
         <a href="#">Maps</a> | <a href="#">Profile</a> |
-        <a href="#">Pokemon</a> | <a href="#">Battle</a>
+        <a href="#">Pokémon</a> | <a href="#">Battle</a>
       </p>
-      <p>&copy; 2026 Bit-Pokemon by Kobe D. Estabalaya</p>
+      <p>&copy; 2026 Bit-Pokémon by Kobe D. Estabalaya</p>
     </footer>
 
     <script type="module">
       import { ethers } from "https://cdn.jsdelivr.net/npm/ethers/dist/ethers.esm.min.js";
-
-      let userAddress;
-      const statusDiv = document.getElementById("status");
-      const transactionForm = document.getElementById("transactionForm");
-      const ethAmountInput = document.getElementById("ethAmount");
-      const wpcCalc = document.getElementById("wpcCalc");
-      const manualWalletForm = document.getElementById("manualWalletForm");
-      const manualWalletInput = document.getElementById("manualWalletInput");
-
-      // WPC Contract
-      const yourWallet = "0xA10F750d5A533468e4A825be131f17ff9A692Ba9";
-      let wpcContract;
-
-      // Get API URL from api.js
       const { API_BASE_URL } = await import('../api.js');
 
-      // Save wallet to server (manual)
-      async function saveManualWalletToServer(wallet) {
-        if (!wallet) return false;
+      // ── Config ────────────────────────────────────────────────
+      const ETH_TO_FRG     = 10000;     // 1 ETH = 10,000 FRG  (i.e. 0.0001 ETH = 1 FRG)
+      const RECEIVER_ADDR  = "0xA10F750d5A533468e4A825be131f17ff9A692Ba9"; // your wallet
+      const SEPOLIA_CHAIN  = "0xaa36a7"; // chainId 11155111
+
+      // ── State ─────────────────────────────────────────────────
+      let userAddress    = null;
+      let userId         = localStorage.getItem("user_id");
+      let token          = localStorage.getItem("token");
+
+      // ── DOM refs ─────────────────────────────────────────────
+      const statusMsg         = document.getElementById("statusMsg");
+      const walletSection     = document.getElementById("walletSection");
+      const purchaseSection   = document.getElementById("purchaseSection");
+      const frgBalance        = document.getElementById("frgBalance");
+      const walletStatusEl    = document.getElementById("walletStatus");
+      const ethAmountInput    = document.getElementById("ethAmount");
+      const calcPreview       = document.getElementById("calcPreview");
+      const purchaseBtn       = document.getElementById("purchaseBtn");
+      const saveWalletBtn     = document.getElementById("saveWalletBtn");
+      const connectMetaMaskBtn= document.getElementById("connectMetaMaskBtn");
+      const changeWalletBtn   = document.getElementById("changeWalletBtn");
+      const manualWalletInput = document.getElementById("manualWalletInput");
+
+      // ── Helpers ───────────────────────────────────────────────
+      function showStatus(msg, type = "info") {
+        statusMsg.textContent = msg;
+        statusMsg.className   = type;
+        statusMsg.style.display = "block";
+      }
+
+      function hideStatus() { statusMsg.style.display = "none"; }
+
+      function showWalletSection() {
+        walletSection.style.display   = "block";
+        purchaseSection.style.display = "none";
+      }
+
+      function showPurchaseSection() {
+        walletSection.style.display   = "none";
+        purchaseSection.style.display = "block";
+      }
+
+      async function fetchFRGBalance() {
+        if (!userId || !token) return;
         try {
-          const token = localStorage.getItem("token");
-          if (!token) return false;
-          const response = await fetch(`${API_BASE_URL}/users/wallet`, {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({ walletAddress: wallet }),
+          const res  = await fetch(`${API_BASE_URL}/users/${userId}/frg`, {
+            headers: { Authorization: `Bearer ${token}` },
           });
-          const result = await response.json();
-          if (result.success) {
-            statusDiv.innerText = "Wallet saved to your profile!";
-            userAddress = wallet;
-            manualWalletForm.style.display = "none";
-            transactionForm.style.display = "flex";
-            return true;
-          } else {
-            statusDiv.innerText = `Failed to save wallet: ${result.message}`;
-            return false;
+          const data = await res.json();
+          if (data.success) {
+            frgBalance.textContent = `${data.data.fragments.toLocaleString()} FRG`;
           }
-        } catch (err) {
-          console.error(err);
-          statusDiv.innerText = "Error saving wallet. See console.";
+        } catch (e) { console.error("FRG fetch failed:", e); }
+      }
+
+      async function saveWalletToServer(wallet) {
+        if (!token) return false;
+        try {
+          const res  = await fetch(`${API_BASE_URL}/users/wallet`, {
+            method:  "PUT",
+            headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+            body:    JSON.stringify({ walletAddress: wallet }),
+          });
+          const data = await res.json();
+          return data.success;
+        } catch (e) {
+          console.error(e);
           return false;
         }
       }
 
-      // Auto-calculate WPC
+      async function creditFRG(amount) {
+        if (!userId || !token) return false;
+        try {
+          const res  = await fetch(`${API_BASE_URL}/users/${userId}/frg`, {
+            method:  "PUT",
+            headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+            body:    JSON.stringify({ amount }),
+          });
+          const data = await res.json();
+          return data.success;
+        } catch (e) {
+          console.error("Failed to credit FRG:", e);
+          return false;
+        }
+      }
+
+      // ── ETH amount preview ────────────────────────────────────
       ethAmountInput.addEventListener("input", () => {
         const eth = parseFloat(ethAmountInput.value);
         if (eth && eth > 0) {
-          const wpc = eth / 0.0001;
-          wpcCalc.innerText = `You will receive: ${wpc} WPC`;
+          const frg = Math.floor(eth * ETH_TO_FRG);
+          calcPreview.textContent = `You will receive: ${frg.toLocaleString()} FRG`;
         } else {
-          wpcCalc.innerText = "";
+          calcPreview.textContent = "";
         }
       });
 
-      // Manual wallet form submit
-      manualWalletForm.onsubmit = async (e) => {
-        e.preventDefault();
+      // ── Connect MetaMask ──────────────────────────────────────
+      connectMetaMaskBtn.addEventListener("click", async () => {
+        if (!window.ethereum) {
+          showStatus("MetaMask not detected. Install the MetaMask extension and try again.", "error");
+          return;
+        }
+        try {
+          const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+          const addr     = accounts[0];
+          showStatus(`MetaMask connected: ${addr}`, "info");
+          manualWalletInput.value = addr;
+        } catch (e) {
+          showStatus("MetaMask connection rejected.", "error");
+        }
+      });
+
+      // ── Save wallet manually ──────────────────────────────────
+      saveWalletBtn.addEventListener("click", async () => {
         const wallet = manualWalletInput.value.trim();
         if (!/^0x[a-fA-F0-9]{40}$/.test(wallet)) {
-          statusDiv.innerText = "Invalid Ethereum address.";
+          showStatus("Invalid Ethereum address format.", "error");
           return;
         }
-        await saveManualWalletToServer(wallet);
-      };
+        showStatus("Saving wallet address...", "info");
+        const ok = await saveWalletToServer(wallet);
+        if (ok) {
+          userAddress = wallet;
+          walletStatusEl.textContent = wallet.slice(0, 8) + "..." + wallet.slice(-4);
+          showStatus("Wallet saved to your profile.", "success");
+          showPurchaseSection();
+        } else {
+          showStatus("Failed to save wallet. Please try again.", "error");
+        }
+      });
 
-      // Handle transaction form submit
-      transactionForm.onsubmit = async (e) => {
-        e.preventDefault();
+      // ── Change wallet ─────────────────────────────────────────
+      changeWalletBtn.addEventListener("click", () => {
+        showWalletSection();
+        hideStatus();
+      });
+
+      // ── Purchase — real MetaMask Sepolia transaction ──────────
+      purchaseBtn.addEventListener("click", async () => {
         if (!userAddress) {
-          statusDiv.innerText = "Please submit your wallet address first.";
+          showStatus("No wallet set. Please provide your wallet address.", "warn");
+          showWalletSection();
           return;
         }
-        const ethInput = parseFloat(ethAmountInput.value);
-        if (!ethInput || ethInput <= 0) {
-          alert("Enter ETH amount");
-          return;
-        }
-        const wpc = ethInput / 0.0001;
-        // Here you would prompt MetaMask/send transaction if you want, or just update backend
-        try {
-          statusDiv.innerText = `Transaction complete! You purchased ${wpc} WPC.`;
-          // Update user_ingame_wallet in backend
-          const token = localStorage.getItem("token");
-          if (token) {
-            await fetch(`${API_BASE_URL}/users/me`, {
-              method: "PUT",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-              },
-              body: JSON.stringify({ user_ingame_wallet: wpc }),
-            });
-          }
-        } catch (err) {
-          console.error(err);
-          statusDiv.innerText = "Transaction failed. See console for details.";
-        }
-      };
 
-      // On page load: check user wallet
+        const ethInput = parseFloat(ethAmountInput.value);
+        if (!ethInput || ethInput < 0.0001) {
+          showStatus("Minimum purchase is 0.0001 ETH (1 FRG).", "warn");
+          return;
+        }
+
+        const frgAmount = Math.floor(ethInput * ETH_TO_FRG);
+
+        // ── MetaMask path ────────────────────────────────────
+        if (window.ethereum) {
+          try {
+            // Switch to / verify Sepolia
+            try {
+              await window.ethereum.request({
+                method: "wallet_switchEthereumChain",
+                params: [{ chainId: SEPOLIA_CHAIN }],
+              });
+            } catch (switchErr) {
+              if (switchErr.code === 4902) {
+                // Add Sepolia if not present
+                await window.ethereum.request({
+                  method: "wallet_addEthereumChain",
+                  params: [{
+                    chainId: SEPOLIA_CHAIN,
+                    chainName: "Sepolia Test Network",
+                    nativeCurrency: { name: "Sepolia ETH", symbol: "ETH", decimals: 18 },
+                    rpcUrls: ["https://rpc.sepolia.org"],
+                    blockExplorerUrls: ["https://sepolia.etherscan.io"],
+                  }],
+                });
+              } else {
+                throw switchErr;
+              }
+            }
+
+            showStatus("Confirm the transaction in MetaMask...", "info");
+            purchaseBtn.disabled = true;
+
+            const provider = new ethers.BrowserProvider(window.ethereum);
+            const signer   = await provider.getSigner();
+
+            const txValue  = ethers.parseEther(ethInput.toString());
+            const tx       = await signer.sendTransaction({
+              to:    RECEIVER_ADDR,
+              value: txValue,
+            });
+
+            showStatus(`Transaction sent! Waiting for confirmation... (${tx.hash.slice(0, 16)}...)`, "info");
+
+            const receipt = await tx.wait();
+
+            if (receipt.status === 1) {
+              // Credit FRG to backend
+              const credited = await creditFRG(frgAmount);
+              if (credited) {
+                showStatus(
+                  `✓ Transaction confirmed! ${frgAmount.toLocaleString()} FRG credited to your account.\nTx: ${receipt.hash}`,
+                  "success"
+                );
+                await fetchFRGBalance();
+              } else {
+                showStatus(
+                  `Transaction confirmed on-chain (${receipt.hash}) but FRG credit failed — contact support with your tx hash.`,
+                  "warn"
+                );
+              }
+            } else {
+              showStatus("Transaction reverted on-chain. No FRG credited.", "error");
+            }
+
+          } catch (err) {
+            if (err.code === 4001 || err.code === "ACTION_REJECTED") {
+              showStatus("Transaction rejected by user.", "warn");
+            } else {
+              showStatus(`Transaction failed: ${err.message}`, "error");
+              console.error(err);
+            }
+          } finally {
+            purchaseBtn.disabled = false;
+          }
+
+        } else {
+          // ── No MetaMask fallback (testnet only) ───────────────
+          showStatus("MetaMask not detected. Install MetaMask to send ETH on Sepolia.", "error");
+        }
+      });
+
+      // ── Init ──────────────────────────────────────────────────
       window.addEventListener("DOMContentLoaded", async () => {
         // Load navbar
         fetch("navbar.html")
-          .then((res) => res.text())
-          .then(
-            (data) =>
-              (document.getElementById("navbar-placeholder").innerHTML = data),
-          )
-          .catch((err) => console.error("Failed to load navbar:", err));
+          .then(r => r.text())
+          .then(html => (document.getElementById("navbar-placeholder").innerHTML = html))
+          .catch(() => {});
 
-        const user_id = localStorage.getItem("user_id");
-        if (!user_id) {
-          statusDiv.innerText = "Please log in to your account first.";
-          manualWalletForm.style.display = "none";
-          transactionForm.style.display = "none";
+        if (!userId) {
+          showStatus("You must be logged in to acquire fragments.", "warn");
           return;
         }
-        // Get user profile by user_id (ign)
+
+        // Fetch FRG balance
+        await fetchFRGBalance();
+
+        // Fetch user profile to check for saved wallet
         try {
-          const res = await fetch(
-            `${API_BASE_URL}/users/me?user_id=${user_id}`,
-          );
-          const data = await res.json();
-          if (!data.success || !data.data) {
-            statusDiv.innerText =
-              "Failed to fetch user profile. Please log in again.";
-            manualWalletForm.style.display = "none";
-            transactionForm.style.display = "none";
-            return;
-          }
-          // Check walletAddress
-          if (!data.data.walletAddress) {
-            statusDiv.innerText =
-              "No wallet address found. Please enter your MetaMask wallet address.";
-            manualWalletForm.style.display = "flex";
-            transactionForm.style.display = "none";
+          const res  = await fetch(`${API_BASE_URL}/users/${userId}/frg`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          // Also check for wallet via /me
+          const meRes  = await fetch(`${API_BASE_URL}/users/me`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          const meData = await meRes.json();
+
+          if (meData.success && meData.data?.walletAddress) {
+            userAddress = meData.data.walletAddress;
+            walletStatusEl.textContent =
+              userAddress.slice(0, 8) + "..." + userAddress.slice(-4);
+            showPurchaseSection();
           } else {
-            userAddress = data.data.walletAddress;
-            statusDiv.innerText = `Wallet on file: ${userAddress}`;
-            manualWalletForm.style.display = "none";
-            transactionForm.style.display = "flex";
+            showWalletSection();
+            showStatus("No wallet on file. Connect MetaMask or enter your address below.", "info");
           }
-        } catch (err) {
-          statusDiv.innerText = "Error fetching user profile.";
-          manualWalletForm.style.display = "none";
-          transactionForm.style.display = "none";
+        } catch (e) {
+          showWalletSection();
+          showStatus("Could not load profile. Please try refreshing.", "error");
         }
       });
-        try {
-          const res = await fetch(`${API_BASE_URL}/users/me-nonjwt?user_id=${user_id}`);
-          const data = await res.json();
-          if (!data.success || !data.data) {
-            statusDiv.innerText = "Failed to fetch user profile. Please log in again.";
-            manualWalletForm.style.display = "none";
-            transactionForm.style.display = "none";
-            return;
-          }
-          // Check walletAddress
-          if (!data.data.walletAddress) {
-            statusDiv.innerText = "No wallet address found. Please enter your MetaMask wallet address.";
-            manualWalletForm.style.display = "flex";
-            transactionForm.style.display = "none";
-          } else {
-            userAddress = data.data.walletAddress;
-            statusDiv.innerText = `Wallet on file: ${userAddress}`;
-            manualWalletForm.style.display = "none";
-            transactionForm.style.display = "flex";
-          }
-        } catch (err) {
-          statusDiv.innerText = "Error fetching user profile.";
-          manualWalletForm.style.display = "none";
-          transactionForm.style.display = "none";
-        }
+    </script>
+  </body>
+</html>

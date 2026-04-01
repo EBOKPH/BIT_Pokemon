@@ -144,7 +144,7 @@ let playerPokemon = null; // { name, sprite, types, level, hp, maxHp, moves, exp
 let enemyPokemon = null; // { name, sprite, types, level, hp, maxHp, moves, rarity }
 let playerTurn = true;
 let battleOver = false;
-let inventory = { pokeball: 0, greatball: 0, ultraball: 0 };
+let inventory = { 'basic-pip': 0, 'reinforced-pip': 0, 'voss-pip': 0 };
 let experienceSystem = null; // Will be initialized when player pokemon is loaded
 
 // ── LOG ─────────────────────────────────────────────────
@@ -1004,48 +1004,53 @@ window.useMove = function (idx) {
     }
   };
 
-  // ── BAG / CATCH ──────────────────────────────────────────
-  window.useBall = function (ballType) {
+  // ── BAG / CAPTURE — PIP (Particle Interface Projector) ─────
+  // Lore: The PIP fires a beam that encodes a Pokémon's bioelectric
+  // signature into a Fragment chip. Lower enemy HP = better capture rate.
+  // Basic PIP: standard capture, Reinforced PIP: boosted, Voss PIP: prototype.
+  window.usePIP = function (pipType) {
     if (!playerTurn || battleOver) return;
-    if (inventory[ballType] <= 0) {
-      log(`No ${ballType}s left!`, "warn");
+    const key = pipType + '-pip';
+    if (inventory[key] <= 0) {
+      log(`No ${pipType.toUpperCase()} PIPs remaining.`, "warn");
       return;
     }
-    inventory[ballType]--;
+    inventory[key]--;
     updateInventoryUI();
 
-    // Catch rate: lower enemy HP = higher chance; ultraball > greatball > pokeball
+    // Capture rate: lower enemy HP = higher chance
+    // Voss PIP > Reinforced PIP > Basic PIP (mirrors old ultra > great > poke)
     const hpRatio = enemyPokemon.hp / enemyPokemon.maxHp;
-    const ballBonus =
-      ballType === "ultraball" ? 2 : ballType === "greatball" ? 1.5 : 1;
-    const catchRate = Math.max(
+    const pipBonus =
+      pipType === "voss" ? 2 : pipType === "reinforced" ? 1.5 : 1;
+    const captureRate = Math.max(
       0.05,
-      Math.min(0.95, (1 - hpRatio) * ballBonus * 0.6 + 0.2),
+      Math.min(0.95, (1 - hpRatio) * pipBonus * 0.6 + 0.2),
     );
 
     SFX.catch_();
     setTurn(false);
-    log(`Threw a ${ballType.toUpperCase()}...`, "info");
+    log(`Fired ${pipType.toUpperCase()} PIP — scanning bioelectric signature...`, "info");
 
     setTimeout(() => {
-      if (Math.random() < catchRate) {
-        log(`${enemyPokemon.name.toUpperCase()} was caught!`, "good");
+      if (Math.random() < captureRate) {
+        log(`Fragment chip encoded! ${enemyPokemon.name.toUpperCase()} captured!`, "good");
         saveToBackend();
         setTimeout(() => endBattle(true), 400);
       } else {
-        log(`${enemyPokemon.name.toUpperCase()} broke free!`, "warn");
+        log(`${enemyPokemon.name.toUpperCase()} disrupted the PIP signal — broke free!`, "warn");
         enemyMove();
       }
     }, 1200);
   };
 
   function updateInventoryUI() {
-    document.getElementById("cnt-pokeball").textContent =
-      `×${inventory.pokeball}`;
-    document.getElementById("cnt-greatball").textContent =
-      `×${inventory.greatball}`;
-    document.getElementById("cnt-ultraball").textContent =
-      `×${inventory.ultraball}`;
+    document.getElementById("cnt-basic-pip").textContent =
+      `×${inventory['basic-pip']}`;
+    document.getElementById("cnt-reinforced-pip").textContent =
+      `×${inventory['reinforced-pip']}`;
+    document.getElementById("cnt-voss-pip").textContent =
+      `×${inventory['voss-pip']}`;
   }
 
   // ── TAB SWITCHING ────────────────────────────────────────
@@ -1307,9 +1312,9 @@ window.useMove = function (idx) {
         if (data.success && data.data) {
           playerWorldLevel = data.data.world_level || 1;
           // Load inventory
-          inventory.pokeball = data.data.pokeball || 0;
-          inventory.greatball = data.data.greatball || 0;
-          inventory.ultraball = data.data.ultraball || 0;
+          inventory['basic-pip'] = data.data['basic-pip'] || data.data.basic_pip || 0;
+          inventory['reinforced-pip'] = data.data['reinforced-pip'] || data.data.reinforced_pip || 0;
+          inventory['voss-pip'] = data.data['voss-pip'] || data.data.voss_pip || 0;
           updateInventoryUI();
         }
       } catch (e) {

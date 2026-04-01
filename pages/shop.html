@@ -909,9 +909,11 @@
         <div class="tab active" onclick="switchTab('gacha')">
           ⬡ FRAGMENT PULL
         </div>
-        <div class="tab" onclick="switchTab('balls')">◎ CAPTURE GEAR</div>
+        <div class="tab" onclick="switchTab('capture')">◎ CAPTURE GEAR</div>
         <div class="tab" onclick="switchTab('boosters')">⚡ BOOSTERS</div>
-        <div class="tab" onclick="switchTab('history')">◈ PULL HISTORY</div>
+        <div class="tab" onclick="switchTab('upgrades')">🔧 PIP UPGRADES</div>
+        <div class="tab" onclick="switchTab('utilities')">◈ UTILITIES</div>
+        <div class="tab" onclick="switchTab('history')">↺ PULL HISTORY</div>
       </div>
 
       <!-- TAB: GACHA -->
@@ -1133,21 +1135,114 @@
       </div>
 
       <!-- TAB: CAPTURE GEAR -->
-      <div class="tab-content" id="tab-balls">
+      <div class="tab-content" id="tab-capture">
         <div class="section-header">
           <div class="section-title">CAPTURE GEAR</div>
-          <div class="section-badge">HARDCODED INVENTORY</div>
+          <div class="section-badge">PIP BEAM EMITTERS</div>
         </div>
-        <div class="items-grid" id="ballsGrid"></div>
+        <div
+          style="
+            font-family: var(--mono);
+            font-size: 9px;
+            letter-spacing: 1.5px;
+            color: rgba(200, 230, 200, 0.35);
+            line-height: 1.8;
+            margin-bottom: 20px;
+            padding: 12px;
+            border-left: 2px solid var(--border);
+          "
+        >
+          // Capture Devices are PIP-mounted beam emitters. They materialise a
+          Fragment signal<br />
+          // and lock it into a crystal chip. Higher tier devices handle more
+          unstable signals.<br />
+          //
+          <span style="color: rgba(255, 184, 48, 0.5)"
+            >APEX units are Ironclad-monitored. Purchase may trigger a faction
+            flag.</span
+          >
+        </div>
+        <div class="items-grid" id="captureGrid"></div>
       </div>
 
       <!-- TAB: BOOSTERS -->
       <div class="tab-content" id="tab-boosters">
         <div class="section-header">
-          <div class="section-title">BOOSTERS</div>
-          <div class="section-badge">FIELD UPGRADES</div>
+          <div class="section-title">FIELD BOOSTERS</div>
+          <div class="section-badge">CONSUMABLE AUGMENTS</div>
+        </div>
+        <div
+          style="
+            font-family: var(--mono);
+            font-size: 9px;
+            letter-spacing: 1.5px;
+            color: rgba(200, 230, 200, 0.35);
+            line-height: 1.8;
+            margin-bottom: 20px;
+            padding: 12px;
+            border-left: 2px solid var(--border);
+          "
+        >
+          // Single-use field augments. Sourced from Echo caches and
+          black-market traders.<br />
+          // Modify scan behaviour, FRG yield, and encounter frequency.
         </div>
         <div class="items-grid" id="boostersGrid"></div>
+      </div>
+
+      <!-- TAB: PIP UPGRADES -->
+      <div class="tab-content" id="tab-upgrades">
+        <div class="section-header">
+          <div class="section-title">PIP UPGRADES</div>
+          <div class="section-badge">PERMANENT MODS — IRREVERSIBLE</div>
+        </div>
+        <div
+          style="
+            font-family: var(--mono);
+            font-size: 9px;
+            letter-spacing: 1.5px;
+            color: rgba(200, 230, 200, 0.35);
+            line-height: 1.8;
+            margin-bottom: 20px;
+            padding: 12px;
+            border-left: 2px solid rgba(255, 184, 48, 0.3);
+          "
+        >
+          // Permanent hardware modifications to your PIP device.
+          <span style="color: rgba(255, 184, 48, 0.6)">Irreversible.</span
+          ><br />
+          // Salvaged from decommissioned Ironclad field units or the Voss
+          Institute black market.<br />
+          // Purchased with
+          <span style="color: rgba(255, 184, 48, 0.7)"
+            >WPC (Wasteland Processor Credits)</span
+          >.
+        </div>
+        <div class="items-grid" id="upgradesGrid"></div>
+      </div>
+
+      <!-- TAB: UTILITIES -->
+      <div class="tab-content" id="tab-utilities">
+        <div class="section-header">
+          <div class="section-title">UTILITIES</div>
+          <div class="section-badge">OPERATIONAL TOOLS</div>
+        </div>
+        <div
+          style="
+            font-family: var(--mono);
+            font-size: 9px;
+            letter-spacing: 1.5px;
+            color: rgba(200, 230, 200, 0.35);
+            line-height: 1.8;
+            margin-bottom: 20px;
+            padding: 12px;
+            border-left: 2px solid var(--border);
+          "
+        >
+          // Timer resets, signal scramblers, and black-market access tokens.<br />
+          // Mixed currency — check each item.
+        </div>
+        <div class="items-grid" id="utilitiesGrid"></div>
       </div>
 
       <!-- TAB: HISTORY -->
@@ -1212,11 +1307,6 @@
       let pityState = loadPity();
       let frgBalance = parseInt(localStorage.getItem("frg_balance") || "0");
 
-      // In a real app this comes from API — for now mock it
-      // Try to load from localStorage if set by game
-      const storedFRG = localStorage.getItem("user_ingame_wallet");
-      if (storedFRG !== null) frgBalance = parseInt(storedFRG) || 0;
-
       function saveFRG(val) {
         frgBalance = val;
         localStorage.setItem("frg_balance", val);
@@ -1227,10 +1317,110 @@
         if (coinEl) coinEl.textContent = val + " FRG";
       }
 
+      // ── FETCH FRAGMENTS FROM BACKEND ──
+      async function loadFragmentsFromBackend() {
+        const user_id = localStorage.getItem("user_id");
+        const token = localStorage.getItem("token");
+
+        if (!user_id || !token) {
+          console.warn("User not authenticated - using localStorage fallback");
+          const storedFRG = localStorage.getItem("user_ingame_wallet");
+          if (storedFRG !== null) frgBalance = parseInt(storedFRG) || 0;
+          saveFRG(frgBalance);
+          return;
+        }
+
+        try {
+          const API_BASE_URL = window.API_BASE_URL || "http://localhost:4000";
+          const res = await fetch(`${API_BASE_URL}/users/${user_id}/frg`, {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          });
+
+          if (!res.ok) {
+            console.error("Failed to fetch fragments:", res.status);
+            const storedFRG = localStorage.getItem("user_ingame_wallet");
+            if (storedFRG !== null) frgBalance = parseInt(storedFRG) || 0;
+            saveFRG(frgBalance);
+            return;
+          }
+
+          const result = await res.json();
+
+          if (result.success && result.data) {
+            // The endpoint returns { success: true, data: { fragments: number }, message: "..." }
+            frgBalance = result.data.fragments || 0;
+            saveFRG(frgBalance);
+            console.log("Fragments loaded from backend:", frgBalance);
+          } else {
+            console.warn("Failed to load fragments", result.message);
+            const storedFRG = localStorage.getItem("user_ingame_wallet");
+            if (storedFRG !== null) frgBalance = parseInt(storedFRG) || 0;
+            saveFRG(frgBalance);
+          }
+        } catch (err) {
+          console.error("Error loading fragments:", err);
+          const storedFRG = localStorage.getItem("user_ingame_wallet");
+          if (storedFRG !== null) frgBalance = parseInt(storedFRG) || 0;
+          saveFRG(frgBalance);
+        }
+      }
+
+      // ── UPDATE FRAGMENTS IN BACKEND ──
+      async function updateFragmentsInBackend(amountSpent) {
+        const user_id = localStorage.getItem("user_id");
+        const token = localStorage.getItem("token");
+
+        if (!user_id || !token) {
+          console.warn("User not authenticated - skipping backend save");
+          return;
+        }
+
+        try {
+          const API_BASE_URL = window.API_BASE_URL || "http://localhost:4000";
+          // Send negative amount since we're deducting fragments
+          const res = await fetch(`${API_BASE_URL}/users/${user_id}/frg`, {
+            method: "PUT",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ amount: -amountSpent }),
+          });
+
+          if (!res.ok) {
+            console.error("Failed to update fragments in backend:", res.status);
+            return;
+          }
+
+          const result = await res.json();
+          if (result.success) {
+            console.log(
+              "Fragments deducted from backend. New balance:",
+              result.data,
+            );
+          } else {
+            console.warn("Update failed:", result.message);
+          }
+        } catch (err) {
+          console.error("Error updating fragments:", err);
+        }
+      }
+
       // ── UTILS ──
       window.switchTab = function (name) {
+        const names = [
+          "gacha",
+          "capture",
+          "boosters",
+          "upgrades",
+          "utilities",
+          "history",
+        ];
         document.querySelectorAll(".tab").forEach((t, i) => {
-          const names = ["gacha", "balls", "boosters", "history"];
           t.classList.toggle("active", names[i] === name);
         });
         document
@@ -1275,6 +1465,173 @@
         if (g5050) g5050.style.display = prm.guaranteed5 ? "block" : "none";
       }
 
+      // ── SAVE CAPTURED POKEMON TO INVENTORY ──
+      async function saveItemsToInventory(results, bannerType, cost) {
+        const user_id = localStorage.getItem("user_id");
+        const token = localStorage.getItem("token");
+
+        if (!user_id || !token) {
+          console.warn("User not authenticated - skipping inventory save");
+          return;
+        }
+
+        const API_BASE_URL = window.API_BASE_URL || "http://localhost:4000";
+
+        // Save each pulled pokemon as a captured fragment
+        for (const pokemon of results) {
+          try {
+            const res = await fetch(
+              `${API_BASE_URL}/users/${user_id}/pokemon`,
+              {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  user_id: user_id,
+                  pokemon_id: pokemon.id,
+                  name: pokemon.name,
+                  pokedex_no: pokemon.id,
+                  types: pokemon.type || null,
+                  sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.id}.png`,
+                  level: 1,
+                  experience: 0,
+                  current_hp: 100,
+                  nickname: null,
+                  nature: null,
+                  is_shiny: false,
+                  status: "ACTIVE",
+                  caught_at: new Date().toISOString(),
+                }),
+              },
+            );
+
+            if (!res.ok) {
+              console.error(
+                `Failed to capture pokemon ${pokemon.name}:`,
+                res.status,
+              );
+            } else {
+              const result = await res.json();
+              console.log(
+                `Pokemon ${pokemon.name} captured and added to vault:`,
+                result,
+              );
+            }
+
+            // Save pull history to Supabase
+            await savePullToHistory(user_id, token, pokemon, bannerType, cost);
+          } catch (err) {
+            console.error(`Error capturing pokemon ${pokemon.name}:`, err);
+          }
+        }
+      }
+
+      // ── SAVE PULL TO HISTORY (SUPABASE) ──
+      async function savePullToHistory(
+        user_id,
+        token,
+        pokemon,
+        bannerType,
+        cost,
+      ) {
+        const API_BASE_URL = window.API_BASE_URL || "http://localhost:4000";
+
+        const payload = {
+          user_id: user_id,
+          pokemon_id: pokemon.id,
+          pokemon_name: pokemon.name,
+          rarity: pokemon.rarity,
+          featured: pokemon.featured || false,
+          banner_type: bannerType,
+          cost: cost,
+        };
+
+        console.log("Saving pull to history:", payload);
+
+        try {
+          const res = await fetch(`${API_BASE_URL}/pull-history`, {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(payload),
+          });
+
+          console.log("Pull save response status:", res.status);
+
+          if (!res.ok) {
+            const errorText = await res.text();
+            console.error(
+              `Failed to save pull history: ${res.status}`,
+              errorText,
+            );
+          } else {
+            const result = await res.json();
+            console.log(`Pull history saved for ${pokemon.name}:`, result);
+          }
+        } catch (err) {
+          console.error(`Error saving pull history:`, err);
+        }
+      }
+
+      // ── LOAD PULL HISTORY FROM SUPABASE ──
+      let pullHistory = [];
+      async function loadPullHistory() {
+        const user_id = localStorage.getItem("user_id");
+        const token = localStorage.getItem("token");
+
+        console.log("loadPullHistory called with user_id:", user_id);
+
+        if (!user_id || !token) {
+          console.warn("User not authenticated - skipping pull history load");
+          return;
+        }
+
+        const API_BASE_URL = window.API_BASE_URL || "http://localhost:4000";
+
+        try {
+          const url = `${API_BASE_URL}/pull-history?user_id=${encodeURIComponent(user_id)}`;
+          console.log("Fetching from:", url);
+
+          const res = await fetch(url, {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          });
+
+          console.log("Response status:", res.status);
+
+          if (!res.ok) {
+            const errorText = await res.text();
+            console.error(
+              `Failed to load pull history: ${res.status}`,
+              errorText,
+            );
+            return;
+          }
+
+          const result = await res.json();
+          console.log("Pull history result:", result);
+
+          if (result.success) {
+            pullHistory = result.data || [];
+            console.log(`Loaded ${pullHistory.length} pulls from history`);
+          } else {
+            console.warn(
+              "Pull history fetch returned success: false",
+              result.message,
+            );
+          }
+        } catch (err) {
+          console.error(`Error loading pull history:`, err);
+        }
+      }
+
       // ── PULL ──
       const ART = (id) =>
         `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
@@ -1294,12 +1651,17 @@
         document.getElementById(insufId).style.display = "none";
 
         // Deduct
-        saveFRG(frgBalance - cost);
+        const newBalance = frgBalance - cost;
+        saveFRG(newBalance);
+        updateFragmentsInBackend(cost);
 
         // Run pity engine
         const { results, state } = doPull(bannerType, count, pityState);
         pityState = state;
         updatePityUI();
+
+        // Save items to inventory & pull history to Supabase
+        saveItemsToInventory(results, bannerType, cost);
 
         // Show result modal
         showResults(results, count);
@@ -1351,7 +1713,7 @@
 
       window.closeResult = function () {
         document.getElementById("resultOverlay").classList.remove("open");
-        renderHistory();
+        loadPullHistory().then(() => renderHistory()); // Reload from Supabase before rendering
       };
 
       // ── SOUNDS ──
@@ -1393,7 +1755,7 @@
       function confirm(title, desc, cost, cb) {
         document.getElementById("confirmTitle").textContent = title;
         document.getElementById("confirmDesc").textContent = desc;
-        document.getElementById("confirmCost").textContent = cost + " FRG";
+        // confirmCost is set by caller before calling confirm()
         _confirmCb = cb;
         document.getElementById("confirmOverlay").classList.add("open");
       }
@@ -1406,23 +1768,47 @@
         closeConfirm();
       };
 
-      // ── RENDER BALLS ──
-      function renderBalls() {
-        const grid = document.getElementById("ballsGrid");
-        grid.innerHTML = SHOP_ITEMS.balls
+      // ── RENDER CAPTURE DEVICES ──
+      function renderCapture() {
+        const grid = document.getElementById("captureGrid");
+        grid.innerHTML = SHOP_ITEMS.capture_devices
           .map((item) => {
+            const isWPC = item.currency === "WPC";
+            const tierLabel =
+              [
+                "",
+                "MK.I — COMMON",
+                "MK.II — RARE",
+                "MK.III — EPIC",
+                "APEX — LEGENDARY",
+              ][item.tier] || "";
+            const tierColor =
+              [
+                "",
+                "var(--green)",
+                "var(--blue)",
+                "var(--purple)",
+                "var(--amber)",
+              ][item.tier] || "var(--green)";
             return `
-      <div class="item-card">
-        <div class="item-icon-wrap"><img src="${item.img}" alt="${item.name}"/></div>
+      <div class="item-card" style="--card-accent:${item.color}">
+        <div style="font-family:var(--mono);font-size:7px;letter-spacing:3px;color:${tierColor};margin-bottom:2px;">${tierLabel}</div>
+        <div class="item-icon-wrap"><div class="item-icon-emoji">📡</div></div>
         <div class="item-name">${item.name}</div>
         <div class="item-desc">${item.desc}</div>
-        <div class="item-cost">${item.cost.toLocaleString()} <span>FRG EACH</span></div>
+        <div class="item-desc" style="color:${item.color};opacity:0.7;margin-top:-4px;">→ ${item.effect}</div>
+        <div class="item-cost" style="color:${isWPC ? "var(--amber)" : "var(--amber)"}">
+          ${item.cost.toLocaleString()} <span>${item.currency}</span>
+        </div>
         <div class="qty-row">
           <button class="qty-btn" onclick="changeQty('${item.id}',-1)">−</button>
           <span class="qty-val" id="qty-${item.id}">1</span>
           <button class="qty-btn" onclick="changeQty('${item.id}',1)">+</button>
         </div>
-        <button class="buy-btn" onclick="buyItem('${item.id}',${item.cost},'${item.name}')">BUY</button>
+        <button class="buy-btn${isWPC ? " amber-btn" : ""}" onclick="buyItem('${item.id}',${item.cost},'${item.name}','${item.currency}')">
+          ${item.restricted ? "⚠ ACQUIRE" : "BUY"}
+        </button>
+        ${item.restricted ? '<div style="font-family:var(--mono);font-size:7px;letter-spacing:1.5px;color:rgba(255,68,68,0.5);margin-top:2px;">IRONCLAD MONITORED</div>' : ""}
       </div>`;
           })
           .join("");
@@ -1434,12 +1820,54 @@
         grid.innerHTML = SHOP_ITEMS.boosters
           .map((item) => {
             return `
-      <div class="item-card booster">
+      <div class="item-card booster" style="--card-accent:${item.color}">
+        <div class="item-icon-wrap"><div class="item-icon-emoji">${item.icon}</div></div>
+        <div class="item-name">${item.name}</div>
+        <div style="font-family:var(--mono);font-size:7px;letter-spacing:2px;color:rgba(200,230,200,0.35);margin-top:-4px;">DURATION: ${item.duration}</div>
+        <div class="item-desc">${item.desc}</div>
+        <div class="item-desc" style="color:${item.color};opacity:0.7;margin-top:-4px;">→ ${item.effect}</div>
+        <div class="item-cost">${item.cost.toLocaleString()} <span>${item.currency}</span></div>
+        <button class="buy-btn amber-btn" onclick="buyBooster('${item.id}',${item.cost},'${item.name}','${item.desc}','${item.currency}')">ACQUIRE</button>
+      </div>`;
+          })
+          .join("");
+      }
+
+      // ── RENDER PIP UPGRADES ──
+      function renderUpgrades() {
+        const grid = document.getElementById("upgradesGrid");
+        grid.innerHTML = SHOP_ITEMS.pip_upgrades
+          .map((item) => {
+            return `
+      <div class="item-card" style="--card-accent:${item.color}">
+        <div style="font-family:var(--mono);font-size:7px;letter-spacing:3px;color:rgba(255,184,48,0.5);margin-bottom:2px;">PERMANENT — IRREVERSIBLE</div>
         <div class="item-icon-wrap"><div class="item-icon-emoji">${item.icon}</div></div>
         <div class="item-name">${item.name}</div>
         <div class="item-desc">${item.desc}</div>
-        <div class="item-cost">${item.cost.toLocaleString()} <span>FRG</span></div>
-        <button class="buy-btn amber-btn" onclick="buyBooster('${item.id}',${item.cost},'${item.name}')">ACQUIRE</button>
+        <div class="item-desc" style="color:${item.color};opacity:0.7;margin-top:-4px;">→ ${item.effect}</div>
+        <div class="item-cost" style="color:var(--amber)">${item.cost.toLocaleString()} <span>WPC</span></div>
+        <button class="buy-btn amber-btn" onclick="buyUpgrade('${item.id}',${item.cost},'${item.name}')">INSTALL</button>
+      </div>`;
+          })
+          .join("");
+      }
+
+      // ── RENDER UTILITIES ──
+      function renderUtilities() {
+        const grid = document.getElementById("utilitiesGrid");
+        grid.innerHTML = SHOP_ITEMS.utilities
+          .map((item) => {
+            const isWPC = item.currency === "WPC";
+            return `
+      <div class="item-card" style="--card-accent:${item.color}">
+        <div class="item-icon-wrap"><div class="item-icon-emoji">${item.icon}</div></div>
+        <div class="item-name">${item.name}</div>
+        <div class="item-desc">${item.desc}</div>
+        <div class="item-desc" style="color:${item.color};opacity:0.7;margin-top:-4px;">→ ${item.effect}</div>
+        <div class="item-cost" style="color:${isWPC ? "var(--amber)" : "var(--amber)"}">
+          ${item.cost.toLocaleString()} <span>${item.currency}</span>
+        </div>
+        <button class="buy-btn${isWPC ? " amber-btn" : ""}" onclick="buyItem('${item.id}',${item.cost},'${item.name}','${item.currency}')">ACQUIRE</button>
       </div>`;
           })
           .join("");
@@ -1453,16 +1881,23 @@
       };
 
       // ── BUY ITEM ──
-      window.buyItem = function (id, costEach, name) {
+      window.buyItem = function (id, costEach, name, currency = "FRG") {
         const qty = qtys[id] || 1;
         const total = costEach * qty;
-        confirm("CONFIRM PURCHASE", `${name} × ${qty}`, total, () => {
+        document.getElementById("confirmCost").textContent =
+          total.toLocaleString() + " " + currency;
+        confirm("CONFIRM PURCHASE", `${name} × ${qty}`, total, async () => {
           if (frgBalance < total) {
-            toast("Insufficient FRG!", "err");
+            toast("Insufficient " + currency + "!", "err");
             return;
           }
+
+          // Update fragments in backend if currency is FRG
+          if (currency === "FRG") {
+            await updateFragmentsInBackend(total);
+          }
+
           saveFRG(frgBalance - total);
-          // Save to localStorage inventory
           const inv = JSON.parse(localStorage.getItem("inventory") || "{}");
           inv[id] = (inv[id] || 0) + qty;
           localStorage.setItem("inventory", JSON.stringify(inv));
@@ -1471,25 +1906,55 @@
       };
 
       // ── BUY BOOSTER ──
-      window.buyBooster = function (id, cost, name) {
+      window.buyBooster = function (id, cost, name, desc, currency = "FRG") {
+        document.getElementById("confirmCost").textContent =
+          cost.toLocaleString() + " " + currency;
+        confirm("ACQUIRE BOOSTER", `${name} — ${desc}`, cost, async () => {
+          if (frgBalance < cost) {
+            toast("Insufficient " + currency + "!", "err");
+            return;
+          }
+
+          // Update fragments in backend if currency is FRG
+          if (currency === "FRG") {
+            await updateFragmentsInBackend(cost);
+          }
+
+          saveFRG(frgBalance - cost);
+          const boosts = JSON.parse(localStorage.getItem("boosters") || "{}");
+          boosts[id] = (boosts[id] || 0) + 1;
+          localStorage.setItem("boosters", JSON.stringify(boosts));
+          toast(`${name} activated`, "ok");
+        });
+      };
+
+      // ── BUY UPGRADE ──
+      window.buyUpgrade = function (id, cost, name) {
+        const upgrades = JSON.parse(
+          localStorage.getItem("pip_upgrades") || "{}",
+        );
+        if (upgrades[id]) {
+          toast("Already installed — upgrade permanent", "warn");
+          return;
+        }
+        document.getElementById("confirmCost").textContent =
+          cost.toLocaleString() + " WPC";
         confirm(
-          "ACQUIRE BOOSTER",
-          name +
-            " — " +
-            document
-              .querySelector(`[onclick*="${id}"] + button, .item-card`)
-              ?.querySelector(".item-desc")?.textContent || "",
+          "INSTALL UPGRADE",
+          `${name} — PERMANENT. Cannot be undone.`,
           cost,
-          () => {
+          async () => {
             if (frgBalance < cost) {
-              toast("Insufficient FRG!", "err");
+              toast("Insufficient WPC!", "err");
               return;
             }
+
+            // Update WPC in Supabase (using a hypothetical WPC item)
+            // For now, just update fragments if used
             saveFRG(frgBalance - cost);
-            const boosts = JSON.parse(localStorage.getItem("boosters") || "{}");
-            boosts[id] = (boosts[id] || 0) + 1;
-            localStorage.setItem("boosters", JSON.stringify(boosts));
-            toast(`${name} activated`, "ok");
+            upgrades[id] = true;
+            localStorage.setItem("pip_upgrades", JSON.stringify(upgrades));
+            toast(`${name} installed permanently`, "ok");
           },
         );
       };
@@ -1497,17 +1962,17 @@
       // ── HISTORY ──
       function renderHistory() {
         const wrap = document.getElementById("historyWrap");
-        if (!pityState.history || !pityState.history.length) {
+        if (!pullHistory || !pullHistory.length) {
           wrap.innerHTML =
             '<span style="font-family:var(--mono);font-size:9px;color:var(--text-dim)">NO PULLS YET</span>';
           return;
         }
-        wrap.innerHTML = pityState.history
+        wrap.innerHTML = pullHistory
           .map(
             (r) => `
     <div class="history-chip r${r.rarity}">
-      <img src="${ART(r.id)}" alt="${r.name}"/>
-      ${r.name.toUpperCase()}
+      <img src="${ART(r.pokemon_id)}" alt="${r.pokemon_name}"/>
+      ${r.pokemon_name.toUpperCase()}
     </div>
   `,
           )
@@ -1533,23 +1998,34 @@
       updateTimer();
 
       // ── INIT ──
-      saveFRG(frgBalance); // render balance
-      updatePityUI();
-      renderBalls();
-      renderBoosters();
+      async function initShop() {
+        await loadFragmentsFromBackend();
+        await loadPullHistory();
+        saveFRG(frgBalance); // render balance
+        updatePityUI();
+        renderCapture();
+        renderBoosters();
+        renderUpgrades();
+        renderUtilities();
+        renderHistory(); // Render history after loading from Supabase
 
-      // Navbar
-      fetch("navbar.html")
-        .then((r) => r.text())
-        .then((data) => {
-          document.getElementById("navbar-placeholder").innerHTML = data;
-          if (typeof window.attachLogoutHandler === "function")
-            window.attachLogoutHandler();
-          if (typeof window.loadProfileName === "function")
-            window.loadProfileName();
-          if (typeof window.updateWPCBalance === "function")
-            window.updateWPCBalance();
-        });
+        // Load navbar and fetch fresh fragment balance
+        fetch("navbar.html")
+          .then((r) => r.text())
+          .then((data) => {
+            document.getElementById("navbar-placeholder").innerHTML = data;
+            if (typeof window.attachLogoutHandler === "function")
+              window.attachLogoutHandler();
+            if (typeof window.loadProfileName === "function")
+              window.loadProfileName();
+            if (typeof window.updateWPCBalance === "function")
+              window.updateWPCBalance();
+          });
+
+        // Load fresh fragment balance from backend on page load
+        await loadFragmentsFromBackend();
+      }
+      initShop();
     </script>
   </body>
 </html>

@@ -1,10 +1,9 @@
 // api.js
 // Frontend API wrapper — talks only to your backend
 // Uses window.API_BASE_URL set from .env CLIENT_URL in deployment
-// export const API_BASE_URL = window.API_BASE_URL || "http://localhost:4000";
+export const API_BASE_URL = window.API_BASE_URL || "http://localhost:4000";
 
-export const API_BASE_URL =
-  window.API_BASE_URL || "https://bit-pokemon-backend.onrender.com";
+// export const API_BASE_URL = window.API_BASE_URL || "https://bit-pokemon-backend.onrender.com";
 
 // ========================
 // PAGE BASE URL — Handles both local and GitHub Pages deployment

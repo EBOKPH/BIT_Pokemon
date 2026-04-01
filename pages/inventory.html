@@ -869,6 +869,37 @@
       .d-btn.drop:hover {
         background: rgba(255, 68, 68, 0.2);
       }
+      /* ── CATEGORY CHIPS ── */
+      .cat-chips {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-bottom: 14px;
+      }
+      .cat-chip {
+        font-family: var(--mono);
+        font-size: 9px;
+        letter-spacing: 2px;
+        padding: 5px 12px;
+        background: rgba(0,0,0,0.3);
+        border: 1px solid var(--border-dim);
+        color: var(--text-dim);
+        cursor: pointer;
+        transition: all 0.15s;
+        text-transform: uppercase;
+      }
+      .cat-chip:hover {
+        color: var(--text);
+        border-color: rgba(74,255,106,0.25);
+      }
+      .cat-chip.active {
+        color: var(--green);
+        border-color: rgba(74,255,106,0.4);
+        background: rgba(74,255,106,0.07);
+      }
+      .cat-chips.hidden {
+        display: none;
+      }
     </style>
   </head>
   <body>
@@ -937,6 +968,15 @@
         </button>
       </div>
 
+      <!-- Category filter chips (items tab only) -->
+      <div class="cat-chips" id="catChips">
+        <button class="cat-chip active" onclick="setCat('all', this)">ALL</button>
+        <button class="cat-chip" onclick="setCat('capture_device', this)">⚡ CAPTURE</button>
+        <button class="cat-chip" onclick="setCat('booster', this)">📡 BOOSTERS</button>
+        <button class="cat-chip" onclick="setCat('pip_upgrade', this)">🔧 UPGRADES</button>
+        <button class="cat-chip" onclick="setCat('utility', this)">◈ UTILITIES</button>
+      </div>
+
       <!-- Filter bar -->
       <div class="inv-filter">
         <input
@@ -952,6 +992,8 @@
           <option value="name">Name A–Z</option>
           <option value="qty_desc">Qty ↓</option>
           <option value="qty_asc">Qty ↑</option>
+          <option value="rarity">Rarity ↓</option>
+          <option value="type">Category</option>
         </select>
         <button class="refresh-btn" onclick="reload()">↻ REFRESH</button>
       </div>
@@ -1005,6 +1047,7 @@
       let allItems = [];
       let allPokemon = [];
       let activeTab = "items";
+      let activeCat = "all";
 
       // ── Item type labels (lore-accurate display names) ───────
       const TYPE_LABELS = {
@@ -1015,17 +1058,16 @@
         pokeball: "Capture Device", // legacy fallback
       };
 
-      // ── Item icon map by SKU then type ───────────────────────
-      // Since Capture Devices are custom tech (no PokeAPI sprite),
-      // we use SVG data URIs rendered inline as card icons.
+      // Rarity sort order
+      const RARITY_ORDER = { legendary: 0, epic: 1, rare: 2, uncommon: 3, common: 4 };
+
+      // ── Item icon map ────────────────────────────────────────
       const TYPE_ICONS = {
         capture_device: "⚡",
         booster: "📡",
         pip_upgrade: "🔧",
         utility: "🔄",
       };
-
-      // SKU → icon override
       const SKU_ICONS = {
         "CAPTURE-MK1": "⚡",
         "CAPTURE-MK2": "⚡",
@@ -1042,23 +1084,16 @@
         "UTIL-SCRAMBLE": "📶",
       };
 
-      // Returns either an image URL (if item has image_url) or null
-      // Card will render icon instead when no image
-      function itemImageUrl(item) {
-        return item.image_url || null;
-      }
-      function itemIcon(item) {
-        return SKU_ICONS[item.sku] || TYPE_ICONS[item.item_type] || "📦";
-      }
-      function itemTypeLabel(item) {
-        return TYPE_LABELS[item.item_type] || item.item_type || "misc";
-      }
+      // Which item types are consumable (show USE button)
+      const CONSUMABLE_TYPES = ["booster", "utility"];
+
+      function itemImageUrl(item) { return item.image_url || null; }
+      function itemIcon(item) { return SKU_ICONS[item.sku] || TYPE_ICONS[item.item_type] || "📦"; }
+      function itemTypeLabel(item) { return TYPE_LABELS[item.item_type] || item.item_type || "misc"; }
 
       // ── Clock ────────────────────────────────────────────────
       setInterval(() => {
-        document.getElementById("sb-clock").textContent = new Date()
-          .toTimeString()
-          .slice(0, 8);
+        document.getElementById("sb-clock").textContent = new Date().toTimeString().slice(0, 8);
       }, 1000);
       document.getElementById("sb-uid").textContent = `UID-${user_id}`;
 
@@ -1076,6 +1111,66 @@
         });
         return r.json();
       }
+      async function post(path, body) {
+        const r = await fetch(`${window._API}${path}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          body: JSON.stringify(body),
+        });
+        return r.json();
+      }
+
+      // ── LocalStorage → Backend sync ──────────────────────────
+      // Items bought in shop.html are stored in localStorage temporarily.
+      // On inventory load we push any pending items to the backend then clear them.
+      async function syncShopPurchases() {
+        try {
+          const inv = JSON.parse(localStorage.getItem("inventory") || "{}");
+          const entries = Object.entries(inv);
+          if (!entries.length) return;
+
+          // Map item IDs from pity.js SHOP_ITEMS to backend-compatible objects
+          const ITEM_CATALOG = {
+            capture_mk1:    { item_name: "Capture Device Mk.I",   item_type: "capture_device", sku: "CAPTURE-MK1",   rarity: "common",    tier: 1, currency: "FRG",  price: 80   },
+            capture_mk2:    { item_name: "Capture Device Mk.II",  item_type: "capture_device", sku: "CAPTURE-MK2",   rarity: "rare",      tier: 2, currency: "FRG",  price: 200  },
+            capture_mk3:    { item_name: "Capture Device Mk.III", item_type: "capture_device", sku: "CAPTURE-MK3",   rarity: "epic",      tier: 3, currency: "FRG",  price: 500  },
+            capture_apex:   { item_name: "Capture Device — APEX", item_type: "capture_device", sku: "CAPTURE-APEX",  rarity: "legendary", tier: 4, currency: "WPC",  price: 5000, restricted: true },
+            neural_boost:   { item_name: "Neural Boost",          item_type: "booster",        sku: "BOOST-NEURAL",  rarity: "uncommon",  duration: "30 min", currency: "FRG", price: 300,  effect: "2× encounter rate for 30 minutes." },
+            xp_boost:       { item_name: "XP Amplifier",          item_type: "booster",        sku: "BOOST-XP",      rarity: "uncommon",  duration: "1 hr",   currency: "FRG", price: 400,  effect: "1.5× FRG yield for 1 hour." },
+            signal_lock:    { item_name: "Signal Lock",           item_type: "booster",        sku: "BOOST-SIGLOCK", rarity: "rare",      duration: "One use", currency: "FRG", price: 600, effect: "Prevents Fragment signal loss on failed encode." },
+            corruption_ward:{ item_name: "Corruption Ward",       item_type: "booster",        sku: "BOOST-WARD",    rarity: "rare",      duration: "1 hr",   currency: "FRG", price: 750,  effect: "Blocks corrupted Fragment signals for 1 hour." },
+            slot_expand:    { item_name: "Slot Chip +1",          item_type: "pip_upgrade",    sku: "UPGRADE-SLOT",  rarity: "legendary", permanent: true, currency: "WPC", price: 2000, effect: "Expands active Fragment slots from 5 to 6." },
+            beam_stabiliser:{ item_name: "Beam Stabiliser",       item_type: "pip_upgrade",    sku: "UPGRADE-BEAM",  rarity: "epic",      permanent: true, currency: "WPC", price: 1500, effect: "Reduces Mk.I and Mk.II failure rate by 10%." },
+            memory_core:    { item_name: "Memory Core Upgrade",   item_type: "pip_upgrade",    sku: "UPGRADE-MEM",   rarity: "rare",      permanent: true, currency: "WPC", price: 3000, effect: "Increases Fragment Vault capacity to 100 chips." },
+            daily_reset:    { item_name: "Reset Timer",           item_type: "utility",        sku: "UTIL-RESET",    rarity: "rare",      currency: "WPC", price: 800,   effect: "Instantly resets daily pull timer." },
+            signal_scrambler:{ item_name: "Signal Scrambler",     item_type: "utility",        sku: "UTIL-SCRAMBLE", rarity: "uncommon",  currency: "FRG", price: 500,  effect: "Stealth mode 2 hrs. Reduced faction aggro." },
+          };
+
+          for (const [id, qty] of entries) {
+            const meta = ITEM_CATALOG[id];
+            if (!meta || qty <= 0) continue;
+            // POST to backend — backend handles upsert (add qty)
+            await post(`/items/inventory/${user_id}`, {
+              item_id: id,
+              quantity: qty,
+              ...meta,
+            });
+          }
+          // Clear pending queue
+          localStorage.removeItem("inventory");
+          // Also sync pip upgrades (permanent — quantity always 1)
+          const upgrades = JSON.parse(localStorage.getItem("pip_upgrades") || "{}");
+          for (const [id, installed] of Object.entries(upgrades)) {
+            if (!installed) continue;
+            const meta = ITEM_CATALOG[id];
+            if (!meta) continue;
+            await post(`/items/inventory/${user_id}`, { item_id: id, quantity: 1, ...meta });
+          }
+          localStorage.removeItem("pip_upgrades");
+        } catch (e) {
+          console.warn("Shop sync failed (offline?):", e);
+        }
+      }
 
       // ── Load profile ─────────────────────────────────────────
       async function loadProfile() {
@@ -1083,32 +1178,33 @@
           const res = await get(`/users/${user_id}`);
           if (res.success && res.data) {
             const d = res.data;
-            document.getElementById("hunterIgn").textContent =
-              d.ign || d.username || "—";
-            document.getElementById("wpcBal").textContent =
-              d.user_ingame_wallet ?? 0;
-            document.getElementById("cnt-pokeball").textContent =
-              d.pokeball ?? 0;
-            document.getElementById("cnt-greatball").textContent =
-              d.greatball ?? 0;
-            document.getElementById("cnt-ultraball").textContent =
-              d.ultraball ?? 0;
-            document.getElementById("cnt-masterball").textContent =
-              d.masterball ?? 0;
+            document.getElementById("hunterIgn").textContent = d.ign || d.username || "—";
+            document.getElementById("wpcBal").textContent = (d.user_ingame_wallet ?? 0).toLocaleString();
           }
         } catch (e) {}
       }
 
-      // ── Load items from user_inventory_detailed view ─────────
+      // ── Update device counts from loaded items ────────────────
+      function updateDeviceCounts(items) {
+        const counts = { "CAPTURE-MK1": 0, "CAPTURE-MK2": 0, "CAPTURE-MK3": 0, "CAPTURE-APEX": 0 };
+        for (const item of items) {
+          if (item.sku in counts) counts[item.sku] = (item.quantity ?? 0);
+        }
+        document.getElementById("cnt-pokeball").textContent  = counts["CAPTURE-MK1"];
+        document.getElementById("cnt-greatball").textContent = counts["CAPTURE-MK2"];
+        document.getElementById("cnt-ultraball").textContent = counts["CAPTURE-MK3"];
+        document.getElementById("cnt-masterball").textContent= counts["CAPTURE-APEX"];
+      }
+
+      // ── Load items ───────────────────────────────────────────
       async function loadItems() {
         try {
           const res = await get(`/items/inventory/${user_id}`);
           allItems = res.success && res.data ? res.data : [];
-        } catch (e) {
-          allItems = [];
-        }
+        } catch (e) { allItems = []; }
         document.getElementById("cntItems").textContent = allItems.length;
         document.getElementById("sb-items").textContent = allItems.length;
+        updateDeviceCounts(allItems);
       }
 
       // ── Load Pokémon ─────────────────────────────────────────
@@ -1116,9 +1212,7 @@
         try {
           const res = await get(`/users/${user_id}/pokemon`);
           allPokemon = res.success && res.data ? res.data : [];
-        } catch (e) {
-          allPokemon = [];
-        }
+        } catch (e) { allPokemon = []; }
         document.getElementById("cntPoke").textContent = allPokemon.length;
         document.getElementById("sb-poke").textContent = allPokemon.length;
       }
@@ -1130,25 +1224,27 @@
           grid.innerHTML = `<div class="state-msg">
       <div class="state-icon">📦</div>
       <div class="state-title">Vault Empty</div>
-      <div class="state-sub">// no items found</div>
+      <div class="state-sub">// no items found in this category</div>
     </div>`;
           return;
         }
-        grid.innerHTML = list
-          .map((item) => {
-            const rarity = (item.rarity || "common").toLowerCase();
-            const icon = itemIcon(item);
-            const imgUrl = itemImageUrl(item);
-            const typeDisp = itemTypeLabel(item);
-            const safe = encodeURIComponent(JSON.stringify(item));
-            const restricted = item.restricted
-              ? `<span style="font-family:var(--mono);font-size:8px;letter-spacing:2px;color:rgba(255,68,68,.7);border:1px solid rgba(255,68,68,.2);padding:1px 5px;">RESTRICTED</span>`
-              : "";
-            const imgContent = imgUrl
-              ? `<img src="${imgUrl}" alt="${item.item_name || "item"}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
+        grid.innerHTML = list.map((item) => {
+          const rarity = (item.rarity || "common").toLowerCase();
+          const icon = itemIcon(item);
+          const imgUrl = itemImageUrl(item);
+          const typeDisp = itemTypeLabel(item);
+          const safe = encodeURIComponent(JSON.stringify(item));
+          const restricted = item.restricted
+            ? `<span style="font-family:var(--mono);font-size:8px;letter-spacing:2px;color:rgba(255,68,68,.7);border:1px solid rgba(255,68,68,.2);padding:1px 5px;">RESTRICTED</span>`
+            : "";
+          const permanentTag = item.permanent
+            ? `<span style="font-family:var(--mono);font-size:8px;letter-spacing:1px;color:rgba(255,184,48,.7);border:1px solid rgba(255,184,48,.2);padding:1px 5px;">PERMANENT</span>`
+            : "";
+          const imgContent = imgUrl
+            ? `<img src="${imgUrl}" alt="${item.item_name || "item"}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
          <div class="card-icon-fallback" style="display:none;font-size:40px;line-height:1">${icon}</div>`
-              : `<div style="font-size:42px;line-height:1;filter:drop-shadow(0 0 8px currentColor)">${icon}</div>`;
-            return `<div class="item-card r-${rarity}" onclick="openItem('${safe}')">
+            : `<div style="font-size:42px;line-height:1;filter:drop-shadow(0 0 8px currentColor)">${icon}</div>`;
+          return `<div class="item-card r-${rarity}" onclick="openItem('${safe}')">
       <span class="cc tl"></span><span class="cc tr"></span>
       <span class="cc bl"></span><span class="cc br"></span>
       <div class="card-img">
@@ -1158,14 +1254,13 @@
       <div class="card-body">
         <div class="card-name">${item.item_name || `Item #${item.item_id}`}</div>
         <div class="card-type">${typeDisp}</div>
-        <div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center">
+        <div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center;margin-top:3px">
           <div class="card-rarity-tag">${rarity}</div>
-          ${restricted}
+          ${restricted}${permanentTag}
         </div>
       </div>
     </div>`;
-          })
-          .join("");
+        }).join("");
       }
 
       // ── Render pokémon ────────────────────────────────────────
@@ -1181,20 +1276,13 @@
         }
         const ART = (id) =>
           `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
-        grid.innerHTML = list
-          .map((p) => {
-            const sprite = p.sprite || ART(p.pokedex_no || p.pokemon_id || 0);
-            const name = p.nickname || p.name || `#${p.pokedex_no || "?"}`;
-            const dex = p.pokedex_no
-              ? `NO.${String(p.pokedex_no).padStart(3, "0")}`
-              : "";
-            const types = Array.isArray(p.types)
-              ? p.types
-              : p.types
-                ? String(p.types).split(",")
-                : [];
-            const safe = encodeURIComponent(JSON.stringify(p));
-            return `<div class="poke-card" onclick="openPoke('${safe}')">
+        grid.innerHTML = list.map((p) => {
+          const sprite = p.sprite || ART(p.pokedex_no || p.pokemon_id || 0);
+          const name = p.nickname || p.name || `#${p.pokedex_no || "?"}`;
+          const dex = p.pokedex_no ? `NO.${String(p.pokedex_no).padStart(3, "0")}` : "";
+          const types = Array.isArray(p.types) ? p.types : p.types ? String(p.types).split(",") : [];
+          const safe = encodeURIComponent(JSON.stringify(p));
+          return `<div class="poke-card" onclick="openPoke('${safe}')">
       <span class="cc tl"></span><span class="cc tr"></span>
       <span class="cc bl"></span><span class="cc br"></span>
       <div class="poke-img">
@@ -1210,54 +1298,53 @@
         </div>
       </div>
     </div>`;
-          })
-          .join("");
+        }).join("");
       }
 
       // ── Filter + Sort ────────────────────────────────────────
+      window.setCat = function(cat, btn) {
+        activeCat = cat;
+        document.querySelectorAll(".cat-chip").forEach(c => c.classList.remove("active"));
+        btn.classList.add("active");
+        applyFilter();
+      };
+
       window.applyFilter = function () {
         const q = document.getElementById("searchInput").value.toLowerCase();
         const sort = document.getElementById("sortSel").value;
         if (activeTab === "items") {
-          let list = allItems.filter(
-            (i) =>
-              (i.item_name || "").toLowerCase().includes(q) ||
+          let list = allItems.filter((i) => {
+            const matchCat = activeCat === "all" || (i.item_type || "").toLowerCase() === activeCat;
+            const matchQ = (i.item_name || "").toLowerCase().includes(q) ||
               (i.item_type || "").toLowerCase().includes(q) ||
-              (i.hunter || "").toLowerCase().includes(q),
-          );
-          if (sort === "name")
-            list.sort((a, b) =>
-              (a.item_name || "").localeCompare(b.item_name || ""),
-            );
-          if (sort === "qty_desc")
-            list.sort((a, b) => (b.quantity || 0) - (a.quantity || 0));
-          if (sort === "qty_asc")
-            list.sort((a, b) => (a.quantity || 0) - (b.quantity || 0));
+              (i.sku || "").toLowerCase().includes(q);
+            return matchCat && matchQ;
+          });
+          if (sort === "name")     list.sort((a, b) => (a.item_name || "").localeCompare(b.item_name || ""));
+          if (sort === "qty_desc") list.sort((a, b) => (b.quantity || 0) - (a.quantity || 0));
+          if (sort === "qty_asc")  list.sort((a, b) => (a.quantity || 0) - (b.quantity || 0));
+          if (sort === "rarity")   list.sort((a, b) => (RARITY_ORDER[a.rarity?.toLowerCase()] ?? 99) - (RARITY_ORDER[b.rarity?.toLowerCase()] ?? 99));
+          if (sort === "type")     list.sort((a, b) => (a.item_type || "").localeCompare(b.item_type || ""));
           renderItems(list);
         } else {
-          let list = allPokemon.filter(
-            (p) =>
-              (p.name || p.nickname || "").toLowerCase().includes(q) ||
-              String(p.types || "")
-                .toLowerCase()
-                .includes(q),
+          let list = allPokemon.filter((p) =>
+            (p.name || p.nickname || "").toLowerCase().includes(q) ||
+            String(p.types || "").toLowerCase().includes(q),
           );
-          if (sort === "name")
-            list.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
-          if (sort === "qty_desc")
-            list.sort((a, b) => (b.level || 0) - (a.level || 0));
-          if (sort === "qty_asc")
-            list.sort((a, b) => (a.level || 0) - (b.level || 0));
+          if (sort === "name")     list.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+          if (sort === "qty_desc") list.sort((a, b) => (b.level || 0) - (a.level || 0));
+          if (sort === "qty_asc")  list.sort((a, b) => (a.level || 0) - (b.level || 0));
           renderPokemon(list);
         }
       };
 
       window.switchTab = function (tab, btn) {
         activeTab = tab;
-        document
-          .querySelectorAll(".tab-btn")
-          .forEach((b) => b.classList.remove("active"));
+        document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
         btn.classList.add("active");
+        // Show/hide category chips
+        const chips = document.getElementById("catChips");
+        chips.classList.toggle("hidden", tab !== "items");
         document.getElementById("searchInput").value = "";
         applyFilter();
       };
@@ -1276,14 +1363,14 @@
         const imgUrl = itemImageUrl(item);
         const typeDisp = itemTypeLabel(item);
         const rarity = (item.rarity || "common").toUpperCase();
+        const isConsumable = CONSUMABLE_TYPES.includes(item.item_type);
+        const canUse = isConsumable && (item.quantity ?? 0) > 0;
 
         const imgBlock = imgUrl
           ? `<div class="d-img"><img src="${imgUrl}" alt="${item.item_name || ""}"/></div>`
           : `<div class="d-img"><div style="font-size:72px;line-height:1;text-align:center">${icon}</div></div>`;
 
-        document.getElementById("dTitle").textContent = (
-          item.item_name || "Item"
-        ).toUpperCase();
+        document.getElementById("dTitle").textContent = (item.item_name || "Item").toUpperCase();
         document.getElementById("dContent").innerHTML = `
     ${imgBlock}
     <div class="d-row"><span class="d-lbl">Name</span><span class="d-val">${item.item_name || "—"}</span></div>
@@ -1294,17 +1381,61 @@
     <div class="d-row"><span class="d-lbl">Quantity</span><span class="d-val" style="color:var(--green);font-size:20px;font-family:'Bebas Neue',sans-serif;letter-spacing:2px">×${item.quantity ?? 0}</span></div>
     ${item.price ? `<div class="d-row"><span class="d-lbl">Price</span><span class="d-val">${item.price} ${item.currency || "FRG"}</span></div>` : ""}
     ${item.duration ? `<div class="d-row"><span class="d-lbl">Duration</span><span class="d-val">${item.duration}</span></div>` : ""}
-    ${item.permanent ? `<div class="d-row"><span class="d-lbl">Type</span><span class="d-val" style="color:var(--amber)">Permanent Upgrade</span></div>` : ""}
+    ${item.permanent ? `<div class="d-row"><span class="d-lbl">Install Type</span><span class="d-val" style="color:var(--amber)">⚠ Permanent — Cannot be removed</span></div>` : ""}
     ${item.restricted ? `<div class="d-row"><span class="d-lbl">Status</span><span class="d-val" style="color:var(--red)">⚠ RESTRICTED — Ironclad-monitored</span></div>` : ""}
     <div class="d-row"><span class="d-lbl">Acquired</span><span class="d-val">${item.acquired_at ? new Date(item.acquired_at).toLocaleDateString() : "—"}</span></div>
     ${item.effect ? `<div class="d-desc">// EFFECT — ${item.effect}</div>` : ""}
     ${item.description ? `<div class="d-desc">// ${item.description}</div>` : ""}
     <div class="d-actions">
-      <button class="d-btn drop" onclick="dropItem(${item.item_id})">✕ Discard from Vault</button>
+      ${canUse ? `<button class="d-btn use" onclick="useItem(${item.item_id}, '${item.item_name}', '${item.item_type}')">▶ Use Item</button>` : ""}
+      ${!item.permanent ? `<button class="d-btn drop" onclick="dropItem(${item.item_id})">✕ Discard from Vault</button>` : `<button class="d-btn drop" style="opacity:0.4;cursor:not-allowed" disabled>✕ Cannot Discard</button>`}
     </div>
   `;
         document.getElementById("drawerOverlay").classList.add("open");
       };
+
+      // ── Use item ─────────────────────────────────────────────
+      window.useItem = async function(item_id, name, type) {
+        // For now: decrement quantity by 1, show activation toast
+        try {
+          const item = allItems.find(i => i.item_id === item_id);
+          const newQty = (item?.quantity ?? 1) - 1;
+          if (newQty < 0) return;
+          const res = newQty === 0
+            ? await del(`/items/inventory/${user_id}/${item_id}`)
+            : await fetch(`${window._API}/items/inventory/${user_id}/${item_id}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                body: JSON.stringify({ quantity: newQty }),
+              }).then(r => r.json());
+
+          if (res.success !== false) {
+            closeDrawer();
+            // Apply effect to localStorage flags so other pages can read it
+            const activeBoosts = JSON.parse(localStorage.getItem("active_boosts") || "{}");
+            activeBoosts[type] = { name, activatedAt: Date.now() };
+            localStorage.setItem("active_boosts", JSON.stringify(activeBoosts));
+            // Show activation overlay
+            showActivationFeedback(name);
+            await loadItems();
+            applyFilter();
+          }
+        } catch(e) { alert("Failed to use item"); }
+      };
+
+      function showActivationFeedback(name) {
+        const toast = document.createElement("div");
+        toast.style.cssText = `
+          position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+          background:rgba(8,12,4,0.97);border:1px solid rgba(74,255,106,0.5);
+          padding:24px 40px;font-family:'Bebas Neue',sans-serif;font-size:22px;
+          letter-spacing:6px;color:var(--green);z-index:9999;text-align:center;
+          box-shadow:0 0 60px rgba(74,255,106,0.15);
+        `;
+        toast.innerHTML = `⚡ ACTIVATED<br><span style="font-size:14px;letter-spacing:3px;color:rgba(74,255,106,0.6)">${name.toUpperCase()}</span>`;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 2200);
+      }
 
       // ── Pokémon drawer ───────────────────────────────────────
       window.openPoke = function (safe) {
@@ -1313,12 +1444,8 @@
           `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
         const sprite = p.sprite || ART(p.pokedex_no || p.pokemon_id || 0);
         const name = p.nickname || p.name || "Unknown Fragment";
-        const types = Array.isArray(p.types)
-          ? p.types.join(" / ")
-          : p.types || "—";
-        const dexNo = p.pokedex_no
-          ? "#" + String(p.pokedex_no).padStart(3, "0")
-          : "—";
+        const types = Array.isArray(p.types) ? p.types.join(" / ") : p.types || "—";
+        const dexNo = p.pokedex_no ? "#" + String(p.pokedex_no).padStart(3, "0") : "—";
         document.getElementById("dTitle").textContent = name.toUpperCase();
         document.getElementById("dContent").innerHTML = `
     <div class="d-img"><img src="${sprite}" alt="${name}" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/0.png'"/></div>
@@ -1330,13 +1457,13 @@
     <div class="d-row"><span class="d-lbl">Signal Integrity</span><span class="d-val">${p.current_hp ?? "—"} / ${p.max_hp || "—"}</span></div>
     <div class="d-row"><span class="d-lbl">Nature Matrix</span><span class="d-val">${p.nature || "—"}</span></div>
     <div class="d-row"><span class="d-lbl">Chip Status</span><span class="d-val">${p.status || "ACTIVE"}</span></div>
-    <div class="d-row"><span class="d-lbl">Corrupted</span><span class="d-val" style="color:${p.is_shiny ? "var(--amber)" : "var(--text-dim)"}">${p.is_shiny ? "★ ANOMALY DETECTED" : "Clean signal"}</span></div>
+    <div class="d-row"><span class="d-lbl">Anomaly</span><span class="d-val" style="color:${p.is_shiny ? "var(--amber)" : "var(--text-dim)"}">${p.is_shiny ? "★ SHINY SIGNAL DETECTED" : "Clean signal"}</span></div>
     <div class="d-row"><span class="d-lbl">Re-encoded</span><span class="d-val">${p.caught_at ? new Date(p.caught_at).toLocaleDateString() : "—"}</span></div>
   `;
         document.getElementById("drawerOverlay").classList.add("open");
       };
 
-      // ── Drop item (DELETE) ───────────────────────────────────
+      // ── Drop item ────────────────────────────────────────────
       window.dropItem = async function (item_id) {
         if (!confirm("Remove this item from your vault?")) return;
         try {
@@ -1345,28 +1472,25 @@
             closeDrawer();
             await loadItems();
             applyFilter();
-          } else {
-            alert(res.message || "Failed to remove item");
-          }
-        } catch (e) {
-          alert("Network error");
-        }
+          } else { alert(res.message || "Failed to remove item"); }
+        } catch (e) { alert("Network error"); }
       };
 
       window.closeDrawer = function () {
         document.getElementById("drawerOverlay").classList.remove("open");
       };
       window.overlayClick = function (e) {
-        if (e.target === document.getElementById("drawerOverlay"))
-          closeDrawer();
+        if (e.target === document.getElementById("drawerOverlay")) closeDrawer();
       };
 
       // ── Init ─────────────────────────────────────────────────
       async function init() {
+        await syncShopPurchases(); // flush any pending shop buys to backend first
         await Promise.all([loadProfile(), loadItems(), loadPokemon()]);
         applyFilter();
       }
       init();
+
     </script>
 
     <!-- Navbar -->

@@ -1,0 +1,1505 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BIT-POKEMON — Line-Up</title>
+    <script src="../config.js"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Bebas+Neue&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --green: #4aff6a;
+        --green-dim: rgba(74, 255, 106, 0.15);
+        --green-dark: #0a1f0f;
+        --amber: #ffb830;
+        --red: #ff4444;
+        --blue: #44aaff;
+        --purple: #b450ff;
+        --cyan: #00e5ff;
+        --bg: #0a0c08;
+        --panel: #0d110a;
+        --border: rgba(74, 255, 106, 0.18);
+        --border-dim: rgba(74, 255, 106, 0.08);
+        --text: #c8e8a0;
+        --text-dim: #4a6a38;
+        --mono: "Share Tech Mono", monospace;
+        --ui: "Rajdhani", sans-serif;
+        --display: "Bebas Neue", sans-serif;
+      }
+
+      *,
+      *::before,
+      *::after {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        width: 100%;
+        min-height: 100%;
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--ui);
+        overflow-x: hidden;
+      }
+
+      /* Scanlines */
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        z-index: 1000;
+        pointer-events: none;
+        background: repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 2px,
+          rgba(0, 0, 0, 0.08) 2px,
+          rgba(0, 0, 0, 0.08) 4px
+        );
+      }
+      /* Vignette */
+      body::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        z-index: 999;
+        pointer-events: none;
+        background: radial-gradient(
+          ellipse 90% 90% at 50% 50%,
+          transparent 40%,
+          rgba(0, 0, 0, 0.7) 100%
+        );
+      }
+
+      #navbar-placeholder {
+        position: relative;
+        z-index: 100;
+      }
+
+      /* ── BG ── */
+      .bg-layer {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        background:
+          radial-gradient(
+            ellipse 60% 40% at 50% 0%,
+            rgba(20, 60, 10, 0.5) 0%,
+            transparent 70%
+          ),
+          radial-gradient(
+            ellipse 30% 30% at 10% 70%,
+            rgba(74, 255, 106, 0.03) 0%,
+            transparent 60%
+          ),
+          radial-gradient(
+            ellipse 30% 30% at 90% 30%,
+            rgba(0, 229, 255, 0.03) 0%,
+            transparent 60%
+          ),
+          linear-gradient(180deg, #060908 0%, #0a0c08 100%);
+      }
+
+      /* ── GRID LINES ── */
+      .grid-lines {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        opacity: 0.04;
+        background-image:
+          linear-gradient(rgba(74, 255, 106, 1) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(74, 255, 106, 1) 1px, transparent 1px);
+        background-size: 60px 60px;
+      }
+
+      /* ── PAGE ── */
+      .page {
+        position: relative;
+        z-index: 1;
+        min-height: calc(100vh - 58px);
+        padding: 32px 24px 80px;
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+
+      /* ── PAGE HEADER ── */
+      .page-header {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        margin-bottom: 28px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid var(--border-dim);
+        animation: fadeUp 0.6s ease both;
+      }
+      .page-header-left {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .page-tag {
+        font-family: var(--mono);
+        font-size: 9px;
+        letter-spacing: 5px;
+        color: rgba(74, 255, 106, 0.35);
+        text-transform: uppercase;
+      }
+      .page-title {
+        font-family: var(--display);
+        font-size: 42px;
+        color: var(--green);
+        filter: drop-shadow(0 0 16px rgba(74, 255, 106, 0.4));
+        line-height: 1;
+      }
+      .page-sub {
+        font-family: var(--mono);
+        font-size: 10px;
+        color: var(--text-dim);
+        letter-spacing: 2px;
+        margin-top: 4px;
+      }
+      .save-btn {
+        font-family: var(--display);
+        font-size: 16px;
+        letter-spacing: 2px;
+        background: rgba(74, 255, 106, 0.08);
+        border: 1px solid var(--border);
+        color: var(--green);
+        padding: 10px 24px;
+        cursor: pointer;
+        transition: all 0.2s;
+        clip-path: polygon(
+          0 0,
+          calc(100% - 8px) 0,
+          100% 8px,
+          100% 100%,
+          8px 100%,
+          0 calc(100% - 8px)
+        );
+      }
+      .save-btn:hover:not(:disabled) {
+        background: rgba(74, 255, 106, 0.18);
+        box-shadow: 0 0 18px rgba(74, 255, 106, 0.25);
+      }
+      .save-btn:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+
+      /* ── LAYOUT ── */
+      .lineup-layout {
+        display: grid;
+        grid-template-columns: 1fr 340px;
+        gap: 24px;
+        animation: fadeUp 0.7s ease 0.1s both;
+      }
+
+      @media (max-width: 900px) {
+        .lineup-layout {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      /* ── TEAM SECTION ── */
+      .section-label {
+        font-family: var(--mono);
+        font-size: 9px;
+        letter-spacing: 5px;
+        color: rgba(74, 255, 106, 0.4);
+        text-transform: uppercase;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .section-label::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: linear-gradient(90deg, var(--border), transparent);
+      }
+
+      /* ── TEAM SLOTS ── */
+      .team-slots {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .team-slot {
+        position: relative;
+        border: 1px solid var(--border-dim);
+        background: linear-gradient(
+          135deg,
+          rgba(74, 255, 106, 0.03),
+          rgba(0, 0, 0, 0.3)
+        );
+        display: flex;
+        align-items: center;
+        gap: 0;
+        min-height: 120px;
+        transition: all 0.2s;
+        overflow: hidden;
+        cursor: default;
+      }
+
+      .team-slot::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: 3px;
+        background: linear-gradient(
+          180deg,
+          var(--green),
+          rgba(74, 255, 106, 0.2)
+        );
+        opacity: 0;
+        transition: opacity 0.2s;
+      }
+      .team-slot.has-pokemon::before {
+        opacity: 1;
+      }
+
+      /* Slot number badge */
+      .slot-number {
+        width: 48px;
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 12px 0;
+        border-right: 1px solid var(--border-dim);
+        gap: 4px;
+        height: 100%;
+      }
+      .slot-num-label {
+        font-family: var(--mono);
+        font-size: 8px;
+        color: var(--text-dim);
+        letter-spacing: 2px;
+      }
+      .slot-num-val {
+        font-family: var(--display);
+        font-size: 26px;
+        color: rgba(74, 255, 106, 0.25);
+        line-height: 1;
+      }
+      .team-slot.has-pokemon .slot-num-val {
+        color: rgba(74, 255, 106, 0.5);
+      }
+
+      /* Empty slot placeholder */
+      .slot-empty {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 20px;
+        opacity: 0.35;
+      }
+      .slot-empty-icon {
+        width: 48px;
+        height: 48px;
+        border: 2px dashed rgba(74, 255, 106, 0.3);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        opacity: 0.5;
+      }
+      .slot-empty-text {
+        font-family: var(--mono);
+        font-size: 9px;
+        color: var(--text-dim);
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        text-align: center;
+      }
+
+      /* ── POKEMON CARD in slot ── */
+      .slot-pokemon {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 12px 16px;
+        position: relative;
+      }
+
+      .slot-sprite-wrap {
+        position: relative;
+        flex-shrink: 0;
+        width: 80px;
+        height: 80px;
+      }
+      .slot-sprite-bg {
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        background: radial-gradient(
+          circle,
+          rgba(74, 255, 106, 0.08) 0%,
+          transparent 70%
+        );
+        animation: spritePulse 3s ease-in-out infinite;
+      }
+      @keyframes spritePulse {
+        0%,
+        100% {
+          transform: scale(1);
+          opacity: 0.6;
+        }
+        50% {
+          transform: scale(1.08);
+          opacity: 1;
+        }
+      }
+      .slot-sprite {
+        width: 80px;
+        height: 80px;
+        object-fit: contain;
+        position: relative;
+        z-index: 1;
+        filter: drop-shadow(0 4px 12px rgba(74, 255, 106, 0.2));
+        transition: transform 0.2s;
+      }
+      .team-slot:hover .slot-sprite {
+        transform: translateY(-2px);
+      }
+
+      /* Shiny indicator */
+      .shiny-badge {
+        position: absolute;
+        top: -2px;
+        right: -2px;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: radial-gradient(circle, #ffd700, #ff8c00);
+        font-size: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
+        z-index: 2;
+      }
+
+      .slot-info {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .slot-types {
+        display: flex;
+        gap: 5px;
+        margin-bottom: 6px;
+        flex-wrap: wrap;
+      }
+      .type-pip {
+        font-family: var(--mono);
+        font-size: 7px;
+        letter-spacing: 2px;
+        padding: 2px 7px;
+        text-transform: uppercase;
+        border-radius: 2px;
+      }
+
+      .slot-name {
+        font-family: var(--display);
+        font-size: 24px;
+        color: var(--green);
+        line-height: 1;
+        margin-bottom: 2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .slot-dex {
+        font-family: var(--mono);
+        font-size: 9px;
+        color: var(--text-dim);
+        letter-spacing: 3px;
+        margin-bottom: 8px;
+      }
+      .slot-desc {
+        font-family: var(--ui);
+        font-size: 12px;
+        color: rgba(200, 232, 160, 0.45);
+        line-height: 1.4;
+        max-width: 360px;
+      }
+
+      .slot-stats {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        margin-top: 10px;
+        flex-shrink: 0;
+      }
+      .stat-row {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-family: var(--mono);
+        font-size: 8px;
+      }
+      .stat-lbl {
+        color: var(--text-dim);
+        letter-spacing: 2px;
+        width: 28px;
+      }
+      .stat-bar-wrap {
+        width: 60px;
+        height: 3px;
+        background: rgba(74, 255, 106, 0.08);
+        border-radius: 2px;
+        overflow: hidden;
+      }
+      .stat-bar {
+        height: 100%;
+        border-radius: 2px;
+        transition: width 0.4s ease;
+      }
+      .stat-val {
+        color: var(--text-dim);
+        font-size: 7px;
+        min-width: 20px;
+      }
+
+      /* Level badge */
+      .level-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        font-family: var(--mono);
+        font-size: 8px;
+        letter-spacing: 2px;
+        color: var(--amber);
+        background: rgba(255, 184, 48, 0.08);
+        border: 1px solid rgba(255, 184, 48, 0.2);
+        padding: 3px 8px;
+      }
+
+      /* Remove btn */
+      .slot-remove {
+        position: absolute;
+        bottom: 8px;
+        right: 10px;
+        font-family: var(--mono);
+        font-size: 8px;
+        letter-spacing: 2px;
+        color: rgba(255, 68, 68, 0.4);
+        background: none;
+        border: none;
+        cursor: pointer;
+        transition: color 0.2s;
+        text-transform: uppercase;
+        padding: 2px 4px;
+      }
+      .slot-remove:hover {
+        color: var(--red);
+      }
+
+      /* Drag over */
+      .team-slot.drag-over {
+        border-color: rgba(74, 255, 106, 0.5);
+        background: rgba(74, 255, 106, 0.06);
+        box-shadow: inset 0 0 20px rgba(74, 255, 106, 0.05);
+      }
+
+      /* ── CORNER CUTS ── */
+      .team-slot::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 12px;
+        height: 12px;
+        border-top: 1px solid var(--border-dim);
+        border-left: 1px solid var(--border-dim);
+        pointer-events: none;
+      }
+
+      /* ── INVENTORY PANEL ── */
+      .inventory-panel {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .inventory-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 4px;
+      }
+      .inventory-count {
+        font-family: var(--mono);
+        font-size: 9px;
+        color: var(--text-dim);
+        letter-spacing: 2px;
+      }
+
+      .inventory-search {
+        position: relative;
+        margin-bottom: 8px;
+      }
+      .inv-search-input {
+        width: 100%;
+        background: rgba(74, 255, 106, 0.04);
+        border: 1px solid var(--border-dim);
+        color: var(--text);
+        font-family: var(--mono);
+        font-size: 10px;
+        padding: 8px 12px 8px 30px;
+        outline: none;
+        transition: border-color 0.2s;
+      }
+      .inv-search-input::placeholder {
+        color: var(--text-dim);
+      }
+      .inv-search-input:focus {
+        border-color: var(--border);
+      }
+      .inv-search-icon {
+        position: absolute;
+        left: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 11px;
+        color: var(--text-dim);
+        pointer-events: none;
+      }
+
+      .inventory-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        max-height: calc(100vh - 320px);
+        overflow-y: auto;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(74, 255, 106, 0.2) transparent;
+        padding-right: 4px;
+      }
+      .inventory-list::-webkit-scrollbar {
+        width: 4px;
+      }
+      .inventory-list::-webkit-scrollbar-thumb {
+        background: rgba(74, 255, 106, 0.2);
+        border-radius: 2px;
+      }
+
+      .inv-card {
+        background: rgba(74, 255, 106, 0.03);
+        border: 1px solid var(--border-dim);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 10px;
+        cursor: grab;
+        transition: all 0.2s;
+        user-select: none;
+        position: relative;
+        overflow: hidden;
+      }
+      .inv-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 2px;
+        height: 100%;
+        background: var(--green);
+        opacity: 0;
+        transition: opacity 0.2s;
+      }
+      .inv-card:hover {
+        border-color: var(--border);
+        background: rgba(74, 255, 106, 0.07);
+      }
+      .inv-card:hover::before {
+        opacity: 0.4;
+      }
+      .inv-card.dragging {
+        opacity: 0.4;
+        transform: scale(0.97);
+        cursor: grabbing;
+      }
+      .inv-card.in-team {
+        opacity: 0.3;
+        cursor: not-allowed;
+        pointer-events: none;
+      }
+      .inv-card:active {
+        cursor: grabbing;
+      }
+
+      .inv-sprite {
+        width: 44px;
+        height: 44px;
+        object-fit: contain;
+        flex-shrink: 0;
+        filter: drop-shadow(0 2px 6px rgba(74, 255, 106, 0.15));
+      }
+      .inv-info {
+        flex: 1;
+        min-width: 0;
+      }
+      .inv-types {
+        display: flex;
+        gap: 4px;
+        margin-bottom: 3px;
+      }
+      .inv-name {
+        font-family: var(--display);
+        font-size: 16px;
+        color: var(--green);
+        line-height: 1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .inv-meta {
+        font-family: var(--mono);
+        font-size: 8px;
+        color: var(--text-dim);
+        letter-spacing: 1px;
+        margin-top: 2px;
+      }
+      .inv-drag-hint {
+        font-family: var(--mono);
+        font-size: 7px;
+        color: rgba(74, 255, 106, 0.2);
+        letter-spacing: 1px;
+        flex-shrink: 0;
+        writing-mode: vertical-rl;
+        text-orientation: mixed;
+      }
+
+      /* Team full warning on inv card */
+      .inv-card.team-full-warn {
+        cursor: not-allowed;
+      }
+
+      /* ── TYPE COLORS ── */
+      .t-fire {
+        background: rgba(255, 100, 20, 0.15);
+        color: #ff6414;
+        border: 1px solid rgba(255, 100, 20, 0.3);
+      }
+      .t-water {
+        background: rgba(68, 170, 255, 0.15);
+        color: #44aaff;
+        border: 1px solid rgba(68, 170, 255, 0.3);
+      }
+      .t-grass {
+        background: rgba(74, 255, 106, 0.12);
+        color: #4aff6a;
+        border: 1px solid rgba(74, 255, 106, 0.25);
+      }
+      .t-electric {
+        background: rgba(255, 220, 0, 0.12);
+        color: #ffdc00;
+        border: 1px solid rgba(255, 220, 0, 0.25);
+      }
+      .t-psychic {
+        background: rgba(255, 80, 180, 0.12);
+        color: #ff50b4;
+        border: 1px solid rgba(255, 80, 180, 0.25);
+      }
+      .t-poison {
+        background: rgba(160, 80, 255, 0.12);
+        color: #a050ff;
+        border: 1px solid rgba(160, 80, 255, 0.25);
+      }
+      .t-ice {
+        background: rgba(120, 220, 255, 0.12);
+        color: #78dcff;
+        border: 1px solid rgba(120, 220, 255, 0.25);
+      }
+      .t-fighting {
+        background: rgba(220, 80, 60, 0.12);
+        color: #dc503c;
+        border: 1px solid rgba(220, 80, 60, 0.25);
+      }
+      .t-ground {
+        background: rgba(200, 160, 80, 0.12);
+        color: #c8a050;
+        border: 1px solid rgba(200, 160, 80, 0.25);
+      }
+      .t-flying {
+        background: rgba(140, 160, 255, 0.12);
+        color: #8ca0ff;
+        border: 1px solid rgba(140, 160, 255, 0.25);
+      }
+      .t-rock {
+        background: rgba(160, 130, 80, 0.12);
+        color: #a08250;
+        border: 1px solid rgba(160, 130, 80, 0.25);
+      }
+      .t-ghost {
+        background: rgba(100, 80, 160, 0.12);
+        color: #6450a0;
+        border: 1px solid rgba(100, 80, 160, 0.25);
+      }
+      .t-dragon {
+        background: rgba(80, 80, 255, 0.12);
+        color: #5050ff;
+        border: 1px solid rgba(80, 80, 255, 0.25);
+      }
+      .t-dark {
+        background: rgba(60, 40, 40, 0.25);
+        color: #806060;
+        border: 1px solid rgba(120, 80, 80, 0.25);
+      }
+      .t-steel {
+        background: rgba(160, 180, 200, 0.12);
+        color: #a0b4c8;
+        border: 1px solid rgba(160, 180, 200, 0.25);
+      }
+      .t-fairy {
+        background: rgba(255, 160, 200, 0.12);
+        color: #ffa0c8;
+        border: 1px solid rgba(255, 160, 200, 0.25);
+      }
+      .t-normal {
+        background: rgba(180, 180, 160, 0.08);
+        color: #b4b4a0;
+        border: 1px solid rgba(180, 180, 160, 0.2);
+      }
+      .t-bug {
+        background: rgba(120, 200, 60, 0.12);
+        color: #78c83c;
+        border: 1px solid rgba(120, 200, 60, 0.25);
+      }
+      .t-default {
+        background: rgba(100, 100, 100, 0.1);
+        color: #888;
+        border: 1px solid rgba(100, 100, 100, 0.2);
+      }
+
+      /* ── STATUS BAR ── */
+      .status-bar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 200;
+        background: rgba(6, 9, 8, 0.95);
+        border-top: 1px solid var(--border-dim);
+        padding: 10px 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-family: var(--mono);
+        font-size: 9px;
+        letter-spacing: 2px;
+        color: var(--text-dim);
+        backdrop-filter: blur(10px);
+      }
+      .status-slots {
+        display: flex;
+        gap: 6px;
+      }
+      .status-slot {
+        width: 10px;
+        height: 10px;
+        border: 1px solid rgba(74, 255, 106, 0.2);
+        border-radius: 50%;
+        transition: all 0.3s;
+      }
+      .status-slot.filled {
+        background: var(--green);
+        box-shadow: 0 0 6px rgba(74, 255, 106, 0.5);
+      }
+      .status-msg {
+        color: rgba(74, 255, 106, 0.35);
+      }
+
+      /* ── TOAST ── */
+      .toast {
+        position: fixed;
+        bottom: 60px;
+        left: 50%;
+        transform: translateX(-50%) translateY(20px);
+        background: rgba(10, 20, 10, 0.95);
+        border: 1px solid var(--border);
+        color: var(--green);
+        font-family: var(--mono);
+        font-size: 11px;
+        letter-spacing: 2px;
+        padding: 10px 22px;
+        z-index: 300;
+        opacity: 0;
+        transition: all 0.3s;
+        white-space: nowrap;
+        clip-path: polygon(
+          0 0,
+          calc(100% - 8px) 0,
+          100% 8px,
+          100% 100%,
+          8px 100%,
+          0 calc(100% - 8px)
+        );
+      }
+      .toast.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+      .toast.error {
+        border-color: rgba(255, 68, 68, 0.4);
+        color: var(--red);
+      }
+
+      /* ── LOAD STATE ── */
+      .loading-shimmer {
+        background: linear-gradient(
+          90deg,
+          rgba(74, 255, 106, 0.03) 0%,
+          rgba(74, 255, 106, 0.08) 50%,
+          rgba(74, 255, 106, 0.03) 100%
+        );
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite;
+      }
+      @keyframes shimmer {
+        0% {
+          background-position: -200% 0;
+        }
+        100% {
+          background-position: 200% 0;
+        }
+      }
+
+      .empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px;
+        gap: 12px;
+        color: var(--text-dim);
+        font-family: var(--mono);
+        font-size: 10px;
+        letter-spacing: 2px;
+        text-align: center;
+        border: 1px dashed rgba(74, 255, 106, 0.1);
+      }
+      .empty-state-icon {
+        font-size: 32px;
+        opacity: 0.3;
+      }
+
+      /* ── ANIMATIONS ── */
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(14px);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+
+      /* Drop ghost indicator */
+      .drop-indicator {
+        position: absolute;
+        inset: 0;
+        border: 2px dashed rgba(74, 255, 106, 0.4);
+        pointer-events: none;
+        z-index: 5;
+        opacity: 0;
+        transition: opacity 0.15s;
+      }
+      .team-slot.drag-over .drop-indicator {
+        opacity: 1;
+      }
+
+      /* Slot scan line */
+      .slot-scan {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          var(--green),
+          transparent
+        );
+        opacity: 0;
+        z-index: 3;
+        animation: slotScan 4s ease-in-out infinite;
+      }
+      @keyframes slotScan {
+        0% {
+          top: 0%;
+          opacity: 0;
+        }
+        10% {
+          opacity: 0.4;
+        }
+        90% {
+          opacity: 0.2;
+        }
+        100% {
+          top: 100%;
+          opacity: 0;
+        }
+      }
+      .team-slot.has-pokemon .slot-scan {
+        animation-play-state: running;
+      }
+      .team-slot:not(.has-pokemon) .slot-scan {
+        animation: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="bg-layer"></div>
+    <div class="grid-lines"></div>
+
+    <div id="navbar-placeholder"></div>
+
+    <div class="page">
+      <!-- Header -->
+      <div class="page-header">
+        <div class="page-header-left">
+          <div class="page-tag">// system — squad config</div>
+          <div class="page-title">LINE-UP</div>
+          <div class="page-sub">ACTIVE TEAM &nbsp;/&nbsp; MAX 5 FRAGMENTS</div>
+        </div>
+        <button class="save-btn" id="saveBtn" disabled>▶ SAVE LINE-UP</button>
+      </div>
+
+      <!-- Main layout -->
+      <div class="lineup-layout">
+        <!-- LEFT: Team Slots -->
+        <div>
+          <div class="section-label">active squad</div>
+          <div class="team-slots" id="teamSlots">
+            <!-- Generated by JS -->
+          </div>
+        </div>
+
+        <!-- RIGHT: Inventory -->
+        <div class="inventory-panel">
+          <div class="inventory-header">
+            <div class="section-label" style="margin-bottom: 0; flex: 1">
+              fragment vault
+            </div>
+            <div class="inventory-count" id="invCount">— / —</div>
+          </div>
+          <div class="inventory-search">
+            <span class="inv-search-icon">⌕</span>
+            <input
+              class="inv-search-input"
+              id="invSearch"
+              type="text"
+              placeholder="SEARCH FRAGMENTS..."
+              autocomplete="off"
+            />
+          </div>
+          <div class="inventory-list" id="inventoryList">
+            <!-- Generated by JS -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Status bar -->
+    <div class="status-bar">
+      <div style="display: flex; align-items: center; gap: 10px">
+        <span>SQUAD</span>
+        <div class="status-slots" id="statusSlots"></div>
+      </div>
+      <div class="status-msg" id="statusMsg">
+        // drag fragments from vault to assign slots
+      </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <script type="module">
+      import { API_BASE_URL, getPageLink } from "../api.js";
+
+      // ── Auth ────────────────────────────────────────────────
+      const user_id = localStorage.getItem("user_id");
+      const token = localStorage.getItem("token");
+      if (!user_id || !token) {
+        window.location.href = getPageLink("index.html");
+      }
+
+      // ── State ───────────────────────────────────────────────
+      const MAX_SLOTS = 5;
+      let allPokemon = []; // full inventory from DB
+      let team = new Array(MAX_SLOTS).fill(null); // team slots (null = empty)
+      let dragPokemon = null; // currently dragged inventory card
+      let dragSlotIdx = null; // dragging from a slot (reorder)
+      let isDirty = false;
+
+      // ── Helpers ─────────────────────────────────────────────
+      const $ = (s) => document.querySelector(s);
+      const $$ = (s) => document.querySelectorAll(s);
+
+      function toast(msg, isError = false) {
+        const el = $("#toast");
+        el.textContent = msg;
+        el.className = "toast" + (isError ? " error" : "");
+        el.classList.add("show");
+        setTimeout(() => el.classList.remove("show"), 2800);
+      }
+
+      function typeClass(t) {
+        const known = [
+          "fire",
+          "water",
+          "grass",
+          "electric",
+          "psychic",
+          "normal",
+          "poison",
+          "flying",
+          "ice",
+          "fighting",
+          "ground",
+          "rock",
+          "ghost",
+          "dragon",
+          "dark",
+          "steel",
+          "fairy",
+          "bug",
+        ];
+        return known.includes(t) ? `t-${t}` : "t-default";
+      }
+
+      function typePip(t) {
+        return `<span class="type-pip ${typeClass(t)}">${t}</span>`;
+      }
+
+      function statColor(val, max = 255) {
+        const pct = val / max;
+        if (pct > 0.7) return "var(--green)";
+        if (pct > 0.4) return "var(--amber)";
+        return "var(--red)";
+      }
+
+      // Map pokedex_no → PokéAPI description (cached)
+      const descCache = {};
+      async function getDesc(dexNo) {
+        if (descCache[dexNo]) return descCache[dexNo];
+        try {
+          const r = await fetch(
+            `https://pokeapi.co/api/v2/pokemon-species/${dexNo}`,
+          );
+          if (!r.ok) return null;
+          const d = await r.json();
+          const entry = d.flavor_text_entries?.find(
+            (e) => e.language.name === "en",
+          );
+          const text = entry ? entry.flavor_text.replace(/\f|\n/g, " ") : null;
+          descCache[dexNo] = text;
+          return text;
+        } catch {
+          return null;
+        }
+      }
+
+      // ── RENDER STATUS BAR ────────────────────────────────────
+      function renderStatus() {
+        const filled = team.filter(Boolean).length;
+        const slots = $("#statusSlots");
+        slots.innerHTML = "";
+        for (let i = 0; i < MAX_SLOTS; i++) {
+          const d = document.createElement("div");
+          d.className = "status-slot" + (team[i] ? " filled" : "");
+          slots.appendChild(d);
+        }
+        $("#statusMsg").textContent =
+          filled === 0
+            ? "// drag fragments from vault to assign slots"
+            : filled === MAX_SLOTS
+              ? "// squad at full capacity — ready to deploy"
+              : `// ${filled} of ${MAX_SLOTS} slots filled`;
+        $("#saveBtn").disabled = !isDirty;
+      }
+
+      // ── RENDER TEAM SLOTS ────────────────────────────────────
+      function renderTeam() {
+        const container = $("#teamSlots");
+        container.innerHTML = "";
+        for (let i = 0; i < MAX_SLOTS; i++) {
+          const slot = document.createElement("div");
+          slot.className = "team-slot" + (team[i] ? " has-pokemon" : "");
+          slot.dataset.slotIdx = i;
+
+          // Drop indicator
+          slot.innerHTML = `<div class="drop-indicator"></div><div class="slot-scan"></div>`;
+
+          // Slot number
+          const numBadge = document.createElement("div");
+          numBadge.className = "slot-number";
+          numBadge.innerHTML = `<span class="slot-num-label">SLT</span><span class="slot-num-val">${String(i + 1).padStart(2, "0")}</span>`;
+          slot.appendChild(numBadge);
+
+          if (team[i]) {
+            const pk = team[i];
+            const types = pk.types || [];
+            const typeHtml = types.map(typePip).join("");
+
+            // Fetch description async and patch later
+            const pkContent = document.createElement("div");
+            pkContent.className = "slot-pokemon";
+            pkContent.innerHTML = `
+              <div class="level-badge">LV.${pk.level ?? 1}</div>
+              <div class="slot-sprite-wrap">
+                <div class="slot-sprite-bg"></div>
+                <img class="slot-sprite" src="${pk.sprite || ""}" alt="${pk.name}" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/0.png'"/>
+                ${pk.is_shiny ? '<div class="shiny-badge">★</div>' : ""}
+              </div>
+              <div class="slot-info">
+                <div class="slot-types">${typeHtml}</div>
+                <div class="slot-name">${(pk.nickname || pk.name || "?").toUpperCase()}</div>
+                <div class="slot-dex">NO.${String(pk.pokedex_no || pk.pokemon_id || 0).padStart(3, "0")}</div>
+                <div class="slot-desc" data-dex="${pk.pokedex_no || pk.pokemon_id}">// scanning fragment data...</div>
+              </div>
+              <div class="slot-stats">
+                ${buildStatBars(pk)}
+              </div>
+            `;
+            slot.appendChild(pkContent);
+
+            // Remove button
+            const removeBtn = document.createElement("button");
+            removeBtn.className = "slot-remove";
+            removeBtn.textContent = "[ REMOVE ]";
+            removeBtn.addEventListener("click", (e) => {
+              e.stopPropagation();
+              removeFromSlot(i);
+            });
+            pkContent.appendChild(removeBtn);
+
+            // Lazy-load description
+            const dexNo = pk.pokedex_no || pk.pokemon_id;
+            if (dexNo) {
+              getDesc(dexNo).then((text) => {
+                const el = slot.querySelector(".slot-desc");
+                if (el && text) el.textContent = text;
+                else if (el)
+                  el.textContent = "// no fragment data found in archive";
+              });
+            }
+
+            // Allow dragging from slot (reorder)
+            pkContent.draggable = true;
+            pkContent.addEventListener("dragstart", (e) => {
+              dragSlotIdx = i;
+              dragPokemon = null;
+              e.dataTransfer.effectAllowed = "move";
+              setTimeout(() => slot.classList.add("dragging"), 0);
+            });
+            pkContent.addEventListener("dragend", () => {
+              slot.classList.remove("dragging");
+              dragSlotIdx = null;
+            });
+          } else {
+            const empty = document.createElement("div");
+            empty.className = "slot-empty";
+            empty.innerHTML = `
+              <div class="slot-empty-icon">◌</div>
+              <div class="slot-empty-text">drag fragment here<br>to assign slot</div>
+            `;
+            slot.appendChild(empty);
+          }
+
+          // Drop handlers on slot
+          slot.addEventListener("dragover", (e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = "move";
+            slot.classList.add("drag-over");
+          });
+          slot.addEventListener("dragleave", () =>
+            slot.classList.remove("drag-over"),
+          );
+          slot.addEventListener("drop", (e) => {
+            e.preventDefault();
+            slot.classList.remove("drag-over");
+            handleDrop(i);
+          });
+
+          container.appendChild(slot);
+        }
+        renderStatus();
+      }
+
+      function buildStatBars(pk) {
+        const stats = [
+          { lbl: "HP", val: pk.current_hp ?? pk.base_hp ?? 45 },
+          { lbl: "ATK", val: pk.base_attack ?? pk.attack ?? 45 },
+          { lbl: "DEF", val: pk.base_defense ?? pk.defense ?? 45 },
+          { lbl: "SPD", val: pk.base_speed ?? pk.speed ?? 45 },
+        ];
+        return stats
+          .map((s) => {
+            const pct = Math.min(100, Math.round((s.val / 255) * 100));
+            return `
+            <div class="stat-row">
+              <span class="stat-lbl">${s.lbl}</span>
+              <div class="stat-bar-wrap">
+                <div class="stat-bar" style="width:${pct}%;background:${statColor(s.val)}"></div>
+              </div>
+              <span class="stat-val">${s.val}</span>
+            </div>`;
+          })
+          .join("");
+      }
+
+      // ── RENDER INVENTORY ─────────────────────────────────────
+      function renderInventory(filter = "") {
+        const container = $("#inventoryList");
+        container.innerHTML = "";
+        const query = filter.toLowerCase().trim();
+        const filtered = query
+          ? allPokemon.filter(
+              (p) =>
+                (p.name || "").toLowerCase().includes(query) ||
+                String(p.pokedex_no || "").includes(query),
+            )
+          : allPokemon;
+
+        $("#invCount").textContent =
+          `${filtered.length} / ${allPokemon.length}`;
+
+        if (!filtered.length) {
+          container.innerHTML = `<div class="empty-state"><div class="empty-state-icon">⊘</div><div>NO FRAGMENTS FOUND<br>IN VAULT</div></div>`;
+          return;
+        }
+
+        filtered.forEach((pk) => {
+          const inTeam = team.some(
+            (t) => t && t.user_pokemon_id === pk.user_pokemon_id,
+          );
+          const types = pk.types || [];
+          const card = document.createElement("div");
+          card.className = "inv-card" + (inTeam ? " in-team" : "");
+          card.draggable = !inTeam;
+          card.innerHTML = `
+            <img class="inv-sprite" src="${pk.sprite || ""}" alt="${pk.name}" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/0.png'"/>
+            <div class="inv-info">
+              <div class="inv-types">${types.map((t) => `<span class="type-pip ${typeClass(t)}">${t}</span>`).join("")}</div>
+              <div class="inv-name">${(pk.nickname || pk.name || "?").toUpperCase()}</div>
+              <div class="inv-meta">NO.${String(pk.pokedex_no || 0).padStart(3, "0")} &nbsp;·&nbsp; LV.${pk.level ?? 1} ${pk.is_shiny ? "&nbsp;·&nbsp; ✦ SHINY" : ""}</div>
+            </div>
+            <div class="inv-drag-hint">${inTeam ? "IN TEAM" : "DRAG"}</div>
+          `;
+
+          if (!inTeam) {
+            card.addEventListener("dragstart", (e) => {
+              dragPokemon = pk;
+              dragSlotIdx = null;
+              e.dataTransfer.effectAllowed = "move";
+              setTimeout(() => card.classList.add("dragging"), 0);
+            });
+            card.addEventListener("dragend", () => {
+              card.classList.remove("dragging");
+              dragPokemon = null;
+            });
+          }
+
+          container.appendChild(card);
+        });
+      }
+
+      // ── DROP LOGIC ───────────────────────────────────────────
+      function handleDrop(targetIdx) {
+        if (dragSlotIdx !== null && dragSlotIdx !== targetIdx) {
+          // Reorder: swap two slots
+          const tmp = team[targetIdx];
+          team[targetIdx] = team[dragSlotIdx];
+          team[dragSlotIdx] = tmp;
+          isDirty = true;
+          renderTeam();
+          renderInventory($("#invSearch").value);
+          toast(`// slot ${dragSlotIdx + 1} ⇄ slot ${targetIdx + 1} swapped`);
+        } else if (dragPokemon) {
+          // Adding from inventory
+          if (team[targetIdx]) {
+            // Slot occupied — swap: put existing back to wherever it was (just replace)
+            toast("// slot occupied — remove existing fragment first", true);
+            return;
+          }
+          const filled = team.filter(Boolean).length;
+          if (filled >= MAX_SLOTS && !team[targetIdx]) {
+            toast("// squad at capacity — 5 fragments maximum", true);
+            return;
+          }
+          team[targetIdx] = dragPokemon;
+          isDirty = true;
+          renderTeam();
+          renderInventory($("#invSearch").value);
+          toast(
+            `// ${(dragPokemon.nickname || dragPokemon.name || "?").toUpperCase()} assigned to slot ${targetIdx + 1}`,
+          );
+        }
+        dragPokemon = null;
+        dragSlotIdx = null;
+      }
+
+      // ── REMOVE FROM SLOT ─────────────────────────────────────
+      function removeFromSlot(idx) {
+        const pk = team[idx];
+        if (!pk) return;
+        team[idx] = null;
+        isDirty = true;
+        renderTeam();
+        renderInventory($("#invSearch").value);
+        toast(
+          `// ${(pk.nickname || pk.name || "?").toUpperCase()} removed from slot ${idx + 1}`,
+        );
+      }
+
+      // ── SAVE LINE-UP ─────────────────────────────────────────
+      async function saveLineup() {
+        const btn = $("#saveBtn");
+        btn.disabled = true;
+        btn.textContent = "// ENCODING...";
+
+        try {
+          const slots = team.map((pk, idx) => ({
+            slot_index: idx,
+            user_pokemon_id: pk ? pk.user_pokemon_id : null,
+          }));
+
+          const res = await fetch(`${API_BASE_URL}/users/${user_id}/lineup`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ slots }),
+          });
+          const data = await res.json();
+
+          if (data.success) {
+            isDirty = false;
+            toast("// line-up saved — squad locked in");
+            btn.textContent = "▶ SAVE LINE-UP";
+          } else {
+            toast("// save failed: " + (data.message || "unknown error"), true);
+            btn.textContent = "▶ SAVE LINE-UP";
+            btn.disabled = false;
+          }
+        } catch (err) {
+          toast("// network error — could not save", true);
+          btn.textContent = "▶ SAVE LINE-UP";
+          btn.disabled = false;
+        }
+      }
+
+      // ── LOAD DATA ────────────────────────────────────────────
+      async function loadData() {
+        // Render skeleton
+        const container = $("#inventoryList");
+        for (let i = 0; i < 3; i++) {
+          const sk = document.createElement("div");
+          sk.className = "inv-card loading-shimmer";
+          sk.style.height = "64px";
+          container.appendChild(sk);
+        }
+
+        try {
+          // Load all user pokemon
+          const pokRes = await fetch(
+            `${API_BASE_URL}/users/${user_id}/pokemon`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            },
+          );
+          const pokData = await pokRes.json();
+          allPokemon = (pokData.success ? pokData.data || [] : []).map(p => ({
+            ...p,
+            types: (p.types || []).map(t => typeof t === "string" ? t : t.type || t.name || t)
+          }));
+
+          // Load existing lineup
+          let existingLineup = [];
+          try {
+            const lineupRes = await fetch(
+              `${API_BASE_URL}/users/${user_id}/lineup`,
+              {
+                headers: { Authorization: `Bearer ${token}` },
+              },
+            );
+            const lineupData = await lineupRes.json();
+            if (lineupData.success && lineupData.data) {
+              existingLineup = lineupData.data;
+            }
+          } catch (_) {}
+
+          // Build team from lineup
+          team = new Array(MAX_SLOTS).fill(null);
+          existingLineup.forEach((slot) => {
+            const idx = slot.slot_index;
+            if (idx >= 0 && idx < MAX_SLOTS && slot.user_pokemon_id) {
+              const pk = allPokemon.find(
+                (p) => p.user_pokemon_id === slot.user_pokemon_id,
+              );
+              if (pk) team[idx] = pk;
+            }
+          });
+
+          // If no lineup exists but user has pokemon, auto-fill slot 0 with first pokemon
+          if (existingLineup.length === 0 && allPokemon.length > 0) {
+            team[0] = allPokemon[0];
+            isDirty = true; // mark dirty so user can save it
+          }
+        } catch (err) {
+          toast("// failed to load fragment data", true);
+        }
+
+        renderTeam();
+        renderInventory();
+      }
+
+      // ── EVENTS ──────────────────────────────────────────────
+      $("#invSearch").addEventListener("input", (e) => {
+        renderInventory(e.target.value);
+      });
+
+      $("#saveBtn").addEventListener("click", () => {
+        if (isDirty) saveLineup();
+      });
+
+      // ── INIT ────────────────────────────────────────────────
+      loadData();
+    </script>
+
+    <!-- Navbar -->
+    <script>
+      fetch("navbar.html")
+        .then((r) => r.text())
+        .then((html) => {
+          document.getElementById("navbar-placeholder").innerHTML = html;
+        })
+        .catch(() => {});
+    </script>
+  </body>
+</html>
