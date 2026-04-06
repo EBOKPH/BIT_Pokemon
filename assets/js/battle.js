@@ -5,11 +5,18 @@
 // ── IMPORT EXPERIENCE SYSTEM ──────────────────────────
 import {
   ExperienceSystem,
+  UserExperienceSystem,
   EXP_CONFIG,
   saveBattleResult,
   updateUserBattleStats,
   updatePokemonStats,
+  updateUserExp,
+  applyEvolution,
   calculateBattleExp,
+  calculateUserBattleExp,
+  checkEvolution,
+  checkAndAutoLevelUp,
+  addExpAndLevelUp,
 } from "./experience-system.js";
 
 // ── IMPORT DYNAMIC MOVE SYSTEM ────────────────────────
@@ -626,6 +633,15 @@ function generateMovesLegacy(types, level) {
 // ── DAMAGE CALCULATION ────────────────────────────────────────
 // Gen 3 formula: floor(floor((2*level/5+2) * power * atk/def) / 50) + 2
 // This keeps damage proportional to HP so battles last 3-8 turns.
+//
+// DAMAGE FIX: minimum damage is now level-proportional.
+// At level 1  → min 1  damage
+// At level 10 → min 3  damage
+// At level 50 → min 8  damage
+// At level 100→ min 12 damage
+// This prevents the 1-damage deadlock at low levels while keeping
+// battles fair. Hard minimum is always at least 2% of enemy max HP
+// so battles never stall permanently.
 function calcDamage(attacker, defender, move) {
   const power = move.power || 40;
 
@@ -635,11 +651,15 @@ function calcDamage(attacker, defender, move) {
   const defenseStat =
     move.category === "special" ? defender.spDef : defender.defense;
 
+  // Sanity check: if stats are undefined/0, treat as minimum meaningful value
+  const atk = Math.max(5, attackStat || 5);
+  const def = Math.max(5, defenseStat || 5);
+
   // Gen 3 core formula
   const base =
     Math.floor(
-      (Math.floor((2 * attacker.level) / 5 + 2) * power * attackStat) /
-        Math.max(1, defenseStat) /
+      (Math.floor((2 * attacker.level) / 5 + 2) * power * atk) /
+        def /
         50,
     ) + 2;
 
@@ -656,7 +676,14 @@ function calcDamage(attacker, defender, move) {
   const isCrit = Math.random() < 0.0625;
   const critMult = isCrit ? 1.5 : 1.0;
 
-  const damage = Math.max(1, Math.floor(base * roll * typeEff * critMult));
+  const rawDamage = Math.floor(base * roll * typeEff * critMult);
+
+  // Level-proportional minimum: floor(level / 8) + 2, at least 2% of enemy maxHp
+  const levelMin    = Math.floor(attacker.level / 8) + 2;
+  const hpMin       = Math.max(1, Math.floor((defender.maxHp || defender.hp || 50) * 0.02));
+  const minDamage   = Math.max(levelMin, hpMin);
+
+  const damage = Math.max(minDamage, rawDamage);
   return { damage, isCrit, typeEff };
 }
 
@@ -826,6 +853,9 @@ window.useMove = function (idx) {
   }
 
   // ── END BATTLE ───────────────────────────────────────────
+  // FIX v2: Pokemon gains EXP on both WIN and LOSS.
+  // User (player) also gains EXP + player_level every battle.
+  // Evolution is checked and applied after level-up.
   function endBattle(won) {
     battleOver = true;
     const overlay = document.getElementById("endOverlay");
@@ -834,98 +864,115 @@ window.useMove = function (idx) {
     const xpEl = document.getElementById("endXp");
     const catchBtn = overlay.querySelector(".end-btn.secondary");
 
+    // ── Calculate EXP amounts (applies to BOTH win AND loss) ────
+    const pokemonExp = calculateBattleExp(
+      won,
+      enemyPokemon?.level  || 1,
+      playerPokemon?.level || 1,
+      enemyPokemon?.rarity || "COMMON",
+    );
+    const userExpGain = calculateUserBattleExp(won, enemyPokemon?.level || 1);
+
     if (won) {
       SFX.victory();
       title.textContent = "VICTORY";
-      title.className = "end-title victory";
-      sub.textContent = `${enemyPokemon.name.toUpperCase()} WAS DEFEATED`;
-
-      // ── EXPERIENCE HANDLING ──────────────────────────────
-      // Calculate experience gained
-      const battleExp = calculateBattleExp(
-        true,
-        enemyPokemon.level,
-        playerPokemon.level,
-        enemyPokemon.rarity || "COMMON",
-      );
-
-      // Add experience to player pokemon
-      if (experienceSystem) {
-        const expResult = experienceSystem.addExperience(
-          battleExp,
-          enemyPokemon.rarity || "COMMON",
-        );
-
-        // Update player pokemon with new stats
-        const updatedPokemon = experienceSystem.getPokemon();
-        playerPokemon.level = updatedPokemon.level;
-        playerPokemon.experience = updatedPokemon.experience;
-        playerPokemon.maxHp = updatedPokemon.maxHp;
-        playerPokemon.hp = updatedPokemon.currentHP;
-
-        // Display XP gained
-        xpEl.textContent = `+ ${expResult.expGained} EXP GAINED`;
-        log(`${enemyPokemon.name.toUpperCase()} fainted!`, "good");
-        log(`You gained ${expResult.expGained} EXP!`, "good");
-
-        // Handle level up
-        if (expResult.leveledUp) {
-          log(
-            `${playerPokemon.name} leveled up to Lv.${expResult.currentLevel}!`,
-            "warn",
-          );
-          SFX.levelup();
-          // Show level up details briefly
-          setTimeout(() => {
-            const details = experienceSystem.getLevelUpDetails();
-            log(
-              `Stats: HP+${EXP_CONFIG.statGrowth.hp} ATK+${EXP_CONFIG.statGrowth.attack}`,
-              "info",
-            );
-          }, 500);
-        } else {
-          SFX.levelup();
-        }
-
-        // Save to backend in background (don't block UI)
-        saveExperienceToBackend(won, expResult).catch((err) =>
-          log("Warning: Could not save battle to backend", "warn"),
-        );
-      } else {
-        // Fallback if experienceSystem not initialized
-        const xpGained = Math.round(
-          (enemyPokemon.exp * enemyPokemon.level) / 7,
-        );
-        xpEl.textContent = `+ ${xpGained} EXP GAINED`;
-        log(`${enemyPokemon.name.toUpperCase()} fainted!`, "good");
-        log(`You gained ${xpGained} EXP!`, "good");
-        SFX.levelup();
-      }
-
-      // show catch button only on win
+      title.className   = "end-title victory";
+      sub.textContent   = `${enemyPokemon.name.toUpperCase()} WAS DEFEATED`;
+      log(`${enemyPokemon.name.toUpperCase()} fainted!`, "good");
       catchBtn.style.display = "inline-block";
     } else {
       SFX.defeat();
       title.textContent = "DEFEATED";
-      title.className = "end-title defeat";
-      sub.textContent = `${playerPokemon.name.toUpperCase()} FAINTED`;
-      xpEl.textContent = "";
+      title.className   = "end-title defeat";
+      sub.textContent   = `${playerPokemon.name.toUpperCase()} FAINTED`;
       log(`${playerPokemon.name.toUpperCase()} fainted...`, "dmg");
       catchBtn.style.display = "none";
-
-      // Save battle loss info to backend
-      saveExperienceToBackend(won, null).catch((err) =>
-        log("Warning: Could not save battle to backend", "warn"),
-      );
     }
+
+    // ── Apply pokemon EXP (win OR loss) ─────────────────────────
+    let expResult = null;
+    if (experienceSystem) {
+      expResult = experienceSystem.addExperience(
+        pokemonExp,
+        enemyPokemon?.rarity || "COMMON",
+      );
+
+      // Sync playerPokemon object with updated stats
+      const updatedPokemon     = experienceSystem.getPokemon();
+      playerPokemon.level      = updatedPokemon.level;
+      playerPokemon.experience = updatedPokemon.experience;
+      playerPokemon.maxHp      = updatedPokemon.maxHp;
+      playerPokemon.hp         = updatedPokemon.currentHP;
+
+      // ── CRITICAL STAT SYNC ────────────────────────────────────
+      // After a level-up, ExperienceSystem recalculates all combat
+      // stats. We MUST push them back to playerPokemon, otherwise
+      // calcDamage keeps using the old (pre-level-up) attack/spAtk
+      // values for the rest of the battle — causing the "1 damage" bug.
+      if (expResult.leveledUp) {
+        playerPokemon.attack  = updatedPokemon.attack;
+        playerPokemon.defense = updatedPokemon.defense;
+        playerPokemon.spAtk   = updatedPokemon.spAtk;
+        playerPokemon.spDef   = updatedPokemon.spDef;
+        playerPokemon.speed   = updatedPokemon.speed;
+      }
+
+      // Show EXP gained regardless of win/loss
+      xpEl.textContent = won
+        ? `+ ${expResult.expGained} EXP GAINED`
+        : `+ ${expResult.expGained} EXP (battle bonus)`;
+      log(`${playerPokemon.name.toUpperCase()} gained ${expResult.expGained} EXP!`, "good");
+
+      // ── Level-up ────────────────────────────────────────────
+      if (expResult.leveledUp) {
+        SFX.levelup();
+        log(
+          `⬆ ${playerPokemon.name.toUpperCase()} leveled up to Lv.${expResult.currentLevel}!`,
+          "warn",
+        );
+        // Update level badge on screen
+        const lvEl = document.getElementById("playerLevel");
+        if (lvEl) lvEl.textContent = `Lv.${playerPokemon.level}`;
+        // Update HP bar for new max
+        updateHpBar("player", playerPokemon.hp, playerPokemon.maxHp);
+
+        // ── Evolution check ────────────────────────────────────
+        if (expResult.evolvesInto) {
+          setTimeout(() => {
+            log(`✨ ${playerPokemon.name.toUpperCase()} is evolving into #${expResult.evolvesInto}!`, "warn");
+          }, 600);
+        }
+      } else {
+        if (won) SFX.levelup();
+      }
+    } else {
+      // Fallback if experienceSystem not initialized
+      const xpGained = Math.round((enemyPokemon?.exp || 64) * (enemyPokemon?.level || 1) / 7);
+      xpEl.textContent = `+ ${xpGained} EXP`;
+      log(`You gained ${xpGained} EXP!`, "good");
+      if (won) SFX.levelup();
+    }
+
+    // ── User player EXP notification ─────────────────────────
+    log(`Player gained ${userExpGain} player EXP!`, "sys");
+
+    // ── Persist everything to backend ───────────────────────
+    saveExperienceToBackend(won, expResult, userExpGain).catch(() =>
+      log("Warning: Could not save battle to backend", "warn"),
+    );
 
     setTimeout(() => overlay.classList.add("show"), 800);
   }
 
   // ── SAVE EXPERIENCE AND BATTLE STATS TO BACKEND ──────────────
-  async function saveExperienceToBackend(won, expResult) {
+  // v2 FIXES:
+  //   - Pokemon EXP saved on LOSS as well as win
+  //   - User player_level + experience updated every battle
+  //   - Evolution applied to the database when triggered
+  //   - Party EXP share works on both win and loss
+  async function saveExperienceToBackend(won, expResult, userExpGain = 0) {
     const user_id = localStorage.getItem("user_id");
-    const token = localStorage.getItem("token");
+    const token   = localStorage.getItem("token");
 
     if (!user_id || !token || !playerPokemon) {
       console.warn("Missing required data for backend save");
@@ -933,19 +980,47 @@ window.useMove = function (idx) {
     }
 
     try {
-      // 1. Update user battle stats (total_battles, battles_won, world_level)
+      // ── 1. Update user battle stats (total_battles, battles_won) ──
       const userStatsRes = await updateUserBattleStats(user_id, won, token);
-      if (!userStatsRes.success) {
-        console.warn(
-          "Failed to update user battle stats:",
-          userStatsRes.message,
-        );
-      } else {
+      if (userStatsRes.success) {
         log("Battle stats updated", "sys");
+      } else {
+        console.warn("Failed to update user battle stats:", userStatsRes.message);
       }
 
-      // 2. Save pokemon experience and level (only if we have experience result)
-      if (won && expResult && playerPokemon.user_pokemon_id) {
+      // ── 2. Update user player_level + experience (every battle) ───
+      if (userExpGain > 0) {
+        try {
+          const { API_BASE_URL: UAPI } = await import("../../api.js");
+          // Fetch current user exp + player_level first
+          const userRes  = await fetch(`${UAPI}/users/${user_id}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          const userData = await userRes.json();
+          if (userData.success && userData.data) {
+            const curPlayerLevel = userData.data.player_level || userData.data.level || 1;
+            const curUserExp     = userData.data.experience   || 0;
+            const userExpSys     = new UserExperienceSystem(curPlayerLevel, curUserExp);
+            const userExpResult  = userExpSys.addExperience(userExpGain);
+
+            await updateUserExp(
+              user_id,
+              userExpResult.currentLevel,
+              userExpResult.totalExp,
+              token,
+            );
+
+            if (userExpResult.leveledUp) {
+              log(`⬆ Player leveled up to Player Lv.${userExpResult.currentLevel}!`, "warn");
+            }
+          }
+        } catch (ue) {
+          console.warn("Could not update user exp:", ue);
+        }
+      }
+
+      // ── 3. Save pokemon EXP + level (NOW runs on loss too) ────────
+      if (expResult && playerPokemon.user_pokemon_id) {
         const pokemonStatsRes = await updatePokemonStats(
           user_id,
           playerPokemon.user_pokemon_id,
@@ -953,16 +1028,30 @@ window.useMove = function (idx) {
           playerPokemon.experience,
           token,
         );
-        if (!pokemonStatsRes.success) {
-          console.warn(
-            "Failed to update pokemon stats:",
-            pokemonStatsRes.message,
-          );
-        } else {
+        if (pokemonStatsRes.success) {
           log("Pokemon stats saved", "sys");
+        } else {
+          console.warn("Failed to update pokemon stats:", pokemonStatsRes.message);
         }
 
-        // 3. Record the battle result
+        // ── 4. Apply evolution if triggered ───────────────────────
+        if (expResult.evolvesInto) {
+          try {
+            const evoRes = await applyEvolution(
+              user_id,
+              playerPokemon.user_pokemon_id,
+              expResult.evolvesInto,
+              token,
+            );
+            if (evoRes.success) {
+              log(`✨ Evolution saved to database!`, "sys");
+            }
+          } catch (evoErr) {
+            console.warn("Evolution save failed:", evoErr);
+          }
+        }
+
+        // ── 5. Record battle result ────────────────────────────────
         const battleResultRes = await saveBattleResult(
           user_id,
           playerPokemon.user_pokemon_id,
@@ -970,13 +1059,50 @@ window.useMove = function (idx) {
           expResult,
           token,
         );
-        if (!battleResultRes.success) {
-          console.warn(
-            "Failed to save battle result:",
-            battleResultRes.message,
-          );
-        } else {
+        if (battleResultRes.success) {
           log("Battle result recorded", "sys");
+        } else {
+          console.warn("Failed to save battle result:", battleResultRes.message);
+        }
+
+        // ── 6. Party EXP share (half exp, applies to loss too) ─────
+        const halfExp = Math.floor(expResult.expGained / 2);
+        if (halfExp > 0 && lineupCache.length > 1) {
+          const { API_BASE_URL: PAPI } = await import("../../api.js");
+          const partyMembers = lineupCache.filter(
+            (p) => p.user_pokemon_id !== playerPokemon.user_pokemon_id,
+          );
+          for (const member of partyMembers) {
+            if (!member?.user_pokemon_id) continue;
+            const memberExpSys = new ExperienceSystem({
+              level:       member.level      || 1,
+              experience:  member.experience || 0,
+              pokedex_no:  member.pokemon_id || member.pokedex_no,
+              baseHP:      member.baseHP      || 45,
+              baseAttack:  member.baseAttack  || 49,
+              baseDefense: member.baseDefense || 49,
+              baseSpAtk:   member.baseSpAtk   || 45,
+              baseSpDef:   member.baseSpDef   || 45,
+              baseSpeed:   member.baseSpeed   || 45,
+              maxHp:       member.max_hp || member.maxHp || 50,
+              currentHP:   member.current_hp || member.hp || 50,
+            });
+            const memberResult = memberExpSys.addExperience(halfExp, enemyPokemon?.rarity || "COMMON");
+            try {
+              await fetch(`${PAPI}/users/${user_id}/pokemon/${member.user_pokemon_id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                body: JSON.stringify({ level: memberResult.currentLevel, experience: memberResult.totalExp }),
+              });
+              member.level      = memberResult.currentLevel;
+              member.experience = memberResult.totalExp;
+              // Apply evolution for party member too
+              if (memberResult.evolvesInto) {
+                await applyEvolution(user_id, member.user_pokemon_id, memberResult.evolvesInto, token);
+              }
+            } catch (_) {}
+          }
+          log(`Party members each received ${halfExp} EXP`, "sys");
         }
       }
     } catch (err) {
@@ -1054,6 +1180,108 @@ window.useMove = function (idx) {
   }
 
   // ── TAB SWITCHING ────────────────────────────────────────
+  // ── PKM PANEL — shows active lineup for mid-battle swap ──────────────────
+  let lineupPanelBuilt = false;
+  async function renderLineupPanel() {
+    if (lineupPanelBuilt) return;
+    lineupPanelBuilt = true;
+
+    const panel = document.getElementById("pokemonPanel");
+    panel.innerHTML = '<div style="font-size:11px;color:var(--text-dim);padding:8px;">Loading lineup...</div>';
+
+    const user_id = localStorage.getItem("user_id");
+    const token   = localStorage.getItem("token");
+    if (!user_id || !token) { panel.innerHTML = '<div style="padding:8px;color:var(--text-dim);">Not logged in.</div>'; return; }
+
+    const lineup = await loadLineup(user_id, token);
+    panel.innerHTML = "";
+
+    if (!lineup.length) {
+      panel.innerHTML = '<div style="font-size:11px;color:var(--text-dim);padding:8px;">No lineup set.</div>';
+      return;
+    }
+
+    lineup.forEach(pokemon => {
+      const name    = (pokemon.nickname || pokemon.name || "Unknown");
+      const level   = pokemon.level  || 1;
+      const hp      = pokemon.current_hp ?? pokemon.hp ?? 0;
+      const maxHp   = pokemon.max_hp || pokemon.maxHp || (level * 2 + 10);
+      const hpPct   = maxHp > 0 ? Math.max(0, Math.round((hp / maxHp) * 100)) : 0;
+      const hpColor = hpPct > 50 ? "var(--green)" : hpPct > 20 ? "var(--amber)" : "#f55";
+      const isCurrent = playerPokemon && name.toLowerCase() === playerPokemon.name.toLowerCase();
+      const isFainted  = hp <= 0;
+      const disabled   = isCurrent || isFainted;
+
+      const btn = document.createElement("div");
+      btn.className = "other-btn";
+      btn.style.cssText = `margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;opacity:${disabled ? "0.4" : "1"};cursor:${disabled ? "default" : "pointer"};`;
+      btn.innerHTML = `
+        <div>
+          <div style="font-weight:bold;font-size:12px;">
+            ${name.toUpperCase()}${isCurrent ? " ◀ ACTIVE" : isFainted ? " † FAINTED" : ""}
+          </div>
+          <div style="font-size:10px;color:var(--text-dim);margin-top:2px;">
+            Lv.${level} · <span style="color:${hpColor};">HP ${hp}/${maxHp}</span>
+          </div>
+        </div>
+        ${!disabled ? '<div style="font-size:10px;color:var(--green);">SWAP →</div>' : ""}
+      `;
+      if (!disabled) btn.onclick = () => swapPokemon(pokemon);
+      panel.appendChild(btn);
+    });
+  }
+
+  // ── MID-BATTLE SWAP ────────────────────────────────────────────────────────
+  async function swapPokemon(newPokemonData) {
+    if (!playerTurn || battleOver) { log("Cannot swap — wait for your turn", "warn"); return; }
+    if (!newPokemonData) return;
+    const apiId = newPokemonData.pokemon_id || newPokemonData.pokedex_no || 1;
+    try {
+      log(`Recalling ${playerPokemon.name.toUpperCase()}... sending out ${(newPokemonData.nickname || newPokemonData.name || "?").toUpperCase()}!`, "info");
+      switchTab("fight");
+      const res     = await fetch(`https://pokeapi.co/api/v2/pokemon/${apiId}`);
+      const apiData = await res.json();
+      const newLevel = newPokemonData.level || 15;
+      const built    = await buildPokemon(apiData, newLevel, true);
+
+      const savedHp = newPokemonData.current_hp ?? newPokemonData.hp ?? built.maxHp;
+      built.hp         = savedHp;
+      built.currentHP  = savedHp;
+      built.experience       = newPokemonData.experience || 0;
+      built.user_pokemon_id  = newPokemonData.user_pokemon_id;
+
+      experienceSystem = new ExperienceSystem({
+        ...built,
+        level: newLevel,
+        maxHp: built.maxHp,
+        currentHP: savedHp,
+        baseHP: built.baseHP,
+        baseAttack: built.baseAttack,
+        baseDefense: built.baseDefense,
+        baseSpAtk: built.baseSpAtk,
+        baseSpDef: built.baseSpDef,
+        baseSpeed: built.baseSpeed,
+        experience: newPokemonData.experience || 0,
+      });
+
+      playerPokemon = built;
+      document.getElementById("playerName").textContent  = built.name.toUpperCase();
+      document.getElementById("playerLevel").textContent = `Lv.${built.level}`;
+      document.getElementById("player-sprite").src       = built.sprite;
+      updateHpBar("player", built.hp, built.maxHp);
+      renderMoves();
+      lineupPanelBuilt = false; // force PKM panel to re-render with new ACTIVE label
+
+      // Swap costs a turn — enemy attacks
+      setTurn(false);
+      setTimeout(() => enemyMove(), 600);
+    } catch (err) {
+      console.error("Swap failed:", err);
+      log("Swap failed — could not load pokemon data", "warn");
+      setTurn(true);
+    }
+  }
+
   window.switchTab = function (tab) {
     document.getElementById("fightPanel").style.display =
       tab === "fight" ? "grid" : "none";
@@ -1067,6 +1295,8 @@ window.useMove = function (idx) {
       "menu-tab" + (tab === "bag" ? " active" : "");
     document.getElementById("tabPoke").className =
       "menu-tab" + (tab === "pokemon" ? " active" : "");
+    // Populate PKM panel on first open
+    if (tab === "pokemon") renderLineupPanel();
   };
 
   // ── RENDER MOVES ─────────────────────────────────────────
@@ -1212,70 +1442,117 @@ window.useMove = function (idx) {
   }
 
   // ── POKEMON SELECTION ────────────────────────────────
+  // ── lineupCache: shared by selection modal AND mid-battle PKM tab ──
+  let lineupCache = [];
+
+  async function loadLineup(user_id, token) {
+    if (lineupCache.length) return lineupCache;
+    try {
+      const { API_BASE_URL } = await import("../../api.js");
+      const { getUserPokemon }  = await import("./pokemon-api.js");
+      const [lineupRes, allRes] = await Promise.all([
+        fetch(`${API_BASE_URL}/users/${user_id}/lineup`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        getUserPokemon(user_id, token),
+      ]);
+      const lineupData = await lineupRes.json();
+      const allPokemon = allRes.data || [];
+      lineupCache = (lineupData.data || [])
+        .sort((a, b) => a.slot_index - b.slot_index)
+        .map(slot => {
+          // lineupControllers returns nested user_pokemons join — flatten it
+          const nested = slot.user_pokemons;
+          const fromAll = allPokemon.find(p => p.user_pokemon_id === slot.user_pokemon_id);
+          return nested ? { ...nested, slot_index: slot.slot_index } : fromAll;
+        })
+        .filter(Boolean);
+    } catch (e) {
+      console.error("Failed to load lineup:", e);
+      lineupCache = [];
+    }
+    return lineupCache;
+  }
+
   async function showPokemonSelection() {
     const user_id = localStorage.getItem("user_id");
-    const token = localStorage.getItem("token");
+    const token   = localStorage.getItem("token");
 
     if (!user_id || !token) {
-      log("Not logged in — cannot load pokemon party", "dmg");
-      await startBattleWithPokemon(1); // fallback
+      log("Not logged in — cannot load lineup", "dmg");
+      await startBattleWithPokemon(1);
       return;
     }
 
     try {
-      const { getUserPokemon } = await import("./pokemon-api.js");
-      const result = await getUserPokemon(user_id, token);
+      lineupCache = []; // reset so we always get fresh data on battle start
+      const lineup = await loadLineup(user_id, token);
 
-      if (!result.success || !result.data || result.data.length === 0) {
-        log("No pokemon in your party — starting with default", "warn");
-        await startBattleWithPokemon(1); // fallback: bulbasaur
+      if (!lineup.length) {
+        log("Lineup is empty — set your lineup before battling", "warn");
+        // Try to fall back to first owned pokemon
+        const { getUserPokemon } = await import("./pokemon-api.js");
+        const allRes = await getUserPokemon(user_id, token);
+        const first  = allRes.data?.[0];
+        if (first) {
+          await startBattleWithPokemon(first.pokemon_id || first.pokedex_no || 1, first);
+        } else {
+          await startBattleWithPokemon(1);
+        }
         return;
       }
 
-      const userParty = result.data;
-      const modal = document.getElementById("pokemonSelectionModal");
-      const list = document.getElementById("pokemonSelectionList");
+      const modal  = document.getElementById("pokemonSelectionModal");
+      const list   = document.getElementById("pokemonSelectionList");
       const status = document.getElementById("selectionStatus");
-
-      list.innerHTML = "";
+      list.innerHTML       = "";
       status.style.display = "none";
 
-      // Display each pokemon as a selectable button
-      userParty.forEach((pokemon, idx) => {
-        const pokemonCard = document.createElement("div");
-        pokemonCard.className = "other-btn";
-        pokemonCard.style.cursor = "pointer";
-        pokemonCard.style.marginBottom = "8px";
-        pokemonCard.style.display = "flex";
-        pokemonCard.style.justifyContent = "space-between";
-        pokemonCard.style.alignItems = "center";
+      lineup.forEach((pokemon, slotIdx) => {
+        const name   = (pokemon.nickname || pokemon.name || "Unknown");
+        const level  = pokemon.level  || 1;
+        const hp     = pokemon.current_hp ?? pokemon.hp ?? 0;
+        const maxHp  = pokemon.max_hp  || pokemon.maxHp || (level * 2 + 10);
+        const hpPct  = maxHp > 0 ? Math.max(0, Math.round((hp / maxHp) * 100)) : 0;
+        const hpCol  = hpPct > 50 ? "var(--green)" : hpPct > 20 ? "var(--amber)" : "#f55";
+        const fainted = hp <= 0;
 
-        const name = pokemon.name || "Unknown";
-        const level = pokemon.level || 1;
-        const hp = pokemon.current_hp || 0;
-        const maxHp = pokemon.max_hp || level * 2 + 10;
-
-        pokemonCard.innerHTML = `
-        <div>
-          <div style="font-weight:bold;">${name.toUpperCase()}</div>
-          <div style="font-size:11px; color:var(--text-dim);">Lv.${level} | HP: ${hp}/${maxHp}</div>
-        </div>
-        <div style="color:var(--green);">→</div>
-      `;
-
-        pokemonCard.onclick = () =>
-          startBattleWithPokemon(
-            pokemon.pokemon_id || pokemon.pokedex_no || pokemon.id,
-            pokemon,
-          );
-        list.appendChild(pokemonCard);
+        const card = document.createElement("div");
+        card.className = "other-btn";
+        card.style.cssText = `
+          cursor:${fainted ? "not-allowed" : "pointer"};
+          margin-bottom:8px;
+          display:flex;
+          justify-content:space-between;
+          align-items:center;
+          opacity:${fainted ? "0.4" : "1"};
+        `;
+        card.innerHTML = `
+          <div>
+            <div style="font-weight:bold;font-size:13px;">${name.toUpperCase()}</div>
+            <div style="font-size:11px;color:var(--text-dim);margin-top:2px;">
+              Slot ${slotIdx + 1} · Lv.${level} ·
+              <span style="color:${hpCol};">HP ${hp}/${maxHp}</span>
+              ${fainted ? " · <span style='color:#f55;'>FAINTED</span>" : ""}
+            </div>
+          </div>
+          <div style="color:${fainted ? "var(--text-dim)" : "var(--green)"};">${fainted ? "✕" : "→"}</div>
+        `;
+        if (!fainted) {
+          card.onclick = () =>
+            startBattleWithPokemon(
+              pokemon.pokemon_id || pokemon.pokedex_no || 1,
+              pokemon,
+            );
+        }
+        list.appendChild(card);
       });
 
       modal.classList.add("open");
     } catch (err) {
-      console.error("Failed to load pokemon party:", err);
-      log("Failed to load your party — starting with default", "warn");
-      await startBattleWithPokemon(1); // fallback
+      console.error("Failed to load lineup:", err);
+      log("Failed to load lineup — using fallback", "warn");
+      await startBattleWithPokemon(1);
     }
   }
 
@@ -1311,14 +1588,25 @@ window.useMove = function (idx) {
         const data = await res.json();
         if (data.success && data.data) {
           playerWorldLevel = data.data.world_level || 1;
-          // Load inventory
-          inventory['basic-pip'] = data.data['basic-pip'] || data.data.basic_pip || 0;
-          inventory['reinforced-pip'] = data.data['reinforced-pip'] || data.data.reinforced_pip || 0;
-          inventory['voss-pip'] = data.data['voss-pip'] || data.data.voss_pip || 0;
-          updateInventoryUI();
         }
       } catch (e) {
         console.error("Failed to load user data:", e);
+      }
+
+      // Load PIP capture device quantities from item inventory
+      try {
+        const { API_BASE_URL: IAPI } = await import("../../api.js");
+        const invRes = await fetch(`${IAPI}/items/inventory/${user_id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const invData = await invRes.json();
+        const items = invData.data || [];
+        inventory['basic-pip']      = items.find(i => i.sku === 'CAPTURE-MK1' || i.item_name?.includes('Mk.I'))?.quantity  || 0;
+        inventory['reinforced-pip'] = items.find(i => i.sku === 'CAPTURE-MK2' || i.item_name?.includes('Mk.II'))?.quantity || 0;
+        inventory['voss-pip']       = items.find(i => i.sku === 'CAPTURE-MK3' || i.item_name?.includes('Mk.III'))?.quantity || 0;
+        updateInventoryUI();
+      } catch (e) {
+        console.error("Failed to load item inventory:", e);
       }
     }
 

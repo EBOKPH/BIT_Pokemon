@@ -1140,6 +1140,25 @@
               document.getElementById("loadTitle").textContent =
                 "FRAGMENT BOUND";
 
+              // Auto-set lineup slot 0 with the new starter
+              try {
+                const newPokemonId = result.data?.user_pokemon_id;
+                if (newPokemonId) {
+                  await fetch(`${API_BASE_URL}/users/${user_id}/lineup`, {
+                    method: "PUT",
+                    headers: {
+                      "Content-Type": "application/json",
+                      Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({
+                      slots: [{ slot_index: 0, user_pokemon_id: newPokemonId }],
+                    }),
+                  });
+                }
+              } catch (e) {
+                console.warn("Could not auto-set lineup:", e);
+              }
+
               // Give starter capture devices via inventory
               try {
                 await fetch(`${API_BASE_URL}/items/add-to-inventory`, {

@@ -132,77 +132,119 @@ async function getMoveDetails(moveName) {
 }
 
 /**
- * Select up to 4 moves for a pokemon based on level and type
- * Prioritizes STAB (Same Type Attack Bonus) moves
- * @param {Object} pokemon - Pokemon object with name, types, level
- * @returns {Promise<Array>} Array of move objects (max 4)
+ * Select up to 4 moves for a pokemon based on level and type.
+ * Prioritizes STAB (Same Type Attack Bonus) moves.
+ *
+ * FIX v2: Low-level starters (e.g. Charmander Lv.1) now always get
+ * their type-appropriate STAB moves rather than defaulting entirely
+ * to Normal-type fallbacks. Strategy:
+ *  1. First try moves learnable at exactly current level (level-up moves).
+ *  2. Broaden to all moves learnable so far (up to current level).
+ *  3. If still nothing useful, take the first 4 moves of the list (includes
+ *     TM / egg moves pre-loaded at level 1).
+ *  4. After fetching details, sort: STAB > power > recency.
+ *  5. Always ensure at least 1 STAB attacking move — if none found from
+ *     the API, inject a guaranteed STAB move from the fallback table
+ *     before filling remaining slots with Normal moves.
+ *
+ * @param {Object} pokemon - { name, types, level }
+ * @returns {Promise<Array>} Array of up to 4 move objects
  */
 async function selectMovesForLevel(pokemon) {
   try {
     const moves = await getPokemonMoves(pokemon.name || pokemon.id);
+    const pokemonTypes = pokemon.types || [];
+
     if (!moves || !moves.length) {
-      console.warn(`No moves found for ${pokemon.name}`);
-      return [];
+      console.warn(`No moves found for ${pokemon.name}, using type fallback`);
+      return getFallbackMoves(pokemonTypes);
     }
 
-    // Filter moves available at current level + recent levels
-    const availableMoves = moves.filter(
+    // ── Step 1: moves learneable at the current level (tight window) ──
+    let availableMoves = moves.filter(
       (m) =>
         (m.levelLearned || 0) <= pokemon.level &&
         (m.levelLearned || 0) >= Math.max(1, pokemon.level - 10),
     );
 
-    // If no recent moves, just get available ones
-    if (!availableMoves.length) {
-      availableMoves.push(
-        ...moves.filter((m) => (m.levelLearned || 0) <= pokemon.level),
-      );
+    // ── Step 2: broaden — all moves learnable up to current level ─────
+    if (availableMoves.length < 2) {
+      availableMoves = moves.filter((m) => (m.levelLearned || 0) <= pokemon.level);
     }
 
-    // Fetch detailed info for all available moves
-    const moveDetailsPromises = availableMoves.map(async (moveSlot) => {
-      const detail = await getMoveDetails(moveSlot.name);
-      return {
-        ...detail,
-        levelLearned: moveSlot.levelLearned,
-      };
-    });
+    // ── Step 3: still nothing — take the first 4 entries (TM/egg/lv1) ─
+    if (availableMoves.length === 0) {
+      availableMoves = moves.slice(0, 8);
+    }
 
-    let selectedMoveDetails = await Promise.all(moveDetailsPromises);
-    selectedMoveDetails = selectedMoveDetails.filter((m) => m !== null);
+    // Fetch move details (cap at 12 candidates to avoid too many API calls)
+    const candidates = availableMoves.slice(0, 12);
+    const moveDetailsRaw = await Promise.all(
+      candidates.map(async (moveSlot) => {
+        const detail = await getMoveDetails(moveSlot.name);
+        return detail ? { ...detail, levelLearned: moveSlot.levelLearned } : null;
+      }),
+    );
 
-    // Prioritize STAB moves (matching pokemon types)
-    const pokemonTypes = pokemon.types || [];
-    selectedMoveDetails.sort((a, b) => {
-      // STAB bonus
-      const aStab = pokemonTypes.includes(a.type) ? 1 : 0;
-      const bStab = pokemonTypes.includes(b.type) ? 1 : 0;
+    // Only keep attacking moves with power > 0
+    let attackingMoves = moveDetailsRaw.filter(
+      (m) => m !== null && m.power > 0,
+    );
+
+    // ── Sort: STAB first → highest power → most recently learned ──────
+    attackingMoves.sort((a, b) => {
+      const aStab = pokemonTypes.includes(a.type) ? 2 : 0;
+      const bStab = pokemonTypes.includes(b.type) ? 2 : 0;
       if (aStab !== bStab) return bStab - aStab;
-
-      // Higher power first (attacking moves before status moves)
       if (a.power !== b.power) return (b.power || 0) - (a.power || 0);
-
-      // Sort by level learned (more recent first)
       return (b.levelLearned || 0) - (a.levelLearned || 0);
     });
 
-    // Select top 4 moves
-    const finalMoves = selectedMoveDetails.slice(0, 4).map((m) => ({
-      name: m.name.toUpperCase().replace(/-/g, " "),
-      type: m.type,
-      power: m.power,
-      pp: m.pp,
-      category: m.category,
+    // ── Guarantee at least 1 STAB move for starters at low level ──────
+    const hasStab = attackingMoves.some((m) => pokemonTypes.includes(m.type));
+    if (!hasStab && pokemonTypes.length > 0) {
+      // Inject the best fallback STAB move as the first move
+      const stabFallbacks = getFallbackMoves(pokemonTypes);
+      const stabMove = stabFallbacks.find((m) => pokemonTypes.includes(m.type));
+      if (stabMove) {
+        attackingMoves.unshift({
+          name:         stabMove.name,
+          type:         stabMove.type,
+          power:        stabMove.power,
+          pp:           stabMove.pp,
+          category:     stabMove.category,
+          currentPp:    stabMove.pp,
+          accuracy:     100,
+          priority:     0,
+          levelLearned: 1,
+        });
+      }
+    }
+
+    // ── Pick top 4 ────────────────────────────────────────────────────
+    const finalMoves = attackingMoves.slice(0, 4).map((m) => ({
+      name:      m.name.toUpperCase().replace(/-/g, " "),
+      type:      m.type,
+      power:     m.power,
+      pp:        m.pp,
+      category:  m.category,
       currentPp: m.pp,
-      accuracy: m.accuracy,
-      priority: m.priority,
-      stab: pokemonTypes.includes(m.type),
+      accuracy:  m.accuracy  || 100,
+      priority:  m.priority  || 0,
+      stab:      pokemonTypes.includes(m.type),
     }));
+
+    // Pad with fallback if fewer than 2 moves found
+    if (finalMoves.length < 2) {
+      const padMoves = getFallbackMoves(pokemonTypes)
+        .filter((fb) => !finalMoves.some((f) => f.name === fb.name));
+      finalMoves.push(...padMoves.slice(0, 4 - finalMoves.length));
+    }
 
     return finalMoves;
   } catch (error) {
     console.error(`Error selecting moves: ${error.message}`);
-    return [];
+    return getFallbackMoves(pokemon.types || []);
   }
 }
 

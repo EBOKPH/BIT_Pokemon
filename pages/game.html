@@ -1999,6 +1999,35 @@
         document.getElementById("map-bg").style.opacity = "0.6";
       }, 3000);
 
+      // ── LOAD WORLD LEVEL & SYNC SCAN ENGINE ──────────────────────────
+      // Fetches the player's world_level from the API, caches it in
+      // localStorage, and pushes it into the scan engine so rarity
+      // gating reflects the actual player level on every session.
+      async function loadWorldLevel() {
+        const user_id = localStorage.getItem("user_id");
+        const token   = localStorage.getItem("token");
+        if (!user_id || !token) return;
+        try {
+          const { API_BASE_URL } = await import("../api.js");
+          const res    = await fetch(`${API_BASE_URL}/users/me`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          const result = await res.json();
+          if (result.success && result.data) {
+            const wl = result.data.world_level || 1;
+            localStorage.setItem("world_level", wl);
+            // Push the real value into the already-running engine
+            if (typeof window._syncEngineWorldLevel === "function") {
+              window._syncEngineWorldLevel(wl);
+            }
+            log("DAT", "info", `// world level: ${wl} — encounter gates calibrated`);
+          }
+        } catch (err) {
+          console.warn("Could not load world_level:", err);
+        }
+      }
+      loadWorldLevel();
+
       // Load inventory
       async function loadInventory() {
         const user_id = localStorage.getItem("user_id");
@@ -2028,8 +2057,34 @@
       } from "../assets/js/encounter-scan.js";
 
       const habitat = window._gameHabitat || "normal";
-      const engine = getEngine(habitat);
+
+      // ── WORLD LEVEL GATING FIX ──────────────────────────────────────
+      // worldLevel must be passed to getEngine so rollRarityGated() can
+      // clamp encounter rarity. Without it, the engine defaults to WL 1
+      // which means LEGENDARY/EPIC/RARE can never appear — but crucially
+      // if worldLevel was previously always 1, the gate was silently
+      // downgrading rolls TO common, not upgrading to rare. Either way
+      // the player's actual level was never respected.
+      //
+      // We read world_level from the cached profile (set during login/load)
+      // and pass it to the engine. Falls back to 1 if not yet loaded, then
+      // re-initialises the engine once the real value arrives.
+
+      function getWorldLevel() {
+        return parseInt(localStorage.getItem("world_level") || "1", 10) || 1;
+      }
+
+      const engine = getEngine(habitat, getWorldLevel());
       window._scanEngine = engine;
+
+      // Re-sync engine world level after profile loads (async fetch may
+      // finish after this script block runs).
+      window._syncEngineWorldLevel = function (wl) {
+        const level = parseInt(wl, 10) || 1;
+        if (window._scanEngine) {
+          window._scanEngine.worldLevel = level;
+        }
+      };
 
       const profile = HABITAT_PROFILES[habitat];
       if (profile) {
